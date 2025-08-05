@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="1080dp"
+    android:layout_height="800dp"
+    android:orientation="horizontal"
+    android:background="@color/background_payment">
+
+    <!-- Left Side Content -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="40dp">
+
+        <!-- Back Button -->
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:text="@string/back"
+            android:textSize="16sp"
+            android:background="@drawable/btn_back"
+            android:layout_marginBottom="40dp" />
+
+        <!-- Payment Information -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_payment_title"
+            android:textSize="28sp"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="30dp" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/scan_qr_code"
+            android:textSize="20sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="20dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_instructions"
+            android:textSize="18sp"
+            android:textColor="@color/text_secondary"
+            android:lineSpacingExtra="6dp" />
+
+    </LinearLayout>
+
+    <!-- Right Side QR Code -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="40dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/iv_qr_code"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:background="@color/white"
+            android:padding="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/scan_with_app"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginTop="20dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

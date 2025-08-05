@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">PowerTap</string>
+    
+    <!-- Main Activity -->
+    <string name="main_description">PowerTapシェアモバイルバッテリーへようこそ！\n\nお支払い方法をお選びください：\n• ターミナル決済：デバイスの決済端末を使用\n• アプリ決済：QRコードをスキャンしてスマホで決済</string>
+    <string name="pay_with_terminal">ターミナルで支払う</string>
+    <string name="pay_with_app">アプリで支払う</string>
+    
+    <!-- Common -->
+    <string name="back">戻る</string>
+    
+    <!-- Terminal Payment -->
+    <string name="terminal_payment_title">ターミナル決済</string>
+    <string name="terminal_instructions">以下の手順で決済を完了してください：\n\n1. ターミナルで決済方法を選択\n2. カードを挿入またはNFC決済を使用\n3. パスワード入力または指紋認証\n4. 決済完了まで待機\n5. モバイルバッテリーを取り出し</string>
+    <string name="processing_payment">決済処理中...</string>
+    <string name="payment_completed">決済完了！モバイルバッテリーをお取りください</string>
+    <string name="terminal_status_info">決済状況がここに表示されます</string>
+    
+    <!-- App Payment -->
+    <string name="app_payment_title">モバイル決済</string>
+    <string name="app_instructions">右側のQRコードをスマートフォンでスキャンしてください：\n\n1. AlipayまたはWeChatを開く\n2. QRコードをスキャン\n3. 決済金額を確認\n4. 決済を完了\n5. モバイルバッテリーが出てくるまで待機</string>
+    <string name="scan_qr_code">QRコードをスキャンして決済を完了してください</string>
+    <string name="scan_with_app">このQRコードをスマートフォンでスキャン</string>
+</resources>

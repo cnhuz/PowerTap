@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="400dp"
+    android:height="600dp"
+    android:viewportWidth="400"
+    android:viewportHeight="600">
+    
+    <!-- Power bank illustration -->
+    <path
+        android:fillColor="@color/primary_blue"
+        android:pathData="M150,100h100v300h-100z" />
+    
+    <!-- Power bank details -->
+    <path
+        android:fillColor="@color/white"
+        android:pathData="M160,120h80v20h-80z" />
+    
+    <path
+        android:fillColor="@color/primary_green"
+        android:pathData="M170,150h60v10h-60z" />
+    
+    <path
+        android:fillColor="@color/primary_green"
+        android:pathData="M170,170h60v10h-60z" />
+    
+    <path
+        android:fillColor="@color/primary_green"
+        android:pathData="M170,190h60v10h-60z" />
+    
+    <!-- Charging cable -->
+    <path
+        android:pathData="M200,400Q250,450 300,500"
+        android:strokeWidth="8"
+        android:strokeColor="@color/text_secondary"
+        android:fillColor="#00000000" />
+</vector>

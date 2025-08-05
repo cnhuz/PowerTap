@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="1080dp"
+    android:layout_height="800dp"
+    android:orientation="horizontal"
+    android:background="@color/background_main">
+
+    <!-- Left Side Content -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="40dp">
+
+        <!-- Language Buttons at Top Right -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:layout_marginBottom="60dp">
+
+            <ImageButton
+                android:id="@+id/btn_english"
+                android:layout_width="60dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/btn_language"
+                android:src="@drawable/ic_flag_en"
+                android:scaleType="centerCrop" />
+
+            <ImageButton
+                android:id="@+id/btn_chinese"
+                android:layout_width="60dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/btn_language"
+                android:src="@drawable/ic_flag_cn"
+                android:scaleType="centerCrop" />
+
+            <ImageButton
+                android:id="@+id/btn_japanese"
+                android:layout_width="60dp"
+                android:layout_height="40dp"
+                android:background="@drawable/btn_language"
+                android:src="@drawable/ic_flag_jp"
+                android:scaleType="centerCrop" />
+
+        </LinearLayout>
+
+        <!-- Description Text -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="@string/main_description"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:gravity="center_vertical"
+            android:lineSpacingExtra="8dp" />
+
+        <!-- Payment Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="40dp">
+
+            <Button
+                android:id="@+id/btn_pay_terminal"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:text="@string/pay_with_terminal"
+                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:background="@drawable/btn_primary"
+                android:layout_marginBottom="20dp" />
+
+            <Button
+                android:id="@+id/btn_pay_app"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:text="@string/pay_with_app"
+                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:background="@drawable/btn_primary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Right Side Image -->
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@drawable/main_illustration"
+        android:scaleType="centerCrop"
+        android:layout_margin="20dp" />
+
+</LinearLayout>

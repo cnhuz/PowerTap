@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">PowerTap</string>
+    
+    <!-- Main Activity -->
+    <string name="main_description">Welcome to PowerTap Shared Power Bank!\n\nPlease choose your payment method:\n• Terminal Payment: Use the payment terminal on the device\n• App Payment: Scan QR code to pay with your phone</string>
+    <string name="pay_with_terminal">PAY WITH TERMINAL</string>
+    <string name="pay_with_app">PAY WITH APP</string>
+    
+    <!-- Common -->
+    <string name="back">Back</string>
+    
+    <!-- Terminal Payment -->
+    <string name="terminal_payment_title">Terminal Payment</string>
+    <string name="terminal_instructions">Please follow these steps to complete payment:\n\n1. Select payment method on the terminal\n2. Insert your card or use NFC payment\n3. Enter password or verify fingerprint\n4. Wait for payment completion\n5. Take out the power bank</string>
+    <string name="processing_payment">Processing payment...</string>
+    <string name="payment_completed">Payment completed! Please take out the power bank</string>
+    <string name="terminal_status_info">Payment status will be displayed here</string>
+    
+    <!-- App Payment -->
+    <string name="app_payment_title">Mobile Payment</string>
+    <string name="app_instructions">Please scan the QR code on the right with your phone:\n\n1. Open Alipay or WeChat\n2. Scan the QR code\n3. Confirm payment amount\n4. Complete payment\n5. Wait for power bank to pop out</string>
+    <string name="scan_qr_code">Please scan QR code to complete payment</string>
+    <string name="scan_with_app">Scan this QR code with your phone</string>
+</resources>

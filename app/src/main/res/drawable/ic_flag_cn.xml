@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="16">
+    
+    <!-- China Flag simplified representation -->
+    <path
+        android:fillColor="#DE2910"
+        android:pathData="M0,0h24v16h-24z" />
+    
+    <!-- Main star -->
+    <path
+        android:fillColor="#FFDE00"
+        android:pathData="M4,3l1,3h3l-2.5,1.8l1,3l-2.5,-1.8l-2.5,1.8l1,-3l-2.5,-1.8h3z" />
+</vector>

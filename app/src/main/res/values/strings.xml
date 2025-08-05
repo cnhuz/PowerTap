@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">PowerTap</string>
+
+    <!-- Main Activity -->
+    <string name="main_description">欢迎使用PowerTap共享充电宝！\n\n请选择您的支付方式：\n• 终端支付：使用设备上的支付终端\n• 手机支付：扫描二维码使用手机支付</string>
+    <string name="pay_with_terminal">PAY WITH TERMINAL</string>
+    <string name="pay_with_app">PAY WITH APP</string>
+
+    <!-- Common -->
+    <string name="back">返回</string>
+
+    <!-- Terminal Payment -->
+    <string name="terminal_payment_title">终端支付</string>
+    <string name="terminal_instructions">请按照以下步骤完成支付：\n\n1. 在支付终端上选择支付方式\n2. 插入银行卡或使用NFC支付\n3. 输入密码或验证指纹\n4. 等待支付完成\n5. 取出充电宝</string>
+    <string name="processing_payment">正在处理支付...</string>
+    <string name="payment_completed">支付完成！请取出充电宝</string>
+    <string name="terminal_status_info">支付状态将在此显示</string>
+
+    <!-- App Payment -->
+    <string name="app_payment_title">手机支付</string>
+    <string name="app_instructions">请使用您的手机扫描右侧二维码：\n\n1. 打开支付宝或微信\n2. 扫描二维码\n3. 确认支付金额\n4. 完成支付\n5. 等待充电宝弹出</string>
+    <string name="scan_qr_code">请扫描二维码完成支付</string>
+    <string name="scan_with_app">使用手机扫描此二维码</string>
+</resources>
