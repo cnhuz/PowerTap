@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -50,6 +53,12 @@
             android:launchMode="singleTask"
             android:excludeFromRecents="true"
             android:stateNotNeeded="true" />
+
+        <!-- Kiosk Watchdog Service -->
+        <service
+            android:name=".KioskWatchdogService"
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 
