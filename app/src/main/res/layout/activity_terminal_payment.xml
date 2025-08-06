@@ -17,12 +17,14 @@
         <!-- Back Button -->
         <Button
             android:id="@+id/btn_back"
-            android:layout_width="120dp"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:text="@string/back"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
-            android:background="@drawable/btn_back"
+            android:background="#29A472"
             android:layout_marginBottom="40dp" />
 
         <!-- Title -->

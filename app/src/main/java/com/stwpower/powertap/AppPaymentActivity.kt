@@ -82,7 +82,7 @@ class AppPaymentActivity : AppCompatActivity() {
             backButton.isEnabled = true
             backButton.alpha = 1.0f
             statusText.text = getString(R.string.payment_completed)
-        }, 5000) // 5秒后完成
+        }, 1000) // 5秒后完成
     }
 
     private fun setupFullscreen() {

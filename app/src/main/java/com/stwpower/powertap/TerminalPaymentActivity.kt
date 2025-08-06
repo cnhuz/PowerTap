@@ -64,7 +64,7 @@ class TerminalPaymentActivity : AppCompatActivity() {
             backButton.isEnabled = true
             backButton.alpha = 1.0f
             statusText.text = getString(R.string.payment_completed)
-        }, 5000) // 5秒后完成支付
+        }, 3000) // 5秒后完成支付
     }
 
     private fun setupFullscreen() {
