@@ -73,17 +73,38 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun setupLanguageButtons() {
-        findViewById<ImageButton>(R.id.btn_english).setOnClickListener {
+        val englishBtn = findViewById<ImageButton>(R.id.btn_english)
+        val chineseBtn = findViewById<ImageButton>(R.id.btn_chinese)
+        val japaneseBtn = findViewById<ImageButton>(R.id.btn_japanese)
+        val germanBtn = findViewById<ImageButton>(R.id.btn_german)
+        val russianBtn = findViewById<ImageButton>(R.id.btn_russian)
+
+        // 设置圆角
+        setRoundedBackground(englishBtn, Color.parseColor("#1E2428"), 8f)
+        setRoundedBackground(chineseBtn, Color.parseColor("#1E2428"), 8f)
+        setRoundedBackground(japaneseBtn, Color.parseColor("#1E2428"), 8f)
+        setRoundedBackground(germanBtn, Color.parseColor("#1E2428"), 8f)
+        setRoundedBackground(russianBtn, Color.parseColor("#1E2428"), 8f)
+
+        englishBtn.setOnClickListener {
             changeLanguage("en")
             saveCurrentLanguageAsDefault("en")
         }
-        findViewById<ImageButton>(R.id.btn_chinese).setOnClickListener {
+        chineseBtn.setOnClickListener {
             changeLanguage("zh")
             saveCurrentLanguageAsDefault("zh")
         }
-        findViewById<ImageButton>(R.id.btn_japanese).setOnClickListener {
+        japaneseBtn.setOnClickListener {
             changeLanguage("ja")
             saveCurrentLanguageAsDefault("ja")
+        }
+        germanBtn.setOnClickListener {
+            changeLanguage("de")
+            saveCurrentLanguageAsDefault("de")
+        }
+        russianBtn.setOnClickListener {
+            changeLanguage("ru")
+            saveCurrentLanguageAsDefault("ru")
         }
     }
     
@@ -105,6 +126,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setRoundedBackground(view: TextView, color: Int, radius: Float) {
+        val drawable = GradientDrawable()
+        drawable.setColor(color)
+        drawable.cornerRadius = radius * resources.displayMetrics.density
+        view.background = drawable
+    }
+
+    private fun setRoundedBackground(view: ImageButton, color: Int, radius: Float) {
         val drawable = GradientDrawable()
         drawable.setColor(color)
         drawable.cornerRadius = radius * resources.displayMetrics.density

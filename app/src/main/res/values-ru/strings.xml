@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">PowerTap</string>
+
+    <!-- Main Activity -->
+    <string name="main_description">Добро пожаловать в PowerTap - аренда павербанков!\n\nПожалуйста, выберите способ оплаты:\n• Оплата через терминал: Используйте платёжный терминал на устройстве\n• Оплата через телефон: Отсканируйте QR-код для мобильной оплаты</string>
+    <string name="pay_with_terminal">ОПЛАТА ЧЕРЕЗ ТЕРМИНАЛ</string>
+    <string name="pay_with_app">ОПЛАТА ЧЕРЕЗ ПРИЛОЖЕНИЕ</string>
+
+    <!-- Common -->
+    <string name="back">Назад</string>
+
+    <!-- Terminal Payment -->
+    <string name="terminal_payment_title">Оплата через терминал</string>
+    <string name="terminal_instructions">Пожалуйста, следуйте этим шагам для оплаты:\n\n1. Выберите способ оплаты на терминале\n2. Вставьте банковскую карту или используйте NFC\n3. Введите пароль или подтвердите отпечатком пальца\n4. Дождитесь подтверждения оплаты\n5. Извлеките павербанк</string>
+    <string name="processing_payment">Обработка платежа...</string>
+    <string name="payment_completed">Оплата завершена! Пожалуйста, извлеките павербанк</string>
+    <string name="terminal_status_info">Статус платежа будет отображён здесь</string>
+
+    <!-- App Payment -->
+    <string name="app_payment_title">Оплата через телефон</string>
+    <string name="app_instructions">Пожалуйста, отсканируйте QR-код справа вашим телефоном:\n\n1. Откройте Alipay или WeChat\n2. Отсканируйте QR-код\n3. Подтвердите сумму платежа\n4. Завершите оплату\n5. Дождитесь выдачи павербанка</string>
+    <string name="scan_qr_code">Пожалуйста, отсканируйте QR-код для оплаты</string>
+    <string name="scan_with_app">Отсканируйте этот QR-код вашим телефоном</string>
+
+    <!-- Admin -->
+    <string name="admin_password_title">Проверка администратора</string>
+    <string name="admin_password_message">Пожалуйста, введите пароль администратора для выхода из приложения</string>
+    <string name="admin_password_hint">Введите пароль администратора</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="cancel">Отмена</string>
+    <string name="password_incorrect">Неверный пароль</string>
+
+    <!-- Admin Settings -->
+    <string name="admin_settings_title">Настройки администратора</string>
+    <string name="change_password">Изменить пароль администратора</string>
+    <string name="set_default_language">Установить язык по умолчанию</string>
+    <string name="exit_app">Выйти из приложения</string>
+    <string name="back_to_main">Вернуться в главное меню</string>
+    <string name="admin_settings">Настройки администратора</string>
+    <string name="direct_exit">Прямой выход</string>
+    <string name="select_operation">Выберите операцию:</string>
+
+    <!-- Language Settings -->
+    <string name="language_chinese">中文</string>
+    <string name="language_english">English</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_russian">Русский</string>
+    <string name="default_language_set">Язык по умолчанию установлен: %s</string>
+</resources>

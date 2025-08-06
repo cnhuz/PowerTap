@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">PowerTap</string>
+
+    <!-- Main Activity -->
+    <string name="main_description">Willkommen bei PowerTap Powerbank-Verleih!\n\nBitte wählen Sie Ihre Zahlungsmethode:\n• Terminal-Zahlung: Verwenden Sie das Zahlungsterminal am Gerät\n• Handy-Zahlung: Scannen Sie den QR-Code für mobile Zahlung</string>
+    <string name="pay_with_terminal">MIT TERMINAL BEZAHLEN</string>
+    <string name="pay_with_app">MIT APP BEZAHLEN</string>
+
+    <!-- Common -->
+    <string name="back">Zurück</string>
+
+    <!-- Terminal Payment -->
+    <string name="terminal_payment_title">Terminal-Zahlung</string>
+    <string name="terminal_instructions">Bitte folgen Sie diesen Schritten zur Zahlung:\n\n1. Wählen Sie die Zahlungsmethode am Terminal\n2. Stecken Sie Ihre Bankkarte ein oder verwenden Sie NFC\n3. Geben Sie Ihr Passwort ein oder verifizieren Sie per Fingerabdruck\n4. Warten Sie auf die Zahlungsbestätigung\n5. Entnehmen Sie die Powerbank</string>
+    <string name="processing_payment">Zahlung wird verarbeitet...</string>
+    <string name="payment_completed">Zahlung abgeschlossen! Bitte entnehmen Sie die Powerbank</string>
+    <string name="terminal_status_info">Zahlungsstatus wird hier angezeigt</string>
+
+    <!-- App Payment -->
+    <string name="app_payment_title">Handy-Zahlung</string>
+    <string name="app_instructions">Bitte scannen Sie den QR-Code rechts mit Ihrem Handy:\n\n1. Öffnen Sie Alipay oder WeChat\n2. Scannen Sie den QR-Code\n3. Bestätigen Sie den Zahlungsbetrag\n4. Schließen Sie die Zahlung ab\n5. Warten Sie, bis die Powerbank ausgegeben wird</string>
+    <string name="scan_qr_code">Bitte scannen Sie den QR-Code zur Zahlung</string>
+    <string name="scan_with_app">Scannen Sie diesen QR-Code mit Ihrem Handy</string>
+
+    <!-- Admin -->
+    <string name="admin_password_title">Administrator-Verifizierung</string>
+    <string name="admin_password_message">Bitte geben Sie das Administrator-Passwort ein, um die App zu beenden</string>
+    <string name="admin_password_hint">Administrator-Passwort eingeben</string>
+    <string name="confirm">Bestätigen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="password_incorrect">Falsches Passwort</string>
+
+    <!-- Admin Settings -->
+    <string name="admin_settings_title">Administrator-Einstellungen</string>
+    <string name="change_password">Administrator-Passwort ändern</string>
+    <string name="set_default_language">Standardsprache festlegen</string>
+    <string name="exit_app">App beenden</string>
+    <string name="back_to_main">Zurück zum Hauptmenü</string>
+    <string name="admin_settings">Administrator-Einstellungen</string>
+    <string name="direct_exit">Direkt beenden</string>
+    <string name="select_operation">Operation auswählen:</string>
+
+    <!-- Language Settings -->
+    <string name="language_chinese">中文</string>
+    <string name="language_english">English</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_russian">Русский</string>
+    <string name="default_language_set">Standardsprache festgelegt auf: %s</string>
+</resources>
