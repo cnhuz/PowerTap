@@ -3,7 +3,7 @@
     android:layout_width="1080dp"
     android:layout_height="800dp"
     android:orientation="vertical"
-    android:background="@color/background_payment"
+    android:background="@color/background_main"
     android:padding="40dp"
     android:gravity="center">
 
@@ -22,51 +22,62 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:background="@color/background_secondary"
+        android:padding="30dp"
+        android:elevation="3dp">
 
         <!-- 修改密码按钮 -->
         <Button
             android:id="@+id/btn_change_password"
-            android:layout_width="300dp"
-            android:layout_height="60dp"
+            android:layout_width="320dp"
+            android:layout_height="65dp"
             android:text="@string/change_password"
-            android:textSize="18sp"
+            android:textSize="19sp"
             android:textColor="@color/white"
+            android:textStyle="bold"
             android:background="@drawable/btn_primary"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="24dp"
+            android:elevation="2dp" />
 
         <!-- 设置默认语言按钮 -->
         <Button
             android:id="@+id/btn_set_default_language"
-            android:layout_width="300dp"
-            android:layout_height="60dp"
+            android:layout_width="320dp"
+            android:layout_height="65dp"
             android:text="@string/set_default_language"
-            android:textSize="18sp"
+            android:textSize="19sp"
             android:textColor="@color/white"
+            android:textStyle="bold"
             android:background="@drawable/btn_primary"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="24dp"
+            android:elevation="2dp" />
 
         <!-- 退出应用按钮 -->
         <Button
             android:id="@+id/btn_exit_app"
-            android:layout_width="300dp"
-            android:layout_height="60dp"
+            android:layout_width="320dp"
+            android:layout_height="65dp"
             android:text="@string/exit_app"
-            android:textSize="18sp"
+            android:textSize="19sp"
             android:textColor="@color/white"
+            android:textStyle="bold"
             android:background="@drawable/btn_back"
-            android:layout_marginBottom="40dp" />
+            android:layout_marginBottom="40dp"
+            android:elevation="2dp" />
 
         <!-- 返回主界面按钮 -->
         <Button
             android:id="@+id/btn_back_to_main"
-            android:layout_width="300dp"
-            android:layout_height="60dp"
+            android:layout_width="320dp"
+            android:layout_height="65dp"
             android:text="@string/back_to_main"
-            android:textSize="18sp"
+            android:textSize="19sp"
             android:textColor="@color/text_primary"
+            android:textStyle="bold"
             android:background="@drawable/btn_language"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="20dp"
+            android:elevation="2dp" />
 
     </LinearLayout>
 

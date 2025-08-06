@@ -7,24 +7,24 @@
     
     <!-- Power bank illustration -->
     <path
-        android:fillColor="@color/primary_blue"
+        android:fillColor="@color/button_primary"
         android:pathData="M150,100h100v300h-100z" />
-    
+
     <!-- Power bank details -->
     <path
         android:fillColor="@color/white"
         android:pathData="M160,120h80v20h-80z" />
-    
+
     <path
-        android:fillColor="@color/primary_green"
+        android:fillColor="@color/accent_green"
         android:pathData="M170,150h60v10h-60z" />
-    
+
     <path
-        android:fillColor="@color/primary_green"
+        android:fillColor="@color/accent_green"
         android:pathData="M170,170h60v10h-60z" />
-    
+
     <path
-        android:fillColor="@color/primary_green"
+        android:fillColor="@color/accent_green"
         android:pathData="M170,190h60v10h-60z" />
     
     <!-- Charging cable -->

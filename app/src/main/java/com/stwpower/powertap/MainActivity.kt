@@ -86,11 +86,11 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun setupPaymentButtons() {
-        findViewById<Button>(R.id.btn_pay_terminal).setOnClickListener {
+        findViewById<TextView>(R.id.btn_pay_terminal).setOnClickListener {
             startActivity(Intent(this, TerminalPaymentActivity::class.java))
         }
-        
-        findViewById<Button>(R.id.btn_pay_app).setOnClickListener {
+
+        findViewById<TextView>(R.id.btn_pay_app).setOnClickListener {
             startActivity(Intent(this, AppPaymentActivity::class.java))
         }
     }
