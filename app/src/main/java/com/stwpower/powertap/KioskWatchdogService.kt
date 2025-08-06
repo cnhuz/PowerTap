@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 
 class KioskWatchdogService : Service() {
 
@@ -59,16 +60,30 @@ class KioskWatchdogService : Service() {
             return
         }
 
-        if (!isAppInForeground()) {
-            // 应用不在前台，重新启动
-            val intent = Intent(this, MainActivity::class.java)
-            intent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_SINGLE_TOP
-            )
-            startActivity(intent)
+        // 使用混合检测策略
+        val isAppForeground = isAppInForeground()
+        val isAllowedActivity = isAllowedActivityInForeground()
+
+//        Log.d("KioskWatchdog", "应用在前台: $isAppForeground, 允许的Activity: $isAllowedActivity")
+
+        // 如果应用在前台但Activity不被允许，或者应用不在前台，都需要重启
+        if (isAppForeground && !isAllowedActivity) {
+//            Log.w("KioskWatchdog", "应用在前台但Activity不被允许，重新启动")
+            restartMainActivity()
+        } else if (!isAppForeground) {
+//            Log.w("KioskWatchdog", "应用不在前台，重新启动")
+            restartMainActivity()
         }
+    }
+
+    private fun restartMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+            Intent.FLAG_ACTIVITY_SINGLE_TOP
+        )
+        startActivity(intent)
     }
     
     private fun isAppInForeground(): Boolean {
@@ -92,17 +107,30 @@ class KioskWatchdogService : Service() {
         val runningTasks = try {
             activityManager.getRunningTasks(1)
         } catch (e: Exception) {
+//            Log.w("KioskWatchdog", "无法获取运行任务: ${e.message}")
             return isAppInForeground() // 如果无法获取任务信息，回退到进程检查
         }
 
         if (runningTasks.isNotEmpty()) {
             val topActivity = runningTasks[0].topActivity
             val topActivityName = topActivity?.className
+            val topPackageName = topActivity?.packageName
 
-            // 检查顶部Activity是否在白名单中
-            return topActivityName != null && allowedActivities.contains(topActivityName)
+//            Log.d("KioskWatchdog", "当前前台Activity: $topActivityName, 包名: $topPackageName")
+
+            // 如果是我们自己的应用，检查Activity是否在白名单中
+            if (topPackageName == packageName) {
+                val isAllowed = topActivityName != null && allowedActivities.contains(topActivityName)
+//                Log.d("KioskWatchdog", "我们的应用Activity检查结果: $isAllowed")
+                return isAllowed
+            } else {
+                // 如果不是我们的应用，说明需要重新启动
+//                Log.d("KioskWatchdog", "检测到其他应用在前台: $topPackageName")
+                return false
+            }
         }
 
+//        Log.d("KioskWatchdog", "没有运行任务，回退到进程检查")
         return isAppInForeground()
     }
 }

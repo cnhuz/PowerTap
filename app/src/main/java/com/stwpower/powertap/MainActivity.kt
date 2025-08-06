@@ -1,6 +1,8 @@
 package com.stwpower.powertap
 
+import android.app.ActivityManager
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -261,15 +263,32 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        // 只有在非管理员退出的情况下才重新启动
-        // 添加小延迟确保isAdminExiting标志正确生效
+        // 只有在非管理员退出且应用真正离开前台的情况下才重新启动
+        // 添加延迟检查，避免在应用内Activity切换时误重启
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isAdminExiting && ::kioskModeManager.isInitialized) {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
+                // 检查是否真的离开了应用（而不是切换到应用内其他Activity）
+                if (!isAppInForeground()) {
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    startActivity(intent)
+                }
             }
-        }, 100)
+        }, 200) // 增加延迟时间，给Activity切换更多时间
+    }
+
+    private fun isAppInForeground(): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val appProcesses = activityManager.runningAppProcesses ?: return false
+
+        val packageName = packageName
+        for (appProcess in appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
+                appProcess.processName == packageName) {
+                return true
+            }
+        }
+        return false
     }
 
     override fun onDestroy() {

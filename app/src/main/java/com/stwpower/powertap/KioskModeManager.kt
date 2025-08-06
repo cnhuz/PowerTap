@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -98,9 +99,9 @@ class KioskModeManager(private val activity: Activity) {
         homeWatcher = object : Runnable {
             override fun run() {
                 if (isKioskEnabled && !MainActivity.isAdminExiting) {
-                    // 检查当前是否为前台应用
-                    if (!isAppInForeground()) {
-                        // 如果不是，重新启动MainActivity
+                    // 检查当前是否为允许的Activity在前台
+                    if (!isAllowedActivityInForeground()) {
+                        // 如果不是允许的Activity，重新启动MainActivity
                         val intent = Intent(activity, MainActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         activity.startActivity(intent)
@@ -142,17 +143,30 @@ class KioskModeManager(private val activity: Activity) {
         val runningTasks = try {
             activityManager.getRunningTasks(1)
         } catch (e: Exception) {
+//            Log.w("KioskModeManager", "无法获取运行任务: ${e.message}")
             return isAppInForeground() // 如果无法获取任务信息，回退到进程检查
         }
 
         if (runningTasks.isNotEmpty()) {
             val topActivity = runningTasks[0].topActivity
             val topActivityName = topActivity?.className
+            val topPackageName = topActivity?.packageName
 
-            // 检查顶部Activity是否在白名单中
-            return topActivityName != null && allowedActivities.contains(topActivityName)
+//            Log.d("KioskModeManager", "当前前台Activity: $topActivityName, 包名: $topPackageName")
+
+            // 如果是我们自己的应用，检查Activity是否在白名单中
+            if (topPackageName == activity.packageName) {
+                val isAllowed = topActivityName != null && allowedActivities.contains(topActivityName)
+//                Log.d("KioskModeManager", "我们的应用Activity检查结果: $isAllowed")
+                return isAllowed
+            } else {
+                // 如果不是我们的应用，说明需要重新启动
+//                Log.d("KioskModeManager", "检测到其他应用在前台: $topPackageName")
+                return false
+            }
         }
 
+//        Log.d("KioskModeManager", "没有运行任务，回退到进程检查")
         return isAppInForeground()
     }
 
