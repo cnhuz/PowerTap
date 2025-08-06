@@ -21,4 +21,51 @@
     <string name="app_instructions">Please scan the QR code on the right with your phone:\n\n1. Open Alipay or WeChat\n2. Scan the QR code\n3. Confirm payment amount\n4. Complete payment\n5. Wait for power bank to pop out</string>
     <string name="scan_qr_code">Please scan QR code to complete payment</string>
     <string name="scan_with_app">Scan this QR code with your phone</string>
+
+    <!-- Admin -->
+    <string name="admin_password_title">Administrator Verification</string>
+    <string name="admin_password_message">Please enter administrator password to exit the app</string>
+    <string name="admin_password_hint">Please enter administrator password</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="password_incorrect">Incorrect password</string>
+
+    <!-- Admin Settings -->
+    <string name="admin_settings_title">Administrator Settings</string>
+    <string name="change_password">Change Administrator Password</string>
+    <string name="set_default_language">Set Default Language</string>
+    <string name="exit_app">Exit Application</string>
+    <string name="back_to_main">Back to Main</string>
+    <string name="admin_settings">Admin Settings</string>
+    <string name="direct_exit">Direct Exit</string>
+    <string name="select_operation">Select operation:</string>
+
+    <!-- Change Password Dialog -->
+    <string name="change_password_title">Change Administrator Password</string>
+    <string name="current_password">Current Password:</string>
+    <string name="new_password">New Password:</string>
+    <string name="confirm_password">Confirm New Password:</string>
+    <string name="enter_current_password">Please enter current password</string>
+    <string name="enter_new_password">Please enter new password</string>
+    <string name="enter_confirm_password">Please enter new password again</string>
+    <string name="current_password_incorrect">Current password is incorrect</string>
+    <string name="new_password_empty">New password cannot be empty</string>
+    <string name="password_mismatch">The two passwords do not match</string>
+    <string name="password_changed_success">Password changed successfully</string>
+
+    <!-- Language Settings -->
+    <string name="set_default_language_title">Set Default Language</string>
+    <string name="language_chinese">中文</string>
+    <string name="language_english">English</string>
+    <string name="language_japanese">日本語</string>
+    <string name="default_language_set">Default language set to: %s</string>
+
+    <!-- Exit Confirmation -->
+    <string name="exit_confirmation_title">Confirm Exit</string>
+    <string name="exit_confirmation_message">Are you sure you want to exit the application?</string>
+
+    <!-- Toast Messages -->
+    <string name="using_basic_protection">Using basic protection mode</string>
+    <string name="enable_full_protection">Enable full protection mode</string>
+    <string name="insufficient_permission">Insufficient permission, using basic protection mode</string>
 </resources>

@@ -74,75 +74,79 @@ class AdminSettingsActivity : AppCompatActivity() {
         val etCurrentPassword = dialogView.findViewById<EditText>(R.id.et_current_password)
         val etNewPassword = dialogView.findViewById<EditText>(R.id.et_new_password)
         val etConfirmPassword = dialogView.findViewById<EditText>(R.id.et_confirm_password)
-        
+
         AlertDialog.Builder(this)
-            .setTitle("修改管理员密码")
+            .setTitle(getString(R.string.change_password_title))
             .setView(dialogView)
-            .setPositiveButton("确认") { _, _ ->
+            .setPositiveButton(getString(R.string.confirm)) { _, _ ->
                 val currentPassword = etCurrentPassword.text.toString()
                 val newPassword = etNewPassword.text.toString()
                 val confirmPassword = etConfirmPassword.text.toString()
-                
+
                 val savedPassword = sharedPreferences.getString("admin_password", "admin123") ?: "admin123"
-                
+
                 when {
                     currentPassword != savedPassword -> {
-                        Toast.makeText(this, "当前密码错误", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.current_password_incorrect), Toast.LENGTH_SHORT).show()
                     }
                     newPassword.isEmpty() -> {
-                        Toast.makeText(this, "新密码不能为空", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.new_password_empty), Toast.LENGTH_SHORT).show()
                     }
                     newPassword != confirmPassword -> {
-                        Toast.makeText(this, "两次输入的密码不一致", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.password_mismatch), Toast.LENGTH_SHORT).show()
                     }
                     else -> {
                         sharedPreferences.edit().putString("admin_password", newPassword).apply()
-                        Toast.makeText(this, "密码修改成功", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.password_changed_success), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
     
     private fun showLanguageSelectionDialog() {
-        val languages = arrayOf("中文", "English", "日本語")
+        val languages = arrayOf(
+            getString(R.string.language_chinese),
+            getString(R.string.language_english),
+            getString(R.string.language_japanese)
+        )
         val languageCodes = arrayOf("zh", "en", "ja")
-        
+
         val currentLanguage = sharedPreferences.getString("default_language", "zh") ?: "zh"
         val currentIndex = languageCodes.indexOf(currentLanguage)
-        
+
         AlertDialog.Builder(this)
-            .setTitle("设置默认语言")
+            .setTitle(getString(R.string.set_default_language_title))
             .setSingleChoiceItems(languages, currentIndex) { dialog, which ->
                 val selectedLanguageCode = languageCodes[which]
                 sharedPreferences.edit().putString("default_language", selectedLanguageCode).apply()
-                
+
                 // 立即应用语言设置
                 changeLanguage(selectedLanguageCode)
-                
-                Toast.makeText(this, "默认语言已设置为：${languages[which]}", Toast.LENGTH_SHORT).show()
+
+                Toast.makeText(this, getString(R.string.default_language_set, languages[which]), Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
     
     private fun showExitConfirmationDialog() {
         AlertDialog.Builder(this)
-            .setTitle("确认退出")
-            .setMessage("确定要退出应用吗？")
-            .setPositiveButton("确认") { _, _ ->
+            .setTitle(getString(R.string.exit_confirmation_title))
+            .setMessage(getString(R.string.exit_confirmation_message))
+            .setPositiveButton(getString(R.string.confirm)) { _, _ ->
                 // 设置管理员退出标志
                 MainActivity.isAdminExiting = true
-                
+
                 // 停止看门狗服务
                 stopService(Intent(this, KioskWatchdogService::class.java))
-                
+
                 // 退出应用
                 finishAffinity()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
     

@@ -21,4 +21,51 @@
     <string name="app_instructions">右側のQRコードをスマートフォンでスキャンしてください：\n\n1. AlipayまたはWeChatを開く\n2. QRコードをスキャン\n3. 決済金額を確認\n4. 決済を完了\n5. モバイルバッテリーが出てくるまで待機</string>
     <string name="scan_qr_code">QRコードをスキャンして決済を完了してください</string>
     <string name="scan_with_app">このQRコードをスマートフォンでスキャン</string>
+
+    <!-- Admin -->
+    <string name="admin_password_title">管理者認証</string>
+    <string name="admin_password_message">アプリを終了するには管理者パスワードを入力してください</string>
+    <string name="admin_password_hint">管理者パスワードを入力してください</string>
+    <string name="confirm">確認</string>
+    <string name="cancel">キャンセル</string>
+    <string name="password_incorrect">パスワードが間違っています</string>
+
+    <!-- Admin Settings -->
+    <string name="admin_settings_title">管理者設定</string>
+    <string name="change_password">管理者パスワードを変更</string>
+    <string name="set_default_language">デフォルト言語を設定</string>
+    <string name="exit_app">アプリを終了</string>
+    <string name="back_to_main">メイン画面に戻る</string>
+    <string name="admin_settings">管理者設定</string>
+    <string name="direct_exit">直接終了</string>
+    <string name="select_operation">操作を選択：</string>
+
+    <!-- Change Password Dialog -->
+    <string name="change_password_title">管理者パスワードを変更</string>
+    <string name="current_password">現在のパスワード：</string>
+    <string name="new_password">新しいパスワード：</string>
+    <string name="confirm_password">新しいパスワードを確認：</string>
+    <string name="enter_current_password">現在のパスワードを入力してください</string>
+    <string name="enter_new_password">新しいパスワードを入力してください</string>
+    <string name="enter_confirm_password">新しいパスワードをもう一度入力してください</string>
+    <string name="current_password_incorrect">現在のパスワードが間違っています</string>
+    <string name="new_password_empty">新しいパスワードは空にできません</string>
+    <string name="password_mismatch">2回入力したパスワードが一致しません</string>
+    <string name="password_changed_success">パスワードが正常に変更されました</string>
+
+    <!-- Language Settings -->
+    <string name="set_default_language_title">デフォルト言語を設定</string>
+    <string name="language_chinese">中文</string>
+    <string name="language_english">English</string>
+    <string name="language_japanese">日本語</string>
+    <string name="default_language_set">デフォルト言語が設定されました：%s</string>
+
+    <!-- Exit Confirmation -->
+    <string name="exit_confirmation_title">終了確認</string>
+    <string name="exit_confirmation_message">本当にアプリを終了しますか？</string>
+
+    <!-- Toast Messages -->
+    <string name="using_basic_protection">基本保護モードを使用</string>
+    <string name="enable_full_protection">完全保護モードを有効化</string>
+    <string name="insufficient_permission">権限不足、基本保護モードを使用</string>
 </resources>

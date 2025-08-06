@@ -71,12 +71,15 @@ class MainActivity : AppCompatActivity() {
     private fun setupLanguageButtons() {
         findViewById<ImageButton>(R.id.btn_english).setOnClickListener {
             changeLanguage("en")
+            saveCurrentLanguageAsDefault("en")
         }
         findViewById<ImageButton>(R.id.btn_chinese).setOnClickListener {
             changeLanguage("zh")
+            saveCurrentLanguageAsDefault("zh")
         }
         findViewById<ImageButton>(R.id.btn_japanese).setOnClickListener {
             changeLanguage("ja")
+            saveCurrentLanguageAsDefault("ja")
         }
     }
     
@@ -105,6 +108,11 @@ class MainActivity : AppCompatActivity() {
         if (currentLanguage != defaultLanguage) {
             changeLanguage(defaultLanguage)
         }
+    }
+
+    private fun saveCurrentLanguageAsDefault(languageCode: String) {
+        val sharedPreferences = getSharedPreferences("admin_settings", MODE_PRIVATE)
+        sharedPreferences.edit().putString("default_language", languageCode).apply()
     }
 
     private fun setupFullscreen() {
@@ -189,9 +197,9 @@ class MainActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.admin_password_title))
-            .setMessage("选择操作：")
+            .setMessage(getString(R.string.select_operation))
             .setView(editText)
-            .setPositiveButton("管理员设置") { _, _ ->
+            .setPositiveButton(getString(R.string.admin_settings)) { _, _ ->
                 val inputPassword = editText.text.toString()
                 val adminPassword = AdminSettingsActivity.getAdminPassword(this@MainActivity)
                 if (inputPassword == adminPassword) {
@@ -202,7 +210,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, getString(R.string.password_incorrect), Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNeutralButton("直接退出") { _, _ ->
+            .setNeutralButton(getString(R.string.direct_exit)) { _, _ ->
                 val inputPassword = editText.text.toString()
                 val adminPassword = AdminSettingsActivity.getAdminPassword(this@MainActivity)
                 if (inputPassword == adminPassword) {
