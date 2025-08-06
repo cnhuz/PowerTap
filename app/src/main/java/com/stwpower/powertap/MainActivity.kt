@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -87,13 +88,27 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun setupPaymentButtons() {
-        findViewById<TextView>(R.id.btn_pay_terminal).setOnClickListener {
+        val terminalButton = findViewById<TextView>(R.id.btn_pay_terminal)
+        val appButton = findViewById<TextView>(R.id.btn_pay_app)
+
+        // 设置圆角
+        setRoundedBackground(terminalButton, Color.parseColor("#29A472"), 12f)
+        setRoundedBackground(appButton, Color.parseColor("#29A472"), 12f)
+
+        terminalButton.setOnClickListener {
             startActivity(Intent(this, TerminalPaymentActivity::class.java))
         }
 
-        findViewById<TextView>(R.id.btn_pay_app).setOnClickListener {
+        appButton.setOnClickListener {
             startActivity(Intent(this, AppPaymentActivity::class.java))
         }
+    }
+
+    private fun setRoundedBackground(view: TextView, color: Int, radius: Float) {
+        val drawable = GradientDrawable()
+        drawable.setColor(color)
+        drawable.cornerRadius = radius * resources.displayMetrics.density
+        view.background = drawable
     }
     
     private fun changeLanguage(languageCode: String) {

@@ -1,6 +1,8 @@
 package com.stwpower.powertap
 
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -46,15 +48,25 @@ class AppPaymentActivity : AppCompatActivity() {
         backButton = findViewById(R.id.btn_back)
         statusText = findViewById(R.id.tv_status)
         qrCodeImage = findViewById(R.id.iv_qr_code)
-        
+
+        // 设置圆角背景
+        setRoundedBackground(backButton, Color.parseColor("#868D91"), 10f)
+
         backButton.isEnabled = false
         backButton.alpha = 0.5f
-        
+
         backButton.setOnClickListener {
             if (!isProcessing) {
                 finish()
             }
         }
+    }
+
+    private fun setRoundedBackground(button: Button, color: Int, radius: Float) {
+        val drawable = GradientDrawable()
+        drawable.setColor(color)
+        drawable.cornerRadius = radius * resources.displayMetrics.density
+        button.background = drawable
     }
     
     private fun generateQRCode() {

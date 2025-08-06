@@ -1,5 +1,7 @@
 package com.stwpower.powertap
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -41,16 +43,26 @@ class TerminalPaymentActivity : AppCompatActivity() {
         backButton = findViewById(R.id.btn_back)
         statusText = findViewById(R.id.tv_status)
         instructionsText = findViewById(R.id.tv_instructions)
-        
+
+        // 设置圆角背景
+        setRoundedBackground(backButton, Color.parseColor("#868D91"), 10f)
+
         // 初始状态：按钮禁用，显示为灰色
         backButton.isEnabled = false
         backButton.alpha = 0.5f
-        
+
         backButton.setOnClickListener {
             if (!isProcessing) {
                 finish()
             }
         }
+    }
+
+    private fun setRoundedBackground(button: Button, color: Int, radius: Float) {
+        val drawable = GradientDrawable()
+        drawable.setColor(color)
+        drawable.cornerRadius = radius * resources.displayMetrics.density
+        button.background = drawable
     }
     
     private fun simulatePaymentProcess() {

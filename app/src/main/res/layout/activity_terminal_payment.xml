@@ -25,7 +25,8 @@
             android:textSize="16sp"
             android:textColor="@color/text_primary"
             android:background="#868D91"
-            android:layout_marginBottom="40dp" />
+            android:layout_marginBottom="40dp"
+            android:elevation="5dp" />
 
         <!-- Title -->
         <TextView

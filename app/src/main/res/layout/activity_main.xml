@@ -71,7 +71,8 @@
                 android:gravity="center"
                 android:layout_marginBottom="16dp"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:elevation="5dp" />
 
             <!-- App Payment Text Button -->
             <TextView
@@ -84,7 +85,8 @@
                 android:background="@color/button_primary"
                 android:gravity="center"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:elevation="5dp" />
 
         </LinearLayout>
 
