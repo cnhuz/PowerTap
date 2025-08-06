@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -14,10 +15,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 
 class TerminalPaymentActivity : AppCompatActivity() {
-    
+
     private lateinit var backButton: Button
     private lateinit var statusText: TextView
     private lateinit var instructionsText: TextView
+    private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +27,9 @@ class TerminalPaymentActivity : AppCompatActivity() {
 
         // 设置全屏
         setupFullscreen()
+
+        // 初始化Home键拦截器
+        homeKeyInterceptor = HomeKeyInterceptor(this)
 
         setContentView(R.layout.activity_terminal_payment)
 
@@ -94,6 +99,28 @@ class TerminalPaymentActivity : AppCompatActivity() {
     override fun onBackPressed() {
         // 禁用返回键，只能通过Back按钮返回
         // 不调用 super.onBackPressed()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        homeKeyInterceptor.startIntercepting()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // 不要停止拦截，保持监控
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        homeKeyInterceptor.stopIntercepting()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (homeKeyInterceptor.onKeyDown(keyCode, event)) {
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

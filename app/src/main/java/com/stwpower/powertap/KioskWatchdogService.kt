@@ -45,11 +45,17 @@ class KioskWatchdogService : Service() {
     }
     
     private fun checkAndRestoreApp() {
+        // 检查是否是管理员退出，如果是则不重新启动
+        if (MainActivity.isAdminExiting) {
+            stopSelf()
+            return
+        }
+
         if (!isAppInForeground()) {
             // 应用不在前台，重新启动
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK or 
+                Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_CLEAR_TOP or
                 Intent.FLAG_ACTIVITY_SINGLE_TOP
             )

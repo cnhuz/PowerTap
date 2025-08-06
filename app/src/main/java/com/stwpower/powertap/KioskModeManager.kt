@@ -36,7 +36,7 @@ class KioskModeManager(private val activity: Activity) {
         // 注册Home键监听
         registerHomeKeyReceiver()
 
-        // 设置窗口监听器来防止状态栏和导航栏的滑动
+        // 设置窗口监听器
         setupWindowInsetsListener()
     }
 
@@ -89,7 +89,7 @@ class KioskModeManager(private val activity: Activity) {
     private fun startHomeWatcher() {
         homeWatcher = object : Runnable {
             override fun run() {
-                if (isKioskEnabled) {
+                if (isKioskEnabled && !MainActivity.isAdminExiting) {
                     // 检查当前是否为前台应用
                     if (!isAppInForeground()) {
                         // 如果不是，重新启动MainActivity
@@ -101,8 +101,8 @@ class KioskModeManager(private val activity: Activity) {
                     // 重新应用全屏设置
                     setupFullscreen()
 
-                    // 每200ms检查一次，更频繁的检查
-                    handler.postDelayed(this, 200)
+                    // 每500ms检查一次
+                    handler.postDelayed(this, 500)
                 }
             }
         }
@@ -134,14 +134,17 @@ class KioskModeManager(private val activity: Activity) {
                 if (action == Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
                     val reason = intent.getStringExtra("reason")
                     if (reason == "homekey" || reason == "recentapps") {
-                        // 检测到Home键或最近任务键，重新启动应用
-                        handler.postDelayed({
-                            if (isKioskEnabled) {
-                                val restartIntent = Intent(activity, MainActivity::class.java)
-                                restartIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                activity.startActivity(restartIntent)
-                            }
-                        }, 100)
+                        // 检测到Home键或最近任务键
+                        if (!MainActivity.isAdminExiting) {
+                            // 非管理员退出，立即重新启动应用
+                            handler.postDelayed({
+                                if (isKioskEnabled && !MainActivity.isAdminExiting) {
+                                    val restartIntent = Intent(activity, MainActivity::class.java)
+                                    restartIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                    activity.startActivity(restartIntent)
+                                }
+                            }, 100)
+                        }
                     }
                 }
             }
@@ -165,27 +168,13 @@ class KioskModeManager(private val activity: Activity) {
     private fun setupWindowInsetsListener() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             activity.window.decorView.setOnApplyWindowInsetsListener { view, insets ->
-                if (isKioskEnabled) {
-                    // 当系统栏显示时，立即隐藏它们
-                    val controller = activity.window.insetsController
-                    controller?.let {
-                        it.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                        it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                    }
-                }
+                // 简化处理，不强制隐藏系统栏
                 insets
             }
         } else {
             // 对于旧版本，使用系统UI可见性监听器
             activity.window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-                if (isKioskEnabled) {
-                    // 当系统UI变为可见时，重新隐藏
-                    handler.postDelayed({
-                        if (isKioskEnabled) {
-                            setupFullscreen()
-                        }
-                    }, 100)
-                }
+                // 简化处理，不强制重新隐藏
             }
         }
     }

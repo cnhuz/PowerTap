@@ -41,7 +41,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-    // QR Code generation
+    // QR Code generation (保留，因为AppPaymentActivity需要)
     implementation("com.google.zxing:core:3.5.2")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 

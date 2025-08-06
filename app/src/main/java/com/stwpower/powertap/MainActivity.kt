@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -28,24 +29,33 @@ class MainActivity : AppCompatActivity() {
     private val clickHandler = Handler(Looper.getMainLooper())
     private var clickRunnable: Runnable? = null
     private lateinit var kioskModeManager: KioskModeManager
+    private lateinit var homeKeyInterceptor: HomeKeyInterceptor
+    private lateinit var fullscreenManager: ImmersiveFullscreenManager
+
+    companion object {
+        @JvmStatic
+        var isAdminExiting = false
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 初始化Kiosk模式管理器
+        // 初始化所有管理器
         kioskModeManager = KioskModeManager(this)
+        homeKeyInterceptor = HomeKeyInterceptor(this)
+        fullscreenManager = ImmersiveFullscreenManager(this)
 
-        // 设置全屏和隐藏状态栏、导航栏
+        // 设置基础全屏
         setupFullscreen()
+
+        // 启动看门狗服务
+        startService(Intent(this, KioskWatchdogService::class.java))
 
         setContentView(R.layout.activity_main)
 
         setupLanguageButtons()
         setupPaymentButtons()
         setupAdminExit()
-
-        // 启动看门狗服务
-        startService(Intent(this, KioskWatchdogService::class.java))
     }
     
     private fun setupLanguageButtons() {
@@ -161,7 +171,8 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(getString(R.string.confirm)) { _, _ ->
                 val inputPassword = editText.text.toString()
                 if (inputPassword == adminPassword) {
-                    // 密码正确，停止看门狗服务并退出应用
+                    // 密码正确，设置管理员退出标志，停止看门狗服务并退出应用
+                    isAdminExiting = true
                     stopService(Intent(this@MainActivity, KioskWatchdogService::class.java))
                     kioskModeManager.disableKioskMode()
                     finishAffinity()
@@ -181,11 +192,23 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
         // 启用kiosk模式
-        kioskModeManager.enableKioskMode()
-        // 重新应用全屏设置
-        setupFullscreen()
+        enableKioskMode()
     }
+
+    private fun enableKioskMode() {
+        // 启用所有保护机制
+        fullscreenManager.enableFullscreen()
+        kioskModeManager.enableKioskMode()
+        homeKeyInterceptor.startIntercepting()
+        fullscreenManager.onResume()
+
+        // 启动看门狗服务
+        startService(Intent(this, KioskWatchdogService::class.java))
+    }
+
+
 
     override fun onPause() {
         super.onPause()
@@ -195,8 +218,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        // 当应用进入后台时，立即重新启动
-        if (kioskModeManager != null) {
+        // 只有在非管理员退出的情况下才重新启动
+        if (!isAdminExiting && ::kioskModeManager.isInitialized) {
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
@@ -206,15 +229,34 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // 只有在管理员退出时才真正禁用
+        if (::fullscreenManager.isInitialized) {
+            fullscreenManager.disableFullscreen()
+        }
         if (::kioskModeManager.isInitialized) {
             kioskModeManager.disableKioskMode()
         }
+        if (::homeKeyInterceptor.isInitialized) {
+            homeKeyInterceptor.stopIntercepting()
+        }
     }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // 使用Home键拦截器处理按键事件
+        if (::homeKeyInterceptor.isInitialized && homeKeyInterceptor.onKeyDown(keyCode, event)) {
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
             // 重新设置全屏模式
+            if (::fullscreenManager.isInitialized) {
+                fullscreenManager.onWindowFocusChanged(hasFocus)
+            }
             setupFullscreen()
         }
     }
