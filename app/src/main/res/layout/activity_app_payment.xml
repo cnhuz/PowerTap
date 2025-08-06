@@ -24,7 +24,7 @@
             android:text="@string/back"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
-            android:background="#29A472"
+            android:background="#868D91"
             android:layout_marginBottom="40dp" />
 
         <!-- Title -->

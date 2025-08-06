@@ -58,13 +58,13 @@ class TerminalPaymentActivity : AppCompatActivity() {
         statusText.text = getString(R.string.processing_payment)
         instructionsText.text = getString(R.string.terminal_instructions)
         
-        // 模拟支付处理过程，5秒后完成
+        // 模拟支付处理过程，3秒后完成
         Handler(Looper.getMainLooper()).postDelayed({
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
             statusText.text = getString(R.string.payment_completed)
-        }, 3000) // 5秒后完成支付
+        }, 1000) // 3秒后完成支付
     }
 
     private fun setupFullscreen() {
