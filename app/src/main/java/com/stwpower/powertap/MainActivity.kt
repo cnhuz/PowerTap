@@ -261,8 +261,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        // 不在onStop中重新启动，让看门狗服务处理
-        // 这样可以避免在内部Activity切换时误重启
+        // 只有在非管理员退出的情况下才重新启动
+        // 添加小延迟确保isAdminExiting标志正确生效
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isAdminExiting && ::kioskModeManager.isInitialized) {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
+            }
+        }, 100)
     }
 
     override fun onDestroy() {

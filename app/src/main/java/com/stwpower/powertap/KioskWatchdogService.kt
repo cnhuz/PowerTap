@@ -40,7 +40,7 @@ class KioskWatchdogService : Service() {
             override fun run() {
                 if (isWatching) {
                     checkAndRestoreApp()
-                    handler.postDelayed(this, 2000) // 每2秒检查一次，降低频率
+                    handler.postDelayed(this, 1000) // 每1秒检查一次
                 }
             }
         }
@@ -59,8 +59,8 @@ class KioskWatchdogService : Service() {
             return
         }
 
-        if (!isAllowedActivityInForeground()) {
-            // 没有允许的Activity在前台，重新启动MainActivity
+        if (!isAppInForeground()) {
+            // 应用不在前台，重新启动
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or

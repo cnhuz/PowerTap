@@ -98,9 +98,9 @@ class KioskModeManager(private val activity: Activity) {
         homeWatcher = object : Runnable {
             override fun run() {
                 if (isKioskEnabled && !MainActivity.isAdminExiting) {
-                    // 检查当前是否为允许的Activity在前台
-                    if (!isAllowedActivityInForeground()) {
-                        // 如果不是允许的Activity，重新启动MainActivity
+                    // 检查当前是否为前台应用
+                    if (!isAppInForeground()) {
+                        // 如果不是，重新启动MainActivity
                         val intent = Intent(activity, MainActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         activity.startActivity(intent)
@@ -109,8 +109,8 @@ class KioskModeManager(private val activity: Activity) {
                     // 重新应用全屏设置
                     setupFullscreen()
 
-                    // 每1秒检查一次，降低频率避免过度干扰
-                    handler.postDelayed(this, 1000)
+                    // 每500ms检查一次
+                    handler.postDelayed(this, 500)
                 }
             }
         }
