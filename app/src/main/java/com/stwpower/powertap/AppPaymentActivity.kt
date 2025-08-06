@@ -122,6 +122,8 @@ class AppPaymentActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         homeKeyInterceptor.startIntercepting()
+        // 重新应用全屏设置
+        setupFullscreen()
     }
 
     override fun onPause() {

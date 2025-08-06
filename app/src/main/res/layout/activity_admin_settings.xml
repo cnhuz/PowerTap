@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="1080dp"
+    android:layout_height="800dp"
+    android:orientation="vertical"
+    android:background="@color/background_payment"
+    android:padding="40dp"
+    android:gravity="center">
+
+    <!-- 标题 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="管理员设置"
+        android:textSize="32sp"
+        android:textColor="@color/text_primary"
+        android:textStyle="bold"
+        android:layout_marginBottom="60dp" />
+
+    <!-- 设置按钮容器 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- 修改密码按钮 -->
+        <Button
+            android:id="@+id/btn_change_password"
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:text="修改管理员密码"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_primary"
+            android:layout_marginBottom="20dp" />
+
+        <!-- 设置默认语言按钮 -->
+        <Button
+            android:id="@+id/btn_set_default_language"
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:text="设置默认语言"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_primary"
+            android:layout_marginBottom="20dp" />
+
+        <!-- 退出应用按钮 -->
+        <Button
+            android:id="@+id/btn_exit_app"
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:text="退出应用"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_back"
+            android:layout_marginBottom="40dp" />
+
+        <!-- 返回主界面按钮 -->
+        <Button
+            android:id="@+id/btn_back_to_main"
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:text="返回主界面"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:background="@drawable/btn_language"
+            android:layout_marginBottom="20dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -23,6 +23,14 @@ class KioskModeManager(private val activity: Activity) {
     private var homeWatcher: Runnable? = null
     private var homeKeyReceiver: BroadcastReceiver? = null
     private var isKioskEnabled = false
+
+    // 允许的Activity白名单
+    private val allowedActivities = setOf(
+        "com.stwpower.powertap.MainActivity",
+        "com.stwpower.powertap.TerminalPaymentActivity",
+        "com.stwpower.powertap.AppPaymentActivity",
+        "com.stwpower.powertap.AdminSettingsActivity"
+    )
     
     fun enableKioskMode() {
         isKioskEnabled = true
@@ -90,9 +98,9 @@ class KioskModeManager(private val activity: Activity) {
         homeWatcher = object : Runnable {
             override fun run() {
                 if (isKioskEnabled && !MainActivity.isAdminExiting) {
-                    // 检查当前是否为前台应用
-                    if (!isAppInForeground()) {
-                        // 如果不是，重新启动MainActivity
+                    // 检查当前是否为允许的Activity在前台
+                    if (!isAllowedActivityInForeground()) {
+                        // 如果不是允许的Activity，重新启动MainActivity
                         val intent = Intent(activity, MainActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         activity.startActivity(intent)
@@ -101,8 +109,8 @@ class KioskModeManager(private val activity: Activity) {
                     // 重新应用全屏设置
                     setupFullscreen()
 
-                    // 每500ms检查一次
-                    handler.postDelayed(this, 500)
+                    // 每1秒检查一次，降低频率避免过度干扰
+                    handler.postDelayed(this, 1000)
                 }
             }
         }
@@ -116,7 +124,7 @@ class KioskModeManager(private val activity: Activity) {
     private fun isAppInForeground(): Boolean {
         val activityManager = activity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val appProcesses = activityManager.runningAppProcesses ?: return false
-        
+
         val packageName = activity.packageName
         for (appProcess in appProcesses) {
             if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
@@ -125,6 +133,27 @@ class KioskModeManager(private val activity: Activity) {
             }
         }
         return false
+    }
+
+    private fun isAllowedActivityInForeground(): Boolean {
+        val activityManager = activity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+
+        // 检查当前前台任务
+        val runningTasks = try {
+            activityManager.getRunningTasks(1)
+        } catch (e: Exception) {
+            return isAppInForeground() // 如果无法获取任务信息，回退到进程检查
+        }
+
+        if (runningTasks.isNotEmpty()) {
+            val topActivity = runningTasks[0].topActivity
+            val topActivityName = topActivity?.className
+
+            // 检查顶部Activity是否在白名单中
+            return topActivityName != null && allowedActivities.contains(topActivityName)
+        }
+
+        return isAppInForeground()
     }
 
     private fun registerHomeKeyReceiver() {

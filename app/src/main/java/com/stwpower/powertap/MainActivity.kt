@@ -3,10 +3,12 @@ package com.stwpower.powertap
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
@@ -14,6 +16,7 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,12 +28,12 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private var clickCount = 0
-    private val adminPassword = "admin123"
     private val clickHandler = Handler(Looper.getMainLooper())
     private var clickRunnable: Runnable? = null
     private lateinit var kioskModeManager: KioskModeManager
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private lateinit var fullscreenManager: ImmersiveFullscreenManager
+    private var adminClickArea: View? = null
 
     companion object {
         @JvmStatic
@@ -40,10 +43,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 重置管理员退出标志
+        isAdminExiting = false
+
         // 初始化所有管理器
         kioskModeManager = KioskModeManager(this)
         homeKeyInterceptor = HomeKeyInterceptor(this)
         fullscreenManager = ImmersiveFullscreenManager(this)
+
+        // 应用默认语言设置
+        applyDefaultLanguage()
 
         // 设置基础全屏
         setupFullscreen()
@@ -56,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         setupLanguageButtons()
         setupPaymentButtons()
         setupAdminExit()
+        setupAdminClickArea()
     }
     
     private fun setupLanguageButtons() {
@@ -87,6 +97,14 @@ class MainActivity : AppCompatActivity() {
         config.locale = locale
         resources.updateConfiguration(config, resources.displayMetrics)
         recreate()
+    }
+
+    private fun applyDefaultLanguage() {
+        val defaultLanguage = AdminSettingsActivity.getDefaultLanguage(this)
+        val currentLanguage = Locale.getDefault().language
+        if (currentLanguage != defaultLanguage) {
+            changeLanguage(defaultLanguage)
+        }
     }
 
     private fun setupFullscreen() {
@@ -127,20 +145,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupAdminExit() {
-        // 在右下角添加隐藏的点击区域
-        val rootView = findViewById<View>(android.R.id.content)
-        rootView.setOnTouchListener { _, event ->
-            val x = event.x
-            val y = event.y
-            val screenWidth = resources.displayMetrics.widthPixels
-            val screenHeight = resources.displayMetrics.heightPixels
+        // 这个方法现在只处理逻辑，UI在setupAdminClickArea中处理
+    }
 
-            // 检查是否点击在右下角区域 (100x100像素)
-            if (x > screenWidth - 100 && y > screenHeight - 100) {
+    private fun setupAdminClickArea() {
+        // 创建半透明的点击区域
+        adminClickArea = View(this).apply {
+            setBackgroundColor(Color.argb(30, 255, 0, 0)) // 半透明红色
+            layoutParams = FrameLayout.LayoutParams(100, 100).apply {
+                gravity = Gravity.BOTTOM or Gravity.END
+            }
+
+            setOnClickListener {
                 handleAdminClick()
             }
-            false
         }
+
+        // 添加到根布局
+        val rootLayout = findViewById<FrameLayout>(android.R.id.content)
+        rootLayout.addView(adminClickArea)
     }
 
     private fun handleAdminClick() {
@@ -166,10 +189,22 @@ class MainActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.admin_password_title))
-            .setMessage(getString(R.string.admin_password_message))
+            .setMessage("选择操作：")
             .setView(editText)
-            .setPositiveButton(getString(R.string.confirm)) { _, _ ->
+            .setPositiveButton("管理员设置") { _, _ ->
                 val inputPassword = editText.text.toString()
+                val adminPassword = AdminSettingsActivity.getAdminPassword(this@MainActivity)
+                if (inputPassword == adminPassword) {
+                    // 密码正确，进入管理员设置页面
+                    val intent = Intent(this@MainActivity, AdminSettingsActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this, getString(R.string.password_incorrect), Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNeutralButton("直接退出") { _, _ ->
+                val inputPassword = editText.text.toString()
+                val adminPassword = AdminSettingsActivity.getAdminPassword(this@MainActivity)
                 if (inputPassword == adminPassword) {
                     // 密码正确，设置管理员退出标志，停止看门狗服务并退出应用
                     isAdminExiting = true
@@ -218,12 +253,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        // 只有在非管理员退出的情况下才重新启动
-        if (!isAdminExiting && ::kioskModeManager.isInitialized) {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            startActivity(intent)
-        }
+        // 不在onStop中重新启动，让看门狗服务处理
+        // 这样可以避免在内部Activity切换时误重启
     }
 
     override fun onDestroy() {

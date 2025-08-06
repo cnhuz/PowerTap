@@ -9,10 +9,18 @@ import android.os.IBinder
 import android.os.Looper
 
 class KioskWatchdogService : Service() {
-    
+
     private val handler = Handler(Looper.getMainLooper())
     private var watchdogRunnable: Runnable? = null
     private var isWatching = false
+
+    // 允许的Activity白名单
+    private val allowedActivities = setOf(
+        "com.stwpower.powertap.MainActivity",
+        "com.stwpower.powertap.TerminalPaymentActivity",
+        "com.stwpower.powertap.AppPaymentActivity",
+        "com.stwpower.powertap.AdminSettingsActivity"
+    )
     
     override fun onBind(intent: Intent?): IBinder? = null
     
@@ -32,7 +40,7 @@ class KioskWatchdogService : Service() {
             override fun run() {
                 if (isWatching) {
                     checkAndRestoreApp()
-                    handler.postDelayed(this, 1000) // 每秒检查一次
+                    handler.postDelayed(this, 2000) // 每2秒检查一次，降低频率
                 }
             }
         }
@@ -51,8 +59,8 @@ class KioskWatchdogService : Service() {
             return
         }
 
-        if (!isAppInForeground()) {
-            // 应用不在前台，重新启动
+        if (!isAllowedActivityInForeground()) {
+            // 没有允许的Activity在前台，重新启动MainActivity
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -66,7 +74,7 @@ class KioskWatchdogService : Service() {
     private fun isAppInForeground(): Boolean {
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val appProcesses = activityManager.runningAppProcesses ?: return false
-        
+
         val packageName = packageName
         for (appProcess in appProcesses) {
             if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
@@ -75,5 +83,26 @@ class KioskWatchdogService : Service() {
             }
         }
         return false
+    }
+
+    private fun isAllowedActivityInForeground(): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+
+        // 检查当前前台任务
+        val runningTasks = try {
+            activityManager.getRunningTasks(1)
+        } catch (e: Exception) {
+            return isAppInForeground() // 如果无法获取任务信息，回退到进程检查
+        }
+
+        if (runningTasks.isNotEmpty()) {
+            val topActivity = runningTasks[0].topActivity
+            val topActivityName = topActivity?.className
+
+            // 检查顶部Activity是否在白名单中
+            return topActivityName != null && allowedActivities.contains(topActivityName)
+        }
+
+        return isAppInForeground()
     }
 }

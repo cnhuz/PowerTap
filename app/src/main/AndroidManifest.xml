@@ -52,6 +52,15 @@
             android:excludeFromRecents="true"
             android:stateNotNeeded="true" />
 
+        <!-- Admin Settings Activity -->
+        <activity
+            android:name=".AdminSettingsActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="true"
+            android:stateNotNeeded="true" />
+
         <!-- Kiosk Watchdog Service -->
         <service
             android:name=".KioskWatchdogService"
