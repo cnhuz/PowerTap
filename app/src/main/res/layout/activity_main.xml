@@ -3,7 +3,7 @@
     android:layout_width="1280dp"
     android:layout_height="800dp"
     android:orientation="horizontal"
-    android:background="#2C2C2C">
+    android:background="@color/background_main">
 
     <!-- Left Side Content -->
     <LinearLayout
@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:text="PowerTap 充电宝租借"
                 android:textSize="36sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 android:layout_marginBottom="20dp" />
 
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/main_description"
                 android:textSize="18sp"
-                android:textColor="#CCCCCC"
+                android:textColor="@color/text_secondary"
                 android:lineSpacingExtra="6dp"
                 android:layout_marginBottom="20dp" />
 
@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:text="租借费用: ¥5.00/24小时"
                 android:textSize="20sp"
-                android:textColor="#FFB74D"
+                android:textColor="@color/button_primary"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -66,8 +66,8 @@
                 android:layout_height="60dp"
                 android:text="@string/pay_with_terminal"
                 android:textSize="20sp"
-                android:textColor="#FFFFFF"
-                android:background="#4A4A4A"
+                android:textColor="@color/text_primary"
+                android:background="@color/button_primary"
                 android:gravity="center"
                 android:layout_marginBottom="16dp"
                 android:clickable="true"
@@ -80,8 +80,8 @@
                 android:layout_height="60dp"
                 android:text="@string/pay_with_app"
                 android:textSize="20sp"
-                android:textColor="#FFFFFF"
-                android:background="#4A4A4A"
+                android:textColor="@color/text_primary"
+                android:background="@color/button_primary"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true" />

@@ -1,190 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="1080dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="1280dp"
     android:layout_height="800dp"
-    android:background="@color/background_main"
-    android:padding="20dp">
+    android:orientation="horizontal"
+    android:background="@color/background_main">
 
-    <!-- Header with Back Button -->
+    <!-- Left Panel - 1/3 width -->
     <LinearLayout
-        android:id="@+id/header_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@color/background_secondary"
+        android:padding="40dp">
 
+        <!-- Back Button -->
         <Button
             android:id="@+id/btn_back"
-            android:layout_width="100dp"
-            android:layout_height="45dp"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
             android:text="@string/back"
             android:textSize="16sp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_primary"
             android:background="@drawable/btn_back"
-            android:elevation="3dp" />
+            android:layout_marginBottom="40dp" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_payment_title"
+            android:textSize="28sp"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="30dp" />
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/scan_qr_code"
+            android:textSize="20sp"
+            android:textColor="@color/button_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="30dp" />
+
+        <!-- Instructions -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="@string/app_instructions"
+            android:textSize="18sp"
+            android:textColor="@color/text_secondary"
+            android:gravity="center_vertical"
+            android:lineSpacingExtra="6dp"
+            android:layout_marginBottom="30dp" />
+
+        <!-- Payment Amount Info -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="支付金额: ¥5.00"
+            android:textSize="20sp"
+            android:textColor="@color/button_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="租借时长: 24小时"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary" />
 
     </LinearLayout>
 
-    <!-- Main Content Area -->
+    <!-- Right Panel - 2/3 width -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_below="@id/header_layout"
-        android:layout_marginTop="20dp"
-        android:orientation="horizontal"
-        android:weightSum="2">
+        android:layout_weight="2"
+        android:orientation="vertical"
+        android:background="@color/background_main"
+        android:padding="40dp"
+        android:gravity="center">
 
-        <!-- Left Panel - Instructions -->
+        <!-- QR Code Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="扫描二维码支付"
+            android:textSize="32sp"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="40dp" />
+
+        <!-- QR Code Container -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginEnd="10dp"
-            android:background="@color/background_secondary"
-            android:padding="40dp"
-            android:elevation="4dp">
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:background="@color/white"
+            android:padding="20dp"
+            android:gravity="center"
+            android:layout_marginBottom="40dp">
 
-            <!-- Title -->
-            <TextView
+            <ImageView
+                android:id="@+id/iv_qr_code"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/app_payment_title"
-                android:textSize="32sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="40dp" />
-
-            <!-- Status -->
-            <TextView
-                android:id="@+id/tv_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/scan_qr_code"
-                android:textSize="24sp"
-                android:textColor="@color/accent_blue"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="40dp" />
-
-            <!-- Instructions -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="@string/app_instructions"
-                android:textSize="20sp"
-                android:textColor="@color/text_secondary"
-                android:gravity="center_vertical"
-                android:lineSpacingExtra="8dp"
-                android:layout_marginBottom="30dp" />
-
-            <!-- Payment Amount Info -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_height="match_parent"
                 android:background="@color/background_main"
-                android:padding="20dp"
-                android:elevation="2dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="支付金额: ¥5.00"
-                    android:textSize="20sp"
-                    android:textColor="@color/accent_orange"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="租借时长: 24小时"
-                    android:textSize="16sp"
-                    android:textColor="@color/text_secondary"
-                    android:gravity="center" />
-
-            </LinearLayout>
+                android:scaleType="centerInside" />
 
         </LinearLayout>
 
-        <!-- Right Panel - QR Code -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="10dp"
-            android:background="@color/background_secondary"
-            android:padding="40dp"
-            android:elevation="4dp"
-            android:gravity="center">
+        <!-- QR Code Instructions -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/scan_with_app"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
 
-            <!-- QR Code Title -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="扫描二维码支付"
-                android:textSize="28sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="40dp" />
-
-            <!-- QR Code Container -->
-            <LinearLayout
-                android:layout_width="350dp"
-                android:layout_height="350dp"
-                android:background="@color/white"
-                android:padding="20dp"
-                android:elevation="6dp"
-                android:gravity="center"
-                android:layout_marginBottom="30dp">
-
-                <ImageView
-                    android:id="@+id/iv_qr_code"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/background_main"
-                    android:scaleType="centerInside" />
-
-            </LinearLayout>
-
-            <!-- QR Code Instructions -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/background_main"
-                android:padding="20dp"
-                android:elevation="2dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/scan_with_app"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="支持微信、支付宝等支付方式"
-                    android:textSize="16sp"
-                    android:textColor="@color/text_secondary"
-                    android:gravity="center" />
-
-            </LinearLayout>
-
-        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="支持微信、支付宝等支付方式"
+            android:textSize="18sp"
+            android:textColor="@color/text_secondary"
+            android:gravity="center" />
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

@@ -8,24 +8,25 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- PowerTap App Colors - 灰色主题 -->
-    <color name="background_main">#E8E8E8</color>
-    <color name="background_secondary">#F0F0F0</color>
-    <color name="background_payment">#F5F5F5</color>
-    <color name="text_primary">#2C2C2C</color>
-    <color name="text_secondary">#5A5A5A</color>
-    <color name="text_light">#787878</color>
+    <!-- PowerTap App Colors - 新配色方案 -->
+    <color name="background_main">#181E22</color>
+    <color name="background_secondary">#1E2428</color>
 
-    <!-- 按钮颜色 - 适配灰色背景 -->
-    <color name="button_primary">#4A4A4A</color>
-    <color name="button_primary_pressed">#3A3A3A</color>
-    <color name="button_secondary">#6A6A6A</color>
-    <color name="button_language">#FFFFFF</color>
-    <color name="button_language_border">#CCCCCC</color>
-    <color name="button_disabled">#CCCCCC</color>
+    <!-- 文字颜色 -->
+    <color name="text_primary">#F7F7F7</color>
+    <color name="text_secondary">#868D91</color>
+    <color name="text_light">#868D91</color>
+
+    <!-- 按钮颜色 -->
+    <color name="button_primary">#29A472</color>
+    <color name="button_primary_pressed">#228A5F</color>
+    <color name="button_secondary">#1E2428</color>
+    <color name="button_language">#1E2428</color>
+    <color name="button_language_border">#868D91</color>
+    <color name="button_disabled">#868D91</color>
 
     <!-- 强调色 -->
-    <color name="accent_blue">#5A9FD4</color>
-    <color name="accent_green">#7CB342</color>
-    <color name="accent_orange">#FF9800</color>
+    <color name="accent_blue">#29A472</color>
+    <color name="accent_green">#29A472</color>
+    <color name="accent_orange">#29A472</color>
 </resources>
