@@ -137,6 +137,7 @@ class MainActivity : AppCompatActivity() {
         drawable.setColor(color)
         drawable.cornerRadius = radius * resources.displayMetrics.density
         view.background = drawable
+        view.clipToOutline = true
     }
     
     private fun changeLanguage(languageCode: String) {
