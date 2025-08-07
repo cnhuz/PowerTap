@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="1080dp"
+    android:layout_width="1280dp"
     android:layout_height="800dp"
     android:orientation="vertical"
     android:background="@color/background_main"
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="@color/background_secondary"
+        android:background="@color/background_main"
         android:padding="30dp"
         android:elevation="3dp">
 
@@ -62,7 +62,7 @@
             android:textSize="19sp"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:background="@drawable/btn_back"
+            android:background="@color/background_main"
             android:layout_marginBottom="40dp"
             android:elevation="2dp" />
 

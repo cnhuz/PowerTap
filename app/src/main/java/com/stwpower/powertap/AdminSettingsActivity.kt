@@ -230,12 +230,12 @@ class AdminSettingsActivity : AppCompatActivity() {
     companion object {
         fun getAdminPassword(context: android.content.Context): String {
             val sharedPreferences = context.getSharedPreferences("admin_settings", MODE_PRIVATE)
-            return sharedPreferences.getString("admin_password", "admin123") ?: "admin123"
+            return sharedPreferences.getString("admin_password", "stw2025") ?: "stw2025"
         }
         
         fun getDefaultLanguage(context: android.content.Context): String {
             val sharedPreferences = context.getSharedPreferences("admin_settings", MODE_PRIVATE)
-            return sharedPreferences.getString("default_language", "zh") ?: "zh"
+            return sharedPreferences.getString("default_language", "en") ?: "en"
         }
     }
 }
