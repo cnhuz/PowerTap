@@ -18,11 +18,12 @@
         <Button
             android:id="@+id/btn_back"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
             android:text="@string/back"
-            android:textSize="16sp"
+            android:textSize="25sp"
+            android:textStyle="bold"
             android:textColor="@color/text_primary"
             android:background="#868D91"
             android:layout_marginBottom="40dp"
@@ -73,63 +74,44 @@
         android:padding="40dp"
         android:gravity="center">
 
-        <!-- Payment Title -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="支付提示"
-            android:textSize="32sp"
-            android:textColor="@color/text_primary"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="40dp" />
-
-        <!-- Payment Icon/Illustration -->
+        <!-- 上半部分：两个文本区域 -->
         <LinearLayout
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:background="@color/button_primary"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginBottom="40dp">
+            android:layout_marginTop="80dp">
 
+            <!-- 标题 -->
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💳"
-                android:textSize="80sp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Tap your card or phone on the terminal."
+                android:textSize="70sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
                 android:gravity="center" />
 
+            <!-- 说明文字 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Not contactless card? Card reader below keypad"
+                android:textSize="25sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center" />
         </LinearLayout>
-
-        <!-- Payment Amount -->
-        <TextView
+        <!-- Image -->
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="支付金额: ¥5.00"
-            android:textSize="28sp"
-            android:textColor="@color/button_primary"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="20dp" />
-
-        <!-- Service Details -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="租借时长: 24小时"
-            android:textSize="20sp"
-            android:textColor="@color/text_secondary"
-            android:gravity="center"
-            android:layout_marginBottom="20dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="请在支付终端上完成支付操作"
-            android:textSize="18sp"
-            android:textColor="@color/text_secondary"
-            android:gravity="center" />
-
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/terminal_tap_to_pay"
+            android:scaleType="fitCenter"
+            android:padding="40dp" />
     </LinearLayout>
 
 </LinearLayout>
