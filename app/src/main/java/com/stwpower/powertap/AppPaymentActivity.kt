@@ -24,7 +24,6 @@ import com.google.zxing.qrcode.QRCodeWriter
 class AppPaymentActivity : AppCompatActivity() {
 
     private lateinit var backButton: Button
-    private lateinit var statusText: TextView
     private lateinit var qrCodeImage: ImageView
     private lateinit var progressTimer: HighPerformanceProgressBar
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
@@ -51,7 +50,6 @@ class AppPaymentActivity : AppCompatActivity() {
     
     private fun setupViews() {
         backButton = findViewById(R.id.btn_back)
-        statusText = findViewById(R.id.tv_status)
         qrCodeImage = findViewById(R.id.iv_qr_code)
         progressTimer = findViewById(R.id.progress_timer)
 
@@ -119,13 +117,10 @@ class AppPaymentActivity : AppCompatActivity() {
     }
     
     private fun simulatePaymentProcess() {
-        statusText.text = getString(R.string.scan_qr_code)
-        
         Handler(Looper.getMainLooper()).postDelayed({
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            statusText.text = getString(R.string.payment_completed)
         }, 0) // 1秒后完成
     }
 
