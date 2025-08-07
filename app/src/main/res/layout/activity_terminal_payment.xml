@@ -6,15 +6,10 @@
     android:background="@color/background_main">
 
     <!-- 顶部进度条 -->
-    <ProgressBar
+    <com.stwpower.powertap.HighPerformanceProgressBar
         android:id="@+id/progress_timer"
-        style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:max="100"
-        android:progress="100"
-        android:progressDrawable="@drawable/custom_progress_bar"
-        android:indeterminate="false" />
+        android:layout_height="10dp" />
 
     <!-- 主要内容区域 -->
     <LinearLayout

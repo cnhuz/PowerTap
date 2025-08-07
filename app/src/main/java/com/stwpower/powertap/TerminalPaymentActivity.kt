@@ -1,7 +1,5 @@
 package com.stwpower.powertap
 
-import android.animation.Animator
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -15,9 +13,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
-import android.view.animation.LinearInterpolator
 import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -27,12 +23,11 @@ class TerminalPaymentActivity : AppCompatActivity() {
     private lateinit var backButton: Button
     private lateinit var statusText: TextView
     private lateinit var instructionsText: TextView
-    private lateinit var progressTimer: ProgressBar
+    private lateinit var progressTimer: HighPerformanceProgressBar
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
-    private var progressAnimator: ValueAnimator? = null
-    private val timeoutDuration = 30000L // 60秒
+    private val timeoutDuration = 60000L // 60秒
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +51,9 @@ class TerminalPaymentActivity : AppCompatActivity() {
         instructionsText = findViewById(R.id.tv_instructions)
         progressTimer = findViewById(R.id.progress_timer)
 
+        // 为弱设备启用高性能模式
+        progressTimer.setHighPerformanceMode(true)
+
         // 设置圆角背景
         setRoundedBackground(backButton, Color.parseColor("#868D91"), 10f)
 
@@ -67,7 +65,6 @@ class TerminalPaymentActivity : AppCompatActivity() {
             if (!isProcessing) {
                 // 取消倒计时器
                 countDownTimer?.cancel()
-                progressAnimator?.cancel()
                 finish()
             }
         }
@@ -81,39 +78,18 @@ class TerminalPaymentActivity : AppCompatActivity() {
     }
     
     private fun startSmoothCountdown() {
-        // 使用ValueAnimator实现丝滑的进度条动画
-        progressAnimator = ValueAnimator.ofInt(100, 0).apply {
-            duration = timeoutDuration
-            interpolator = LinearInterpolator()
-
-            addUpdateListener { animator ->
-                val progress = animator.animatedValue as Int
-                progressTimer.progress = progress
-            }
-
-            // 动画结束时返回主页面
-            addListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator) {}
-                override fun onAnimationCancel(animation: Animator) {}
-                override fun onAnimationRepeat(animation: Animator) {}
-                override fun onAnimationEnd(animation: Animator) {
-                    returnToMainActivity()
-                }
-            })
-        }
-        progressAnimator?.start()
-
-        // 同时使用CountDownTimer作为备用计时器，确保60秒后一定会返回
-        countDownTimer = object : CountDownTimer(timeoutDuration, 1000) {
+        // 使用优化的更新频率，在性能和丝滑度之间取得平衡
+        // 对于弱设备，使用33ms间隔（约30fps）既保证丝滑又节省性能
+        countDownTimer = object : CountDownTimer(timeoutDuration, 33) {
             override fun onTick(millisUntilFinished: Long) {
-                // 每秒检查一次，不做其他操作
+                // 计算当前进度百分比
+                val progress = (millisUntilFinished.toFloat() / timeoutDuration) * 100f
+                progressTimer.setProgress(progress)
             }
 
             override fun onFinish() {
-                // 确保60秒后返回主页面（备用机制）
-                if (progressAnimator?.isRunning == true) {
-                    progressAnimator?.cancel()
-                }
+                // 确保进度条到0，然后返回主页面
+                progressTimer.setProgress(0f)
                 returnToMainActivity()
             }
         }
@@ -189,7 +165,6 @@ class TerminalPaymentActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         countDownTimer?.cancel()
-        progressAnimator?.cancel()
         homeKeyInterceptor.stopIntercepting()
     }
 
