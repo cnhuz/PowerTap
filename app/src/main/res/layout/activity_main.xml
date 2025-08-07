@@ -10,55 +10,72 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="5.5"
-        android:orientation="vertical"
-        android:padding="40dp">
+        android:orientation="vertical">
 
-        <!-- Upper Text Area -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="40dp">
-
-            <!-- Main Title -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="RENT A\nPOWERBANK"
-                android:textSize="100sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
-                android:layout_marginBottom="20dp"
-                android:lineSpacingMultiplier="0.9" />
-
-            <!-- Description -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/main_description"
-                android:textSize="18sp"
-                android:textColor="@color/text_secondary"
-                android:lineSpacingExtra="6dp"
-                android:layout_marginBottom="20dp" />
-
-            <!-- Price Info -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="租借费用: ¥5.00/24小时"
-                android:textSize="20sp"
-                android:textColor="@color/button_primary"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- Lower Button Area -->
+        <!-- Text Area - Fixed Height (60% of left side) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="65dp"
+            android:paddingStart="80dp"
+            android:paddingEnd="80dp"
+            >
+
+            <!-- 品牌名 - Fixed Height -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:text="STW"
+                android:textSize="63sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:gravity="center_vertical"
+                android:lineSpacingMultiplier="0.9" />
+
+            <!-- Fixed Spacing -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp" />
+
+            <!-- Main Title - Fixed Height -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:text="RENT A\nPOWERBANK"
+                android:textSize="80sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:gravity="center_vertical"
+                android:lineSpacingMultiplier="0.9" />
+
+            <!-- Fixed Spacing -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="30dp" />
+
+            <!-- Price Info - Fixed Height -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="5.00$ / 60minutes"
+                android:textSize="45sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <!-- Button Area - Fixed Height (40% of left side) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingStart="80dp"
+            android:paddingEnd="80dp"
+            >
 
             <!-- Terminal Payment Text Button -->
             <TextView
@@ -66,7 +83,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:text="@string/pay_with_terminal"
-                android:textSize="20sp"
+                android:textSize="25sp"
+                android:textStyle="bold"
                 android:textColor="@color/text_primary"
                 android:background="@color/button_primary"
                 android:gravity="center"
@@ -75,19 +93,27 @@
                 android:focusable="true"
                 android:elevation="5dp" />
 
-            <!-- App Payment Text Button -->
+            <!-- OR text -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OR"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="10dp"/>
+
+            <!-- App Payment Text (just text, no button style) -->
             <TextView
                 android:id="@+id/btn_pay_app"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="@string/pay_with_app"
                 android:textSize="20sp"
                 android:textColor="@color/text_primary"
-                android:background="@color/button_primary"
-                android:gravity="center"
+                android:textStyle="normal"
                 android:clickable="true"
-                android:focusable="true"
-                android:elevation="5dp" />
+                android:focusable="true" />
 
         </LinearLayout>
 
@@ -98,8 +124,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="4.5"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:orientation="vertical">
 
         <!-- Language Buttons Row -->
         <LinearLayout
@@ -107,9 +132,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="45dp"
-            android:layout_marginEnd="60dp">
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="80dp"
+            android:layout_marginEnd="80dp">
 
             <ImageButton
                 android:id="@+id/btn_english"
@@ -173,8 +198,8 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:src="@drawable/main_illustration"
-            android:scaleType="centerInside"
-            android:layout_margin="20dp" />
+            android:scaleType="fitCenter"
+            android:padding="80dp" />
 
     </LinearLayout>
 

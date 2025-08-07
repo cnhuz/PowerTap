@@ -114,7 +114,6 @@ class MainActivity : AppCompatActivity() {
 
         // 设置圆角
         setRoundedBackground(terminalButton, Color.parseColor("#29A472"), 18f)
-        setRoundedBackground(appButton, Color.parseColor("#29A472"), 12f)
 
         terminalButton.setOnClickListener {
             startActivity(Intent(this, TerminalPaymentActivity::class.java))
