@@ -1,19 +1,21 @@
-package com.stwpower.powertap.data.provider;
+package com.stwpower.powertap.data.provider
 
-import com.stripe.stripeterminal.external.callable.ConnectionTokenCallback;
-import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider;
-import com.stripe.stripeterminal.external.models.ConnectionTokenException;
-import com.stwpower.powertap.data.api.MyApiClient;
+import com.stripe.stripeterminal.external.callable.ConnectionTokenCallback
+import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider
+import com.stripe.stripeterminal.external.models.ConnectionTokenException
+import com.stwpower.powertap.data.api.MyApiClient
 
-public class TokenProvider implements ConnectionTokenProvider {
+/**
+ * Stripe Terminal 连接令牌提供者
+ */
+class TokenProvider : ConnectionTokenProvider {
 
-    @Override
-    public void fetchConnectionToken(ConnectionTokenCallback callback) {
+    override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
         try {
-            final String token = MyApiClient.createConnectionToken();
-            callback.onSuccess(token);
-        } catch (ConnectionTokenException e) {
-            callback.onFailure(e);
+            val token = MyApiClient.createConnectionToken()
+            callback.onSuccess(token)
+        } catch (e: ConnectionTokenException) {
+            callback.onFailure(e)
         }
     }
 }

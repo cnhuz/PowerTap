@@ -1,80 +1,69 @@
-package com.stwpower.powertap.data.api;
+package com.stwpower.powertap.data.api
 
-import com.stwpower.powertap.domain.MyResponse;
+import com.stwpower.powertap.domain.MyResponse
 
-import java.util.Map;
+import retrofit2.Call
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
-import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
+interface MyApiService {
 
-public interface MyApiService {
-    /**
-     * 获取ConnectionToken
-     */
+    /** 获取 ConnectionToken */
     @GET("pos/stripe/create_connection_token")
-    Call<MyResponse> getConnectionToken(@Query("key") String key);
+    fun getConnectionToken(@Query("key") key: String): Call<MyResponse>
 
-    /**
-     * 获取ClientSecret
-     */
+    /** 获取 ClientSecret（方式一） */
     @POST("api/bankcard/stripe/createPaymentIntent4Terminal/{secretKey}")
-    Call<MyResponse> createPaymentIntent(@Path("secretKey") String secretKey);
+    fun createPaymentIntent(@Path("secretKey") secretKey: String): Call<MyResponse>
 
-    /**
-     * 获取ClientSecret
-     */
+    /** 获取 ClientSecret（方式二） */
     @POST("api/bankcard/stripe/createPaymentIntent4Terminal")
-    Call<MyResponse> createPaymentIntent(@Query("secretKey") String secretKey, @Query("qrCode") String qrCode);
+    fun createPaymentIntent(
+        @Query("secretKey") secretKey: String,
+        @Query("qrCode") qrCode: String
+    ): Call<MyResponse>
 
-    /**
-     * 获取设备绑定的Stripe terminal位置ID
-     * @param qrCode
-     * @return
-     */
+    /** 获取设备绑定的 Stripe terminal 位置ID */
     @GET("pos/power/get_location_id")
-    Call<MyResponse> getLocationId(@Query("qrCode") String qrCode);
+    fun getLocationId(@Query("qrCode") qrCode: String): Call<MyResponse>
 
-    /**
-     * 租借充电宝
-     */
+    /** 租借充电宝（Stripe Terminal） */
     @POST("pos/power/lend_power_stripe_terminal")
-    Call<MyResponse> lendPowerStripeTerminal(@Body Map<String,String> body);
+    fun lendPowerStripeTerminal(@Body body: Map<String, String>): Call<MyResponse>
 
+    /** 获取预授权金额 */
     @GET("pos/power/get_pre_amount")
-    Call<MyResponse> getPreAmount(@Query("secretKey") String secretKey);
+    fun getPreAmount(@Query("secretKey") secretKey: String): Call<MyResponse>
 
+    /** 租借充电宝（Nayax） */
     @POST("pos/power/lend_power_nayax")
-    Call<MyResponse> lendPowerNayax(@Body Map<String,Object> body);
+    fun lendPowerNayax(@Body body: Map<String, Any>): Call<MyResponse>
 
+    /** 获取广告版本号 */
     @GET("cabinet/advertising/getVersion")
-    Call<MyResponse> getVersion(@Query("qrCode") String qrCode);
+    fun getVersion(@Query("qrCode") qrCode: String): Call<MyResponse>
 
+    /** 获取亮度配置 */
     @GET("cabinet/advertising/getBrightnessConfig")
-    Call<MyResponse> getBrightnessConfig(@Query("qrCode") String qrCode);
+    fun getBrightnessConfig(@Query("qrCode") qrCode: String): Call<MyResponse>
 
-    /**
-     * 请求二维码
-     * @param fno
-     * @return
-     */
+    /** 请求二维码 */
     @GET("cabinet/advertising/cabinet_advertising")
-    Call<MyResponse> getQrCode(@Query("fno") String fno);
+    fun getQrCode(@Query("fno") fno: String): Call<MyResponse>
 
-    /**
-     * 获取广告
-     * @param qrCode
-     * @param timestamp
-     * @param ip
-     * @param sign
-     * @return
-     */
+    /** 获取广告内容 */
     @GET("cabinet/advertising/get")
-    Call<MyResponse> getAD(@Query("qrCode") String qrCode, @Query("timestamp") Long timestamp, @Query("ip") String ip, @Query("sign") String sign);
+    fun getAD(
+        @Query("qrCode") qrCode: String,
+        @Query("timestamp") timestamp: Long,
+        @Query("ip") ip: String,
+        @Query("sign") sign: String
+    ): Call<MyResponse>
 
+    /** 根据充电宝ID获取订单信息 */
     @GET("api/borrow/getOrderInfoByPowerBankId")
-    Call<MyResponse> getOrderInfoByPowerBankId(@Query("powerBankId") String powerBankId);
+    fun getOrderInfoByPowerBankId(@Query("powerBankId") powerBankId: String): Call<MyResponse>
 }
