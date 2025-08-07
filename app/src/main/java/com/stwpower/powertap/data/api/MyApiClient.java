@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.stripe.stripeterminal.external.models.ConnectionTokenException;
+import com.stwpower.powertap.ConfigLoader;
 import com.stwpower.powertap.domain.MyResponse;
 import com.stwpower.powertap.utils.LoggingInterceptor;
 
@@ -31,8 +32,7 @@ public class MyApiClient {
             .addInterceptor(new LoggingInterceptor())
             .build();
     private static final Retrofit mRetrofit = new Retrofit.Builder()
-            .baseUrl(MyApp.baseUrl + "/")
-//            .baseUrl("http://192.168.5.142:8082/power_bank/")
+            .baseUrl(ConfigLoader.getApiUrl() + "/")
             .client(getUnsafeOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create())
             .build();
@@ -86,7 +86,7 @@ public class MyApiClient {
     @NotNull
     public static String createConnectionToken() throws ConnectionTokenException {
         try {
-            final Response<MyResponse> result = mService.getConnectionToken(MyApp.secretKey).execute();
+            final Response<MyResponse> result = mService.getConnectionToken(ConfigLoader.getSecretKey()).execute();
             if (result.isSuccessful() && result.body() != null) {
                 return (String)result.body().getData();
             } else {
@@ -98,8 +98,9 @@ public class MyApiClient {
     }
 
     public static Map<String,String> createPaymentIntent(String qrCode) throws IOException{
-        Response<MyResponse> result = mService.createPaymentIntent(MyApp.secretKey,qrCode).execute();
-        Log.d(MyApp.TERMINAL_TAG,new Gson().toJson(result.body()));
+        Response<MyResponse> result = mService.createPaymentIntent(ConfigLoader.getSecretKey(),qrCode).execute();
+        String TAG = "terminal";
+        Log.d(TAG,new Gson().toJson(result.body()));
         if(result.body() != null && result.body().getCode() == 200){
             Object data = result.body().getData();
             if(data instanceof Map){
@@ -119,7 +120,7 @@ public class MyApiClient {
     }
 
     public static Map<String,String> getPreAmount() throws IOException {
-        final Response<MyResponse> result = mService.getPreAmount(MyApp.secretKey).execute();
+        final Response<MyResponse> result = mService.getPreAmount(ConfigLoader.getSecretKey()).execute();
         if (result.isSuccessful() && result.body() != null) {
             Map<String,String> data = (Map)result.body().getData();
             return data;

@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
@@ -42,10 +43,35 @@ class MainActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         var isAdminExiting = false
+        private const val TAG = "MainActivity"
+    }
+
+    private fun loadAndUseConfig() {
+        try {
+            // 直接使用静态变量 - 更简洁！
+            Log.d(TAG, "=== 配置信息 ===")
+            Log.d(TAG, "API URL: ${ConfigLoader.apiUrl}")
+            Log.d(TAG, "qrCodeUrl: ${ConfigLoader.qrCodeUrl}")
+            Log.d(TAG, "IMEI: ${ConfigLoader.imei}")
+            Log.d(TAG, "Debug Mode: ${ConfigLoader.enableDebug}")
+            Log.d(TAG, "===============")
+
+            // 根据配置调整应用行为
+            if (ConfigLoader.enableDebug) {
+                // 调试模式下的特殊处理
+                Log.d(TAG, "Debug mode enabled - showing detailed logs")
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load config in MainActivity", e)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 使用配置 - 此时Application.onCreate()已经执行完毕，配置已加载
+        loadAndUseConfig()
 
         // 重置管理员退出标志
         isAdminExiting = false

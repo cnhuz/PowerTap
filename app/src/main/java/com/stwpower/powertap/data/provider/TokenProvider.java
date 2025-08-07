@@ -3,6 +3,7 @@ package com.stwpower.powertap.data.provider;
 import com.stripe.stripeterminal.external.callable.ConnectionTokenCallback;
 import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider;
 import com.stripe.stripeterminal.external.models.ConnectionTokenException;
+import com.stwpower.powertap.data.api.MyApiClient;
 
 public class TokenProvider implements ConnectionTokenProvider {
 
