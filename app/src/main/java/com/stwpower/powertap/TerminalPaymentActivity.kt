@@ -14,6 +14,7 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -22,6 +23,8 @@ class TerminalPaymentActivity : AppCompatActivity() {
 
     private lateinit var backButton: Button
     private lateinit var progressTimer: HighPerformanceProgressBar
+    private lateinit var loadingLayout: LinearLayout
+    private lateinit var completedLayout: LinearLayout
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
@@ -46,6 +49,8 @@ class TerminalPaymentActivity : AppCompatActivity() {
     private fun setupViews() {
         backButton = findViewById(R.id.btn_back)
         progressTimer = findViewById(R.id.progress_timer)
+        loadingLayout = findViewById(R.id.loading_layout)
+        completedLayout = findViewById(R.id.completed_layout)
 
         // 为弱设备启用高性能模式
         progressTimer.setHighPerformanceMode(true)
@@ -99,12 +104,27 @@ class TerminalPaymentActivity : AppCompatActivity() {
     }
 
     private fun simulatePaymentProcess() {
+        // 初始状态：显示加载界面
+        showLoadingState()
+
         // 模拟支付处理过程，3秒后完成
         Handler(Looper.getMainLooper()).postDelayed({
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-        }, 1000) // 3秒后完成支付
+            // 切换到完成状态
+            showCompletedState()
+        }, 3000) // 3秒后完成支付
+    }
+
+    private fun showLoadingState() {
+        loadingLayout.visibility = View.VISIBLE
+        completedLayout.visibility = View.GONE
+    }
+
+    private fun showCompletedState() {
+        loadingLayout.visibility = View.GONE
+        completedLayout.visibility = View.VISIBLE
     }
 
     private fun setupFullscreen() {

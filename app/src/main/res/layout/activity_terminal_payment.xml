@@ -178,44 +178,86 @@
             android:padding="40dp"
             android:gravity="center">
 
-            <!-- 上半部分：两个文本区域 -->
+            <!-- 加载状态布局 -->
             <LinearLayout
+                android:id="@+id/loading_layout"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginTop="80dp">
+                android:visibility="visible">
 
-                <!-- 标题 -->
+                <!-- 环形加载器 -->
+                <ProgressBar
+                    android:id="@+id/loading_progress"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:layout_marginBottom="40dp"
+                    android:indeterminateTint="@color/button_primary" />
+
+                <!-- 加载说明文字 -->
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="Tap your card or phone on the terminal."
+                    android:id="@+id/loading_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Processing payment..."
                     android:textSize="70sp"
                     android:textColor="@color/text_primary"
-                    android:textStyle="bold"
+                    android:textStyle="normal"
                     android:gravity="center" />
 
-                <!-- 说明文字 -->
-                <TextView
+            </LinearLayout>
+
+            <!-- 完成状态布局 -->
+            <LinearLayout
+                android:id="@+id/completed_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <!-- 上半部分：两个文本区域 -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:text="Not contactless card? Card reader below keypad"
-                    android:textSize="25sp"
-                    android:textColor="@color/text_secondary"
-                    android:gravity="center" />
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_marginTop="80dp">
+
+                    <!-- 标题 -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="Tap your card or phone on the terminal."
+                        android:textSize="70sp"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <!-- 说明文字 -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="Not contactless card? Card reader below keypad"
+                        android:textSize="25sp"
+                        android:textColor="@color/text_secondary"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <!-- Image -->
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/terminal_tap_to_pay"
+                    android:scaleType="fitCenter"
+                    android:padding="40dp" />
             </LinearLayout>
-            <!-- Image -->
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:src="@drawable/terminal_tap_to_pay"
-                android:scaleType="fitCenter"
-                android:padding="40dp" />
+
         </LinearLayout>
 
     </LinearLayout>
