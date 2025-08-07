@@ -107,19 +107,15 @@ class AppPaymentActivity : AppCompatActivity() {
     
     private fun generateQRCode() {
         val qrCodeContent = "powertap://payment?id=12345&amount=5.00"
-        val writer = QRCodeWriter()
-        val bitMatrix = writer.encode(qrCodeContent, BarcodeFormat.QR_CODE, 300, 300)
-        val width = bitMatrix.width
-        val height = bitMatrix.height
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-        
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                bitmap.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
-            }
-        }
-        
-        qrCodeImage.setImageBitmap(bitmap)
+
+        // 使用美化的二维码生成器
+        val beautifulBitmap = BeautifulQRGenerator.generateBeautifulQR(
+            content = qrCodeContent,
+            size = 300,
+            style = BeautifulQRGenerator.Styles.CLASSIC_GREEN
+        )
+
+        qrCodeImage.setImageBitmap(beautifulBitmap)
     }
     
     private fun simulatePaymentProcess() {
