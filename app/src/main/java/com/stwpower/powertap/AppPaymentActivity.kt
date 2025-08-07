@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
@@ -25,8 +26,11 @@ class AppPaymentActivity : AppCompatActivity() {
     private lateinit var backButton: Button
     private lateinit var statusText: TextView
     private lateinit var qrCodeImage: ImageView
+    private lateinit var progressTimer: HighPerformanceProgressBar
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
+    private var countDownTimer: CountDownTimer? = null
+    private val timeoutDuration = 60000L // 60秒
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +44,7 @@ class AppPaymentActivity : AppCompatActivity() {
         setContentView(R.layout.activity_app_payment)
 
         setupViews()
+        startSmoothCountdown()
         generateQRCode()
         simulatePaymentProcess()
     }
@@ -48,6 +53,10 @@ class AppPaymentActivity : AppCompatActivity() {
         backButton = findViewById(R.id.btn_back)
         statusText = findViewById(R.id.tv_status)
         qrCodeImage = findViewById(R.id.iv_qr_code)
+        progressTimer = findViewById(R.id.progress_timer)
+
+        // 为弱设备启用高性能模式
+        progressTimer.setHighPerformanceMode(true)
 
         // 设置圆角背景
         setRoundedBackground(backButton, Color.parseColor("#868D91"), 10f)
@@ -57,6 +66,8 @@ class AppPaymentActivity : AppCompatActivity() {
 
         backButton.setOnClickListener {
             if (!isProcessing) {
+                // 取消倒计时器
+                countDownTimer?.cancel()
                 finish()
             }
         }
@@ -67,6 +78,31 @@ class AppPaymentActivity : AppCompatActivity() {
         drawable.setColor(color)
         drawable.cornerRadius = radius * resources.displayMetrics.density
         button.background = drawable
+    }
+
+    private fun startSmoothCountdown() {
+        // 使用优化的更新频率，在性能和丝滑度之间取得平衡
+        // 对于弱设备，使用33ms间隔（约30fps）既保证丝滑又节省性能
+        countDownTimer = object : CountDownTimer(timeoutDuration, 33) {
+            override fun onTick(millisUntilFinished: Long) {
+                // 计算当前进度百分比
+                val progress = (millisUntilFinished.toFloat() / timeoutDuration) * 100f
+                progressTimer.setProgress(progress)
+            }
+
+            override fun onFinish() {
+                // 确保进度条到0，然后返回主页面
+                progressTimer.setProgress(0f)
+                returnToMainActivity()
+            }
+        }
+        countDownTimer?.start()
+    }
+
+    private fun returnToMainActivity() {
+        // 时间到后返回主页面，使用简单的finish()即可
+        // 因为MainActivity应该还在任务栈中
+        finish()
     }
     
     private fun generateQRCode() {
@@ -94,7 +130,7 @@ class AppPaymentActivity : AppCompatActivity() {
             backButton.isEnabled = true
             backButton.alpha = 1.0f
             statusText.text = getString(R.string.payment_completed)
-        }, 1000) // 1秒后完成
+        }, 0) // 1秒后完成
     }
 
     private fun setupFullscreen() {
@@ -145,6 +181,7 @@ class AppPaymentActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        countDownTimer?.cancel()
         homeKeyInterceptor.stopIntercepting()
     }
 
