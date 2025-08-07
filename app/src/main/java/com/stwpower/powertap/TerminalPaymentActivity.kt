@@ -21,8 +21,6 @@ import androidx.core.view.WindowCompat
 class TerminalPaymentActivity : AppCompatActivity() {
 
     private lateinit var backButton: Button
-    private lateinit var statusText: TextView
-    private lateinit var instructionsText: TextView
     private lateinit var progressTimer: HighPerformanceProgressBar
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
@@ -47,8 +45,6 @@ class TerminalPaymentActivity : AppCompatActivity() {
     
     private fun setupViews() {
         backButton = findViewById(R.id.btn_back)
-        statusText = findViewById(R.id.tv_status)
-        instructionsText = findViewById(R.id.tv_instructions)
         progressTimer = findViewById(R.id.progress_timer)
 
         // 为弱设备启用高性能模式
@@ -103,16 +99,11 @@ class TerminalPaymentActivity : AppCompatActivity() {
     }
 
     private fun simulatePaymentProcess() {
-        // 初始状态
-        statusText.text = getString(R.string.processing_payment)
-        instructionsText.text = getString(R.string.terminal_instructions)
-
         // 模拟支付处理过程，3秒后完成
         Handler(Looper.getMainLooper()).postDelayed({
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            statusText.text = getString(R.string.payment_completed)
         }, 1000) // 3秒后完成支付
     }
 
