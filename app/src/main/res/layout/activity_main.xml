@@ -26,7 +26,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
-                android:text="STW"
+                android:text="@string/brand_name"
                 android:textSize="63sp"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
@@ -42,7 +42,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
-                android:text="RENT A\nPOWERBANK"
+                android:text="@string/main_title"
                 android:textSize="80sp"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
@@ -97,7 +97,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="OR"
+                android:text="@string/or_text"
                 android:textSize="18sp"
                 android:textColor="@color/text_primary"
                 android:layout_marginBottom="16dp"

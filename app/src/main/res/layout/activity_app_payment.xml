@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="PRICING"
+                android:text="@string/pricing"
                 android:textSize="30sp"
                 android:textColor="@color/text_secondary"
                 android:textStyle="bold"
@@ -79,7 +79,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="/60minutes"
+                        android:text="@string/per_60_minutes"
                         android:textSize="28sp"
                         android:textColor="@color/text_secondary"
                         android:gravity="start" />
@@ -106,7 +106,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="/ 1 day"
+                        android:text="@string/per_1_day"
                         android:textSize="28sp"
                         android:textColor="@color/text_secondary"
                         android:gravity="start" />
@@ -119,7 +119,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TEMPORARY DEPOSIT"
+                android:text="@string/temporary_deposit"
                 android:textSize="30sp"
                 android:textColor="@color/text_secondary"
                 android:textStyle="bold"
@@ -147,7 +147,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:text="Deposit will be refunded when powerbank is returned"
+                    android:text="@string/deposit_refund_info"
                     android:textSize="25sp"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingExtra="2dp"
@@ -158,7 +158,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:text="Additional charges may apply for late returns or damage"
+                    android:text="@string/additional_charges_info"
                     android:textSize="25sp"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingExtra="2dp"
@@ -182,7 +182,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="扫描二维码支付"
+                android:text="@string/scan_qr_code_payment"
                 android:textSize="32sp"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
