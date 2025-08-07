@@ -1,4 +1,4 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.ui
 
 import android.content.Context
 import android.graphics.Canvas

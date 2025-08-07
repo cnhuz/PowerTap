@@ -1,4 +1,4 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.utils
 
 import android.graphics.*
 import com.google.zxing.BarcodeFormat

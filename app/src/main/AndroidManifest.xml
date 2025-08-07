@@ -36,7 +36,7 @@
 
         <!-- Terminal Payment Activity -->
         <activity
-            android:name=".TerminalPaymentActivity"
+            android:name=".ui.TerminalPaymentActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:launchMode="singleTask"
@@ -45,7 +45,7 @@
 
         <!-- App Payment Activity -->
         <activity
-            android:name=".AppPaymentActivity"
+            android:name=".ui.AppPaymentActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:launchMode="singleTask"
@@ -54,7 +54,7 @@
 
         <!-- Admin Settings Activity -->
         <activity
-            android:name=".AdminSettingsActivity"
+            android:name=".ui.AdminSettingsActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:launchMode="singleTask"

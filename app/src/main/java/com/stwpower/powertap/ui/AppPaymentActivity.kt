@@ -1,6 +1,5 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.ui
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
@@ -14,17 +13,18 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import com.stwpower.powertap.HomeKeyInterceptor
+import com.stwpower.powertap.R
+import com.stwpower.powertap.utils.BeautifulQRGenerator
 
-class TerminalPaymentActivity : AppCompatActivity() {
+class AppPaymentActivity : AppCompatActivity() {
 
     private lateinit var backButton: Button
+    private lateinit var qrCodeImage: ImageView
     private lateinit var progressTimer: HighPerformanceProgressBar
-    private lateinit var loadingLayout: LinearLayout
-    private lateinit var completedLayout: LinearLayout
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
@@ -39,18 +39,18 @@ class TerminalPaymentActivity : AppCompatActivity() {
         // 初始化Home键拦截器
         homeKeyInterceptor = HomeKeyInterceptor(this)
 
-        setContentView(R.layout.activity_terminal_payment)
+        setContentView(R.layout.activity_app_payment)
 
         setupViews()
         startSmoothCountdown()
+        generateQRCode()
         simulatePaymentProcess()
     }
     
     private fun setupViews() {
         backButton = findViewById(R.id.btn_back)
+        qrCodeImage = findViewById(R.id.iv_qr_code)
         progressTimer = findViewById(R.id.progress_timer)
-        loadingLayout = findViewById(R.id.loading_layout)
-        completedLayout = findViewById(R.id.completed_layout)
 
         // 为弱设备启用高性能模式
         progressTimer.setHighPerformanceMode(true)
@@ -58,7 +58,6 @@ class TerminalPaymentActivity : AppCompatActivity() {
         // 设置圆角背景
         setRoundedBackground(backButton, Color.parseColor("#868D91"), 10f)
 
-        // 初始状态：按钮禁用，显示为灰色
         backButton.isEnabled = false
         backButton.alpha = 0.5f
 
@@ -77,7 +76,7 @@ class TerminalPaymentActivity : AppCompatActivity() {
         drawable.cornerRadius = radius * resources.displayMetrics.density
         button.background = drawable
     }
-    
+
     private fun startSmoothCountdown() {
         // 使用优化的更新频率，在性能和丝滑度之间取得平衡
         // 对于弱设备，使用33ms间隔（约30fps）既保证丝滑又节省性能
@@ -102,29 +101,26 @@ class TerminalPaymentActivity : AppCompatActivity() {
         // 因为MainActivity应该还在任务栈中
         finish()
     }
+    
+    private fun generateQRCode() {
+        val qrCodeContent = "powertap://payment?id=12345&amount=5.00"
 
+        // 使用美化的二维码生成器（边框内白色背景，外部透明）
+        val beautifulBitmap = BeautifulQRGenerator.generateBeautifulQR(
+            content = qrCodeContent,
+            size = 400,
+            style = BeautifulQRGenerator.Styles.WHITE_BORDERED
+        )
+
+        qrCodeImage.setImageBitmap(beautifulBitmap)
+    }
+    
     private fun simulatePaymentProcess() {
-        // 初始状态：显示加载界面
-        showLoadingState()
-
-        // 模拟支付处理过程，3秒后完成
         Handler(Looper.getMainLooper()).postDelayed({
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            // 切换到完成状态
-            showCompletedState()
-        }, 3000) // 3秒后完成支付
-    }
-
-    private fun showLoadingState() {
-        loadingLayout.visibility = View.VISIBLE
-        completedLayout.visibility = View.GONE
-    }
-
-    private fun showCompletedState() {
-        loadingLayout.visibility = View.GONE
-        completedLayout.visibility = View.VISIBLE
+        }, 0) // 1秒后完成
     }
 
     private fun setupFullscreen() {

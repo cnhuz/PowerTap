@@ -1,4 +1,4 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.ui
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -13,11 +13,13 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import com.stwpower.powertap.HomeKeyInterceptor
+import com.stwpower.powertap.KioskWatchdogService
+import com.stwpower.powertap.MainActivity
+import com.stwpower.powertap.R
 import java.util.*
 
 class AdminSettingsActivity : AppCompatActivity() {

@@ -17,7 +17,6 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -25,8 +24,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import com.stwpower.powertap.ui.AdminSettingsActivity
+import com.stwpower.powertap.ui.AppPaymentActivity
+import com.stwpower.powertap.ui.TerminalPaymentActivity
 import java.util.*
 
 class MainActivity : AppCompatActivity() {

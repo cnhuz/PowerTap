@@ -28,9 +28,9 @@ class KioskModeManager(private val activity: Activity) {
     // 允许的Activity白名单
     private val allowedActivities = setOf(
         "com.stwpower.powertap.MainActivity",
-        "com.stwpower.powertap.TerminalPaymentActivity",
-        "com.stwpower.powertap.AppPaymentActivity",
-        "com.stwpower.powertap.AdminSettingsActivity"
+        "com.stwpower.powertap.ui.TerminalPaymentActivity",
+        "com.stwpower.powertap.ui.AppPaymentActivity",
+        "com.stwpower.powertap.ui.AdminSettingsActivity"
     )
     
     fun enableKioskMode() {
