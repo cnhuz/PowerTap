@@ -80,11 +80,11 @@ class MainActivity : AppCompatActivity() {
         val russianBtn = findViewById<ImageButton>(R.id.btn_russian)
 
         // 设置圆角
-        setRoundedBackground(englishBtn, Color.parseColor("#1E2428"), 8f)
-        setRoundedBackground(chineseBtn, Color.parseColor("#1E2428"), 8f)
-        setRoundedBackground(japaneseBtn, Color.parseColor("#1E2428"), 8f)
-        setRoundedBackground(germanBtn, Color.parseColor("#1E2428"), 8f)
-        setRoundedBackground(russianBtn, Color.parseColor("#1E2428"), 8f)
+         setRoundedBackground(englishBtn, Color.parseColor("#1E2428"), 12f)
+         setRoundedBackground(chineseBtn, Color.parseColor("#1E2428"), 12f)
+         setRoundedBackground(japaneseBtn, Color.parseColor("#1E2428"), 12f)
+         setRoundedBackground(germanBtn, Color.parseColor("#1E2428"), 12f)
+         setRoundedBackground(russianBtn, Color.parseColor("#1E2428"), 12f)
 
         englishBtn.setOnClickListener {
             changeLanguage("en")
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         val appButton = findViewById<TextView>(R.id.btn_pay_app)
 
         // 设置圆角
-        setRoundedBackground(terminalButton, Color.parseColor("#29A472"), 12f)
+        setRoundedBackground(terminalButton, Color.parseColor("#29A472"), 18f)
         setRoundedBackground(appButton, Color.parseColor("#29A472"), 12f)
 
         terminalButton.setOnClickListener {
