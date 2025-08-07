@@ -117,9 +117,9 @@
 
             <!-- QR Code Container -->
             <LinearLayout
-                android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:background="@color/white"
+                android:layout_width="400dp"
+                android:layout_height="400dp"
+                android:background="@color/background_main"
                 android:padding="20dp"
                 android:gravity="center"
                 android:layout_marginBottom="40dp">

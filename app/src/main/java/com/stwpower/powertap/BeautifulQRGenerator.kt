@@ -38,9 +38,23 @@ object BeautifulQRGenerator {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         
-        // 3. 绘制背景
-        canvas.drawColor(style.backgroundColor)
-        
+        // 3. 如果有边框，先绘制边框内的白色背景
+        if (style.borderWidth > 0) {
+            val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.WHITE
+            }
+            val borderInset = style.borderWidth
+            val backgroundRect = RectF(
+                borderInset, borderInset,
+                width - borderInset, height - borderInset
+            )
+            canvas.drawRoundRect(backgroundRect, style.borderRadius - borderInset/2, style.borderRadius - borderInset/2, backgroundPaint)
+        } else if (style.backgroundColor != Color.TRANSPARENT) {
+            // 如果没有边框但有背景色，绘制整体背景
+            canvas.drawColor(style.backgroundColor)
+        }
+        // 如果背景是透明且没有边框，则不绘制任何背景
+
         // 4. 创建渐变画笔
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val gradient = LinearGradient(
@@ -219,6 +233,39 @@ object BeautifulQRGenerator {
             borderWidth = 4f,
             borderColor = Color.BLACK,
             borderRadius = 8f
+        )
+
+        // 绿色边框主题（透明外部，边框内白色背景）
+        val BORDERED_GREEN = QRStyle(
+            backgroundColor = Color.TRANSPARENT, // 外部透明
+            foregroundStartColor = 0xFF29A472.toInt(),
+            foregroundEndColor = 0xFF1E7A5F.toInt(),
+            roundedDots = true,
+            borderWidth = 8f,
+            borderColor = 0xFF29A472.toInt(),
+            borderRadius = 12f
+        )
+
+        // 纯净绿色主题（无边框，透明背景）
+        val PURE_GREEN = QRStyle(
+            backgroundColor = Color.TRANSPARENT,
+            foregroundStartColor = 0xFF29A472.toInt(),
+            foregroundEndColor = 0xFF1E7A5F.toInt(),
+            roundedDots = true,
+            borderWidth = 0f,
+            borderColor = Color.TRANSPARENT,
+            cornerRadius = 2f
+        )
+
+        // 白色边框主题（白色边框，白色背景）
+        val WHITE_BORDERED = QRStyle(
+            backgroundColor = Color.WHITE,
+            foregroundStartColor = 0xFF29A472.toInt(),
+            foregroundEndColor = 0xFF1E7A5F.toInt(),
+            roundedDots = true,
+            borderWidth = 8f,
+            borderColor = Color.WHITE,
+            borderRadius = 12f
         )
     }
 }

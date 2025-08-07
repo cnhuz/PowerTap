@@ -108,11 +108,11 @@ class AppPaymentActivity : AppCompatActivity() {
     private fun generateQRCode() {
         val qrCodeContent = "powertap://payment?id=12345&amount=5.00"
 
-        // 使用美化的二维码生成器
+        // 使用美化的二维码生成器（边框内白色背景，外部透明）
         val beautifulBitmap = BeautifulQRGenerator.generateBeautifulQR(
             content = qrCodeContent,
-            size = 300,
-            style = BeautifulQRGenerator.Styles.CLASSIC_GREEN
+            size = 400,
+            style = BeautifulQRGenerator.Styles.WHITE_BORDERED
         )
 
         qrCodeImage.setImageBitmap(beautifulBitmap)
