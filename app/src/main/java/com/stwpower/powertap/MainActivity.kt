@@ -33,8 +33,10 @@ import androidx.core.view.WindowCompat
 import com.stwpower.powertap.ui.AdminSettingsActivity
 import com.stwpower.powertap.ui.AppPaymentActivity
 import com.stwpower.powertap.ui.TerminalPaymentActivity
+import com.stwpower.powertap.utils.DirectPermissionManager
 import com.stwpower.powertap.utils.PermissionManager
 import com.stwpower.powertap.utils.PreferenceManager
+import com.stwpower.powertap.utils.SystemPermissionManager
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -439,6 +441,24 @@ class MainActivity : AppCompatActivity() {
     private fun checkAndRequestPermissions() {
         Log.d(TAG, "Starting permission check...")
 
+        // 首先尝试系统级权限管理
+        if (SystemPermissionManager.isSystemApp(this)) {
+            Log.d(TAG, "Detected system app, using system permission management")
+
+            val systemPermissionsReady = SystemPermissionManager.initializeSystemPermissions(this)
+
+            if (systemPermissionsReady) {
+                Log.d(TAG, "System permissions initialized successfully")
+                onPermissionsReady()
+                return
+            } else {
+                Log.w(TAG, "System permission initialization failed, falling back to regular permissions")
+            }
+        }
+
+        // 回退到常规权限管理
+        Log.d(TAG, "Using regular permission management")
+
         // 打印详细的权限状态报告
         Log.d(TAG, PermissionManager.getPermissionReport(this))
 
@@ -612,6 +632,27 @@ class MainActivity : AppCompatActivity() {
             val terminalReady = PermissionManager.isTerminalReady(this)
             val message = if (terminalReady) "Terminal准备就绪" else "Terminal未准备好"
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            true
+        }
+
+        // 长按俄文按钮直接授予权限
+        findViewById<ImageButton>(R.id.btn_russian)?.setOnLongClickListener {
+            Log.d(TAG, "Debug: Direct permission grant")
+            Toast.makeText(this, "尝试直接授予权限...", Toast.LENGTH_SHORT).show()
+
+            // 异步执行权限授予
+            Thread {
+                val success = DirectPermissionManager.grantAllPermissions(this)
+                runOnUiThread {
+                    val message = if (success) "权限授予成功" else "权限授予失败"
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+
+                    if (success) {
+                        // 重新检查权限状态
+                        checkAndRequestPermissions()
+                    }
+                }
+            }.start()
             true
         }
     }
