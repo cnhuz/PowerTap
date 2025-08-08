@@ -15,6 +15,8 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -33,6 +35,10 @@ class AppPaymentActivity : AppCompatActivity() {
     private lateinit var qrCodeImage: ImageView
     private lateinit var qrCodeText: TextView
     private lateinit var progressTimer: HighPerformanceProgressBar
+
+    // QR码加载相关
+    private lateinit var qrLoadingLayout: LinearLayout
+    private lateinit var qrLoadingProgress: ProgressBar
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
@@ -66,6 +72,9 @@ class AppPaymentActivity : AppCompatActivity() {
             Log.d("AppPayment", "Starting countdown")
             startSmoothCountdown()
 
+            Log.d("AppPayment", "Showing initial loading state")
+            showQRCodeLoading()
+
             Log.d("AppPayment", "Generating QR code")
             generateQRCode()
 
@@ -84,6 +93,10 @@ class AppPaymentActivity : AppCompatActivity() {
         qrCodeImage = findViewById(R.id.iv_qr_code)
         qrCodeText = findViewById(R.id.tv_qr_code_content)
         progressTimer = findViewById(R.id.progress_timer)
+
+        // QR码加载相关
+        qrLoadingLayout = findViewById(R.id.qr_loading_layout)
+        qrLoadingProgress = findViewById(R.id.qr_loading_progress)
 
         // 为弱设备启用高性能模式
         progressTimer.setHighPerformanceMode(true)
@@ -134,18 +147,41 @@ class AppPaymentActivity : AppCompatActivity() {
         // 因为MainActivity应该还在任务栈中
         finish()
     }
-    
+
+    /**
+     * 显示QR码加载状态
+     */
+    private fun showQRCodeLoading() {
+        Log.d("AppPayment", "显示QR码加载状态")
+        // 二维码区域显示加载环（无文字）
+        qrLoadingLayout.visibility = View.VISIBLE
+        qrCodeImage.visibility = View.GONE
+
+        // 下方文字显示loading说明
+        qrCodeText.text = "loading"
+    }
+
+    /**
+     * 隐藏QR码加载状态，显示二维码
+     */
+    private fun hideQRCodeLoading() {
+        Log.d("AppPayment", "隐藏QR码加载状态，显示二维码")
+        // 隐藏加载环，显示二维码
+        qrLoadingLayout.visibility = View.GONE
+        qrCodeImage.visibility = View.VISIBLE
+        // qrCodeText会在生成成功后更新为实际的qrCode内容
+    }
+
     private fun generateQRCode() {
         // 获取qrCodeUrl和qrCode
         val rawQrCodeUrl = ConfigLoader.qrCodeUrl
         val qrCode = PreferenceManager.getQrCode()
 
-        // 检查必要的参数
+        // 检查必要参数
         if (rawQrCodeUrl.isEmpty() || qrCode.isNullOrEmpty()) {
             Log.w("AppPayment", "qrCodeUrl或qrCode为空，无法生成二维码")
-            Log.w("AppPayment", "  rawQrCodeUrl: $rawQrCodeUrl")
-            Log.w("AppPayment", "  qrCode: $qrCode")
-            qrCodeText.text = "配置信息不完整"
+            // 保持loading状态，下方显示loading文字
+            qrCodeText.text = "loading"
             return
         }
 
@@ -158,6 +194,8 @@ class AppPaymentActivity : AppCompatActivity() {
             qrCode == currentQRCode &&
             fullQRCodeContent == currentQRCodeContent) {
             Log.d("AppPayment", "二维码内容未变化，跳过生成")
+            // 如果内容未变化，直接隐藏加载状态
+            hideQRCodeLoading()
             return
         }
 
@@ -184,25 +222,29 @@ class AppPaymentActivity : AppCompatActivity() {
 
                 // 检查bitmap是否生成成功
                 if (bitmap != null && !bitmap.isRecycled) {
+                    // 隐藏加载状态，显示二维码
+                    hideQRCodeLoading()
+
                     // 在主线程更新UI
                     qrCodeImage.setImageBitmap(bitmap)
-                    qrCodeText.text = qrCode // 显示qrCode部分
+                    qrCodeText.text = qrCode ?: "" // 显示qrCode部分，安全处理null
 
                     // 更新当前状态
                     currentQRCodeUrl = qrCodeUrl
-                    currentQRCode = qrCode
+                    currentQRCode = qrCode ?: ""
                     currentQRCodeContent = fullQRCodeContent
 
                     Log.d("AppPayment", "二维码生成并显示完成")
                 } else {
                     Log.e("AppPayment", "二维码bitmap生成失败")
-                    qrCodeText.text = "二维码生成失败"
+                    // 保持loading状态，下方显示loading文字
+                    qrCodeText.text = "loading"
                 }
 
             } catch (e: Exception) {
                 Log.e("AppPayment", "生成二维码失败", e)
-                // 显示错误信息
-                qrCodeText.text = "二维码生成失败"
+                // 保持loading状态，下方显示loading文字
+                qrCodeText.text = "loading"
             }
         }
     }
