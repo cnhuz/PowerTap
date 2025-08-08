@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
@@ -14,24 +15,35 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import com.stripe.stripeterminal.external.models.PaymentIntent
 import com.stwpower.powertap.HomeKeyInterceptor
 import com.stwpower.powertap.R
+import com.stwpower.powertap.terminal.StripeTerminalManager
+import com.stwpower.powertap.terminal.TerminalState
+import com.stwpower.powertap.utils.PermissionManager
+import com.stwpower.powertap.utils.PreferenceManager
 
-class TerminalPaymentActivity : AppCompatActivity() {
+class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.TerminalStateListener {
 
     private lateinit var backButton: Button
     private lateinit var progressTimer: HighPerformanceProgressBar
     private lateinit var loadingLayout: LinearLayout
     private lateinit var completedLayout: LinearLayout
+    private lateinit var loadingText: TextView
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
+    private lateinit var terminalManager: StripeTerminalManager
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
     private val timeoutDuration = 60000L // 60秒
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 初始化PreferenceManager
+        PreferenceManager.init(this)
 
         // 设置全屏
         setupFullscreen()
@@ -42,8 +54,18 @@ class TerminalPaymentActivity : AppCompatActivity() {
         setContentView(R.layout.activity_terminal_payment)
 
         setupViews()
+
+        // 显示初始加载状态
+        showLoadingState()
+        loadingText.text = "正在初始化..."
+
         startSmoothCountdown()
-        simulatePaymentProcess()
+
+        // 初始化Terminal管理器
+        terminalManager = StripeTerminalManager(this, this)
+
+        // 检查权限状态并初始化Terminal
+        checkPermissionsAndInitialize()
     }
     
     private fun setupViews() {
@@ -51,6 +73,7 @@ class TerminalPaymentActivity : AppCompatActivity() {
         progressTimer = findViewById(R.id.progress_timer)
         loadingLayout = findViewById(R.id.loading_layout)
         completedLayout = findViewById(R.id.completed_layout)
+        loadingText = findViewById(R.id.loading_text)
 
         // 为弱设备启用高性能模式
         progressTimer.setHighPerformanceMode(true)
@@ -64,6 +87,8 @@ class TerminalPaymentActivity : AppCompatActivity() {
 
         backButton.setOnClickListener {
             if (!isProcessing) {
+                // 取消Terminal操作
+                terminalManager.cancel()
                 // 取消倒计时器
                 countDownTimer?.cancel()
                 finish()
@@ -103,18 +128,83 @@ class TerminalPaymentActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun simulatePaymentProcess() {
-        // 初始状态：显示加载界面
-        showLoadingState()
+    // TerminalStateListener 实现
+    override fun onStateChanged(state: TerminalState, progress: Int) {
+        runOnUiThread {
+            updateUIForState(state, progress)
+        }
+    }
 
-        // 模拟支付处理过程，3秒后完成
-        Handler(Looper.getMainLooper()).postDelayed({
+    override fun onPaymentSuccess(paymentIntent: PaymentIntent) {
+        runOnUiThread {
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            // 切换到完成状态
             showCompletedState()
-        }, 3000) // 3秒后完成支付
+
+            // 显示成功消息
+            val successMessage = getString(R.string.payment_successful) + "\n" +
+                                getString(R.string.payment_completed)
+            loadingText.text = successMessage
+
+            // 可以在这里添加成功的视觉效果，比如绿色背景等
+            loadingText.setTextColor(getColor(android.R.color.holo_green_dark))
+        }
+    }
+
+    override fun onPaymentFailed(error: String) {
+        runOnUiThread {
+            isProcessing = false
+            backButton.isEnabled = true
+            backButton.alpha = 1.0f
+            showCompletedState()
+
+            // 显示错误消息
+            val errorMessage = getString(R.string.payment_failed) + "\n$error"
+            loadingText.text = errorMessage
+
+            // 添加错误的视觉效果
+            loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
+        }
+    }
+
+    private fun updateUIForState(state: TerminalState, progress: Int = 0) {
+        // 更新加载文本
+        loadingText.text = state.getFormattedText(this, progress)
+
+        // 重置文本颜色
+        loadingText.setTextColor(getColor(R.color.text_primary))
+
+        // 根据状态更新UI
+        when {
+            state.isLoading -> {
+                showLoadingState()
+            }
+            state.isFinal() -> {
+                if (state.canGoBack) {
+                    isProcessing = false
+                    backButton.isEnabled = true
+                    backButton.alpha = 1.0f
+                }
+                if (state == TerminalState.WAITING_FOR_CARD) {
+                    showCompletedState()
+                } else if (state.isError()) {
+                    showCompletedState()
+                    // 错误状态显示红色文本
+                    loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
+                }
+            }
+            state == TerminalState.WAITING_FOR_CARD -> {
+                showCompletedState()
+                if (state.canGoBack) {
+                    isProcessing = false
+                    backButton.isEnabled = true
+                    backButton.alpha = 1.0f
+                }
+                // 等待刷卡状态显示蓝色文本
+                loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
+            }
+        }
     }
 
     private fun showLoadingState() {
@@ -177,6 +267,7 @@ class TerminalPaymentActivity : AppCompatActivity() {
         super.onDestroy()
         countDownTimer?.cancel()
         homeKeyInterceptor.stopIntercepting()
+        terminalManager.cleanup()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -190,6 +281,48 @@ class TerminalPaymentActivity : AppCompatActivity() {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
             setupFullscreen()
+        }
+    }
+
+    /**
+     * 检查权限状态并初始化Terminal
+     */
+    private fun checkPermissionsAndInitialize() {
+        Log.d("TerminalPayment", "Checking permissions and initializing...")
+
+        // 打印权限状态报告
+        Log.d("TerminalPayment", PermissionManager.getPermissionReport(this))
+
+        if (PermissionManager.isTerminalReady(this)) {
+            // 权限和GPS都准备好了，开始初始化Terminal
+            Log.d("TerminalPayment", "Terminal ready, initializing...")
+            terminalManager.initialize()
+        } else {
+            // 权限或GPS未准备好，显示错误状态
+            Log.w("TerminalPayment", "Terminal not ready, showing error state")
+            updateUIForState(TerminalState.INITIALIZATION_FAILED)
+
+            val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)
+            val gpsEnabled = PermissionManager.isGpsEnabled(this)
+
+            Log.d("TerminalPayment", "Missing permissions: ${missingPermissions.joinToString()}")
+            Log.d("TerminalPayment", "GPS enabled: $gpsEnabled")
+
+            val errorMessage = buildString {
+                if (missingPermissions.isNotEmpty()) {
+                    append("缺少权限: ${missingPermissions.joinToString()}")
+                }
+                if (!gpsEnabled) {
+                    if (isNotEmpty()) append("\n")
+                    append("GPS未启用")
+                }
+                if (isEmpty()) {
+                    append("Terminal初始化失败")
+                }
+            }
+
+            loadingText.text = errorMessage
+            Log.d("TerminalPayment", "Error message: $errorMessage")
         }
     }
 }

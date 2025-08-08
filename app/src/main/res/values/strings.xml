@@ -87,6 +87,28 @@
     <string name="tap_card_instruction">Tap your card or phone on the terminal.</string>
     <string name="card_reader_instruction">Not contactless card? Card reader below keypad</string>
 
+    <!-- Terminal Status Messages -->
+    <string name="initializing_terminal">Initializing terminal...</string>
+    <string name="requesting_permissions">Requesting permissions...</string>
+    <string name="scanning_readers">Scanning for card readers...</string>
+    <string name="connecting_reader">Connecting to card reader...</string>
+    <string name="reader_connected">Card reader connected</string>
+    <string name="updating_reader">Updating card reader...</string>
+    <string name="preparing_payment">Preparing payment...</string>
+    <string name="starting_payment">Starting payment collection...</string>
+    <string name="waiting_for_card">Tap your card or phone on the terminal</string>
+    <string name="card_detected">Card detected, processing...</string>
+    <string name="processing_payment_terminal">Processing payment...</string>
+    <string name="confirming_payment">Confirming payment...</string>
+    <string name="payment_successful">Payment successful!</string>
+    <string name="payment_failed">Payment failed. Please try again.</string>
+    <string name="initialization_failed">Failed to initialize terminal</string>
+    <string name="reader_not_found">No card reader found</string>
+    <string name="connection_failed">Failed to connect to card reader</string>
+    <string name="payment_cancelled">Payment cancelled</string>
+    <string name="operation_timeout">Operation timed out</string>
+    <string name="retrying">Retrying...</string>
+
     <!-- Main Page -->
     <string name="brand_name">STW</string>
     <string name="main_title">RENT A\nPOWERBANK</string>

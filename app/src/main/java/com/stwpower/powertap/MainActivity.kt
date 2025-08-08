@@ -1,9 +1,11 @@
 package com.stwpower.powertap
 
+import android.Manifest
 import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -11,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
@@ -23,11 +26,15 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.stwpower.powertap.ui.AdminSettingsActivity
 import com.stwpower.powertap.ui.AppPaymentActivity
 import com.stwpower.powertap.ui.TerminalPaymentActivity
+import com.stwpower.powertap.utils.PermissionManager
+import com.stwpower.powertap.utils.PreferenceManager
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +46,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private lateinit var fullscreenManager: ImmersiveFullscreenManager
     private var adminClickArea: View? = null
+    private var permissionsReady = false // 权限是否准备完成
+
+    // 权限请求
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        handlePermissionResult(permissions)
+    }
 
     companion object {
         @JvmStatic
@@ -70,6 +85,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 初始化PreferenceManager
+        PreferenceManager.init(this)
+
         // 使用配置 - 此时Application.onCreate()已经执行完毕，配置已加载
         loadAndUseConfig()
 
@@ -96,6 +114,10 @@ class MainActivity : AppCompatActivity() {
         setupPaymentButtons()
         setupAdminExit()
         setupAdminClickArea()
+        setupDebugFeatures()
+
+        // 检查和请求权限
+        checkAndRequestPermissions()
     }
     
     private fun setupLanguageButtons() {
@@ -308,11 +330,17 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        // 启用kiosk模式
-        enableKioskMode()
+        // 只有在权限准备完成后才启用kiosk模式
+        if (permissionsReady) {
+            enableKioskMode()
+        } else {
+            // 权限未准备好时，只启用基础的全屏模式
+            enableBasicFullscreen()
+        }
     }
 
     private fun enableKioskMode() {
+        Log.d(TAG, "Enabling full kiosk mode...")
         // 启用所有保护机制
         fullscreenManager.enableFullscreen()
         kioskModeManager.enableKioskMode()
@@ -321,6 +349,36 @@ class MainActivity : AppCompatActivity() {
 
         // 启动看门狗服务
         startService(Intent(this, KioskWatchdogService::class.java))
+    }
+
+    private fun enableBasicFullscreen() {
+        Log.d(TAG, "Enabling basic fullscreen mode (no kiosk restrictions)...")
+        // 只启用全屏模式，不启用Kiosk限制
+        fullscreenManager.enableFullscreen()
+        fullscreenManager.onResume()
+
+        // 不启动看门狗服务，不启用Home键拦截
+        // 这样权限对话框可以正常显示
+    }
+
+    private fun temporarilyDisableKioskMode() {
+        Log.d(TAG, "Temporarily disabling kiosk mode for permission request...")
+
+        // 停止看门狗服务
+        stopService(Intent(this, KioskWatchdogService::class.java))
+
+        // 禁用Kiosk限制
+        if (::kioskModeManager.isInitialized) {
+            kioskModeManager.disableKioskMode()
+        }
+
+        // 停止Home键拦截
+        if (::homeKeyInterceptor.isInitialized) {
+            homeKeyInterceptor.stopIntercepting()
+        }
+
+        // 保持基础全屏模式
+        enableBasicFullscreen()
     }
 
 
@@ -375,6 +433,139 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 检查和请求权限
+     */
+    private fun checkAndRequestPermissions() {
+        Log.d(TAG, "Starting permission check...")
+
+        // 打印详细的权限状态报告
+        Log.d(TAG, PermissionManager.getPermissionReport(this))
+
+        val missingPermissions = PermissionManager.getMissingPermissions(this)
+        Log.d(TAG, "Missing permissions count: ${missingPermissions.size}")
+        Log.d(TAG, "Missing permissions: ${missingPermissions.joinToString()}")
+
+        if (missingPermissions.isEmpty()) {
+            // 所有权限已授予，检查GPS
+            Log.d(TAG, "All permissions granted, checking GPS...")
+            checkGpsStatus()
+        } else {
+            // 请求缺失的权限前，暂时禁用Kiosk模式
+            Log.d(TAG, "Requesting permissions: ${missingPermissions.joinToString()}")
+            temporarilyDisableKioskMode()
+            requestPermissionLauncher.launch(missingPermissions.toTypedArray())
+        }
+    }
+
+    /**
+     * 处理权限请求结果
+     */
+    private fun handlePermissionResult(permissions: Map<String, Boolean>) {
+        val deniedPermissions = permissions.filter { !it.value }.keys.toList()
+
+        Log.d(TAG, "Permission request result:")
+        permissions.forEach { (permission, granted) ->
+            Log.d(TAG, "  $permission: ${if (granted) "GRANTED" else "DENIED"}")
+        }
+
+        if (deniedPermissions.isEmpty()) {
+            Log.d(TAG, "All requested permissions granted")
+            checkGpsStatus()
+        } else {
+            Log.w(TAG, "Some permissions denied: ${deniedPermissions.joinToString()}")
+            showPermissionDeniedDialog(deniedPermissions)
+        }
+    }
+
+    /**
+     * 检查GPS状态
+     */
+    private fun checkGpsStatus() {
+        if (!PermissionManager.isGpsEnabled(this)) {
+            showGpsRequiredDialog()
+        } else {
+            Log.d(TAG, "All permissions and GPS ready")
+            // 权限和GPS都准备好了，可以正常使用Terminal功能
+            onPermissionsReady()
+        }
+    }
+
+    /**
+     * 权限准备完成
+     */
+    private fun onPermissionsReady() {
+        Log.d(TAG, "Permissions ready, Terminal functionality available")
+        permissionsReady = true
+
+        // 现在可以安全地启用Kiosk模式
+        enableKioskMode()
+
+        // 打印权限状态报告
+        Log.d(TAG, PermissionManager.getPermissionReport(this))
+    }
+
+    /**
+     * 显示权限被拒绝的对话框
+     */
+    private fun showPermissionDeniedDialog(deniedPermissions: List<String>) {
+        AlertDialog.Builder(this)
+            .setTitle("权限需求")
+            .setMessage("应用需要以下权限才能正常工作：\n\n${deniedPermissions.joinToString("\n")}\n\n请在设置中手动授予这些权限。")
+            .setPositiveButton("去设置") { _, _ ->
+                openAppSettings()
+            }
+            .setNegativeButton("稍后") { _, _ ->
+                // 用户选择稍后，可以继续使用应用的其他功能
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    /**
+     * 显示GPS需求对话框
+     */
+    private fun showGpsRequiredDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("GPS需求")
+            .setMessage("Terminal支付功能需要启用GPS定位服务。\n\n请在设置中开启位置服务。")
+            .setPositiveButton("去设置") { _, _ ->
+                openLocationSettings()
+            }
+            .setNegativeButton("稍后") { _, _ ->
+                // 用户选择稍后，可以继续使用应用的其他功能
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    /**
+     * 打开应用设置
+     */
+    private fun openAppSettings() {
+        try {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.data = android.net.Uri.fromParts("package", packageName, null)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open app settings", e)
+            Toast.makeText(this, "无法打开设置", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * 打开位置设置
+     */
+    private fun openLocationSettings() {
+        try {
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open location settings", e)
+            Toast.makeText(this, "无法打开位置设置", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         // 使用Home键拦截器处理按键事件
         if (::homeKeyInterceptor.isInitialized && homeKeyInterceptor.onKeyDown(keyCode, event)) {
@@ -393,6 +584,35 @@ class MainActivity : AppCompatActivity() {
                 fullscreenManager.onWindowFocusChanged(hasFocus)
             }
             setupFullscreen()
+        }
+    }
+
+    /**
+     * 设置调试功能
+     */
+    private fun setupDebugFeatures() {
+        // 长按英文按钮触发权限测试
+        findViewById<ImageButton>(R.id.btn_english)?.setOnLongClickListener {
+            Log.d(TAG, "Debug: Force permission request")
+            Toast.makeText(this, "强制权限请求", Toast.LENGTH_SHORT).show()
+
+            // 强制请求所有Terminal权限
+            val allTerminalPermissions = PermissionManager.TERMINAL_PERMISSIONS
+            requestPermissionLauncher.launch(allTerminalPermissions)
+            true
+        }
+
+        // 长按中文按钮显示权限状态
+        findViewById<ImageButton>(R.id.btn_chinese)?.setOnLongClickListener {
+            Log.d(TAG, "Debug: Show permission status")
+            val report = PermissionManager.getPermissionReport(this)
+            Log.d(TAG, report)
+
+            // 显示简化的权限状态
+            val terminalReady = PermissionManager.isTerminalReady(this)
+            val message = if (terminalReady) "Terminal准备就绪" else "Terminal未准备好"
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            true
         }
     }
 }
