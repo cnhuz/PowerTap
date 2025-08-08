@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
@@ -14,42 +15,74 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.stwpower.powertap.HomeKeyInterceptor
 import com.stwpower.powertap.R
+import com.stwpower.powertap.ConfigLoader
 import com.stwpower.powertap.utils.BeautifulQRGenerator
+import com.stwpower.powertap.utils.OptimizedQRGenerator
+import com.stwpower.powertap.utils.PreferenceManager
+import com.stwpower.powertap.utils.QRCodeUrlProcessor
+import kotlinx.coroutines.*
 
 class AppPaymentActivity : AppCompatActivity() {
 
     private lateinit var backButton: Button
     private lateinit var qrCodeImage: ImageView
+    private lateinit var qrCodeText: TextView
     private lateinit var progressTimer: HighPerformanceProgressBar
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
     private val timeoutDuration = 60000L // 60秒
+
+    // 二维码相关
+    private var currentQRCodeUrl: String = ""
+    private var currentQRCode: String = ""
+    private var currentQRCodeContent: String = ""
+    private var qrCodeJob: Job? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("AppPayment", "AppPaymentActivity onCreate started")
         super.onCreate(savedInstanceState)
 
-        // 设置全屏
-        setupFullscreen()
+        try {
+            // 设置全屏
+            Log.d("AppPayment", "Setting up fullscreen")
+            setupFullscreen()
 
-        // 初始化Home键拦截器
-        homeKeyInterceptor = HomeKeyInterceptor(this)
+            // 初始化Home键拦截器
+            Log.d("AppPayment", "Initializing home key interceptor")
+            homeKeyInterceptor = HomeKeyInterceptor(this)
 
-        setContentView(R.layout.activity_app_payment)
+            Log.d("AppPayment", "Setting content view")
+            setContentView(R.layout.activity_app_payment)
 
-        setupViews()
-        startSmoothCountdown()
-        generateQRCode()
-        simulatePaymentProcess()
+            Log.d("AppPayment", "Setting up views")
+            setupViews()
+
+            Log.d("AppPayment", "Starting countdown")
+            startSmoothCountdown()
+
+            Log.d("AppPayment", "Generating QR code")
+            generateQRCode()
+
+            Log.d("AppPayment", "Simulating payment process")
+            simulatePaymentProcess()
+
+            Log.d("AppPayment", "AppPaymentActivity onCreate completed successfully")
+        } catch (e: Exception) {
+            Log.e("AppPayment", "Error in AppPaymentActivity onCreate", e)
+            finish()
+        }
     }
     
     private fun setupViews() {
         backButton = findViewById(R.id.btn_back)
         qrCodeImage = findViewById(R.id.iv_qr_code)
+        qrCodeText = findViewById(R.id.tv_qr_code_content)
         progressTimer = findViewById(R.id.progress_timer)
 
         // 为弱设备启用高性能模式
@@ -103,17 +136,78 @@ class AppPaymentActivity : AppCompatActivity() {
     }
     
     private fun generateQRCode() {
-        val qrCodeContent = "powertap://payment?id=12345&amount=5.00"
+        // 获取qrCodeUrl和qrCode
+        val rawQrCodeUrl = ConfigLoader.qrCodeUrl
+        val qrCode = PreferenceManager.getQrCode()
 
-        // 使用美化的二维码生成器（边框内白色背景，外部透明）
-        val beautifulBitmap = BeautifulQRGenerator.generateBeautifulQR(
-            content = qrCodeContent,
-            size = 400,
-            style = BeautifulQRGenerator.Styles.WHITE_BORDERED
-        )
+        // 检查必要的参数
+        if (rawQrCodeUrl.isEmpty() || qrCode.isNullOrEmpty()) {
+            Log.w("AppPayment", "qrCodeUrl或qrCode为空，无法生成二维码")
+            Log.w("AppPayment", "  rawQrCodeUrl: $rawQrCodeUrl")
+            Log.w("AppPayment", "  qrCode: $qrCode")
+            qrCodeText.text = "配置信息不完整"
+            return
+        }
 
-        qrCodeImage.setImageBitmap(beautifulBitmap)
+        // 使用工具类处理qrCodeUrl和生成完整内容
+        val qrCodeUrl = QRCodeUrlProcessor.processQrCodeUrl(rawQrCodeUrl)
+        val fullQRCodeContent = QRCodeUrlProcessor.generateQRCodeContent(rawQrCodeUrl, qrCode)
+
+        // 检查是否需要更新二维码（任一组成部分发生变化）
+        if (qrCodeUrl == currentQRCodeUrl &&
+            qrCode == currentQRCode &&
+            fullQRCodeContent == currentQRCodeContent) {
+            Log.d("AppPayment", "二维码内容未变化，跳过生成")
+            return
+        }
+
+        Log.d("AppPayment", "二维码内容发生变化，开始生成新的二维码")
+        Log.d("AppPayment", "变化详情:")
+        Log.d("AppPayment", "  qrCodeUrl: $currentQRCodeUrl -> $qrCodeUrl")
+        Log.d("AppPayment", "  qrCode: $currentQRCode -> $qrCode")
+        Log.d("AppPayment", "  完整内容: $currentQRCodeContent -> $fullQRCodeContent")
+
+        // 取消之前的二维码生成任务
+        qrCodeJob?.cancel()
+
+        // 异步生成二维码
+        qrCodeJob = CoroutineScope(Dispatchers.Main).launch {
+            try {
+                // 在后台线程生成二维码
+                val bitmap = withContext(Dispatchers.IO) {
+                    OptimizedQRGenerator.generateQRCodeAsync(
+                        content = fullQRCodeContent,
+                        size = 400,
+                        style = "WHITE_BORDERED"
+                    )
+                }
+
+                // 检查bitmap是否生成成功
+                if (bitmap != null && !bitmap.isRecycled) {
+                    // 在主线程更新UI
+                    qrCodeImage.setImageBitmap(bitmap)
+                    qrCodeText.text = qrCode // 显示qrCode部分
+
+                    // 更新当前状态
+                    currentQRCodeUrl = qrCodeUrl
+                    currentQRCode = qrCode
+                    currentQRCodeContent = fullQRCodeContent
+
+                    Log.d("AppPayment", "二维码生成并显示完成")
+                } else {
+                    Log.e("AppPayment", "二维码bitmap生成失败")
+                    qrCodeText.text = "二维码生成失败"
+                }
+
+            } catch (e: Exception) {
+                Log.e("AppPayment", "生成二维码失败", e)
+                // 显示错误信息
+                qrCodeText.text = "二维码生成失败"
+            }
+        }
     }
+
+
     
     private fun simulatePaymentProcess() {
         Handler(Looper.getMainLooper()).postDelayed({
@@ -173,6 +267,11 @@ class AppPaymentActivity : AppCompatActivity() {
         super.onDestroy()
         countDownTimer?.cancel()
         homeKeyInterceptor.stopIntercepting()
+
+        // 取消二维码生成任务
+        qrCodeJob?.cancel()
+
+        Log.d("AppPayment", "AppPaymentActivity destroyed")
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

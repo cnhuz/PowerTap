@@ -76,9 +76,11 @@
             android:name=".ui.AppPaymentActivity"
             android:exported="false"
             android:screenOrientation="landscape"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:excludeFromRecents="true"
-            android:stateNotNeeded="true" />
+            android:stateNotNeeded="true"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="stateHidden" />
 
         <!-- Admin Settings Activity -->
         <activity

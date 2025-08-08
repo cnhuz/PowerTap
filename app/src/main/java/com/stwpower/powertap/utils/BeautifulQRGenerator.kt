@@ -204,6 +204,16 @@ object BeautifulQRGenerator {
      * 预设样式
      */
     object Styles {
+        val SIMPLE = QRStyle(
+            backgroundColor = Color.WHITE,
+            foregroundStartColor = 0xFF29A472.toInt(),
+            foregroundEndColor = 0xFF1E7A5F.toInt(),
+            roundedDots = true,
+            borderWidth = 8f,
+            borderColor = Color.WHITE,
+            borderRadius = 12f
+        )
+        
         // 经典绿色主题（匹配应用主色调）
         val CLASSIC_GREEN = QRStyle(
             backgroundColor = Color.WHITE,

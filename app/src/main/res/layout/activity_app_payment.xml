@@ -209,9 +209,10 @@
 
             <!-- QR Code Instructions -->
             <TextView
+                android:id="@+id/tv_qr_code_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="STWB062508000001"
+                android:text="qrCode"
                 android:textSize="24sp"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"

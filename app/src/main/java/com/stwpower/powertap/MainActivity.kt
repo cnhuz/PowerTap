@@ -38,8 +38,10 @@ import com.stwpower.powertap.ui.TerminalPaymentActivity
 import com.stwpower.powertap.data.api.MyApiClient
 import com.stwpower.powertap.terminal.TerminalConnectionManager
 import com.stwpower.powertap.utils.DirectPermissionManager
+import com.stwpower.powertap.utils.OptimizedQRGenerator
 import com.stwpower.powertap.utils.PermissionManager
 import com.stwpower.powertap.utils.PreferenceManager
+import com.stwpower.powertap.utils.QRCodeUrlProcessor
 import com.stwpower.powertap.utils.SystemPermissionManager
 import java.util.*
 
@@ -53,6 +55,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fullscreenManager: ImmersiveFullscreenManager
     private var adminClickArea: View? = null
     private var permissionsReady = false // 权限是否准备完成
+
+    // 防抖动相关
+    private var lastClickTime = 0L
+    private val clickDebounceTime = 1000L // 1秒防抖动
 
     // 不再需要单独的Terminal管理器，使用TerminalConnectionManager
 
@@ -129,6 +135,9 @@ class MainActivity : AppCompatActivity() {
 
         // 获取设备信息和QR码
         getDeviceInfoAndQrCode()
+
+        // 预生成二维码（提升性能）
+        preGenerateQRCodes()
     }
     
     private fun setupLanguageButtons() {
@@ -166,7 +175,19 @@ class MainActivity : AppCompatActivity() {
             saveCurrentLanguageAsDefault("ru")
         }
     }
-    
+
+    /**
+     * 检查点击是否被允许（防抖动）
+     */
+    private fun isClickAllowed(): Boolean {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastClickTime < clickDebounceTime) {
+            return false
+        }
+        lastClickTime = currentTime
+        return true
+    }
+
     private fun setupPaymentButtons() {
         val terminalButton = findViewById<TextView>(R.id.btn_pay_terminal)
         val appButton = findViewById<TextView>(R.id.btn_pay_app)
@@ -175,11 +196,67 @@ class MainActivity : AppCompatActivity() {
         setRoundedBackground(terminalButton, Color.parseColor("#29A472"), 18f)
 
         terminalButton.setOnClickListener {
-            startActivity(Intent(this, TerminalPaymentActivity::class.java))
+            if (isClickAllowed()) {
+                Log.d(TAG, "Terminal button clicked")
+
+                // 立即提供视觉反馈
+                terminalButton.alpha = 0.7f
+                terminalButton.isEnabled = false
+
+                // 使用Handler延迟启动Activity
+                Handler(Looper.getMainLooper()).post {
+                    try {
+                        Log.d(TAG, "Starting TerminalPaymentActivity...")
+                        val intent = Intent(this, TerminalPaymentActivity::class.java)
+                        startActivity(intent)
+                        // 添加过渡动画
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        Log.d(TAG, "Terminal activity started successfully")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to start Terminal activity", e)
+                    } finally {
+                        // 恢复按钮状态
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            terminalButton.alpha = 1.0f
+                            terminalButton.isEnabled = true
+                        }, 1000)
+                    }
+                }
+            } else {
+                Log.d(TAG, "Terminal button click ignored (debounce)")
+            }
         }
 
         appButton.setOnClickListener {
-            startActivity(Intent(this, AppPaymentActivity::class.java))
+            if (isClickAllowed()) {
+                Log.d(TAG, "App payment button clicked")
+
+                // 立即提供视觉反馈
+                appButton.alpha = 0.7f
+                appButton.isEnabled = false
+
+                // 使用Handler延迟启动Activity，避免UI阻塞
+                Handler(Looper.getMainLooper()).post {
+                    try {
+                        Log.d(TAG, "Starting AppPaymentActivity...")
+                        val intent = Intent(this, AppPaymentActivity::class.java)
+                        startActivity(intent)
+                        // 添加过渡动画，减少黑屏
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        Log.d(TAG, "App payment activity started successfully")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to start App payment activity", e)
+                    } finally {
+                        // 恢复按钮状态
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            appButton.alpha = 1.0f
+                            appButton.isEnabled = true
+                        }, 1000)
+                    }
+                }
+            } else {
+                Log.d(TAG, "App payment button click ignored (debounce)")
+            }
         }
     }
 
@@ -796,6 +873,37 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error getting location ID", e)
+            }
+        }.start()
+    }
+
+    /**
+     * 预生成二维码（提升性能）
+     */
+    private fun preGenerateQRCodes() {
+        Log.d(TAG, "开始预生成二维码...")
+
+        Thread {
+            try {
+                // 获取qrCodeUrl和qrCode
+                val rawQrCodeUrl = ConfigLoader.qrCodeUrl
+                val qrCode = PreferenceManager.getQrCode()
+
+                // 验证和处理URL
+                if (QRCodeUrlProcessor.validateQrCodeUrl(rawQrCodeUrl) && !qrCode.isNullOrEmpty()) {
+                    // 使用工具类生成完整的二维码内容
+                    val fullQRCodeContent = QRCodeUrlProcessor.generateQRCodeContent(rawQrCodeUrl, qrCode)
+
+                    OptimizedQRGenerator.preGenerateQRCode(fullQRCodeContent, 400, "WHITE_BORDERED")
+
+                    Log.d(TAG, "二维码预生成完成")
+                } else {
+                    Log.w(TAG, "qrCodeUrl或qrCode无效，跳过预生成")
+                    Log.w(TAG, "  qrCodeUrl: ${QRCodeUrlProcessor.getProcessedUrlForLogging(rawQrCodeUrl)}")
+                    Log.w(TAG, "  qrCode: $qrCode")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "预生成二维码时发生异常", e)
             }
         }.start()
     }
