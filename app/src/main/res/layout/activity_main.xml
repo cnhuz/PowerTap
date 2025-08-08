@@ -100,18 +100,19 @@
                 android:text="@string/or_text"
                 android:textSize="18sp"
                 android:textColor="@color/text_primary"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="0dp"
                 android:layout_marginTop="10dp"/>
 
-            <!-- App Payment Text (just text, no button style) -->
+            <!-- App Payment Text (matching terminal button height) -->
             <TextView
                 android:id="@+id/btn_pay_app"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:text="@string/pay_with_app"
                 android:textSize="20sp"
                 android:textColor="@color/text_primary"
                 android:textStyle="normal"
+                android:gravity="center"
                 android:clickable="true"
                 android:focusable="true" />
 
