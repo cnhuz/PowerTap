@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
@@ -30,9 +31,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import com.stwpower.powertap.ConfigLoader
 import com.stwpower.powertap.ui.AdminSettingsActivity
 import com.stwpower.powertap.ui.AppPaymentActivity
 import com.stwpower.powertap.ui.TerminalPaymentActivity
+import com.stwpower.powertap.data.api.MyApiClient
 import com.stwpower.powertap.utils.DirectPermissionManager
 import com.stwpower.powertap.utils.PermissionManager
 import com.stwpower.powertap.utils.PreferenceManager
@@ -120,6 +123,9 @@ class MainActivity : AppCompatActivity() {
 
         // 检查和请求权限
         checkAndRequestPermissions()
+
+        // 获取设备信息和QR码
+        getDeviceInfoAndQrCode()
     }
     
     private fun setupLanguageButtons() {
@@ -655,5 +661,133 @@ class MainActivity : AppCompatActivity() {
             }.start()
             true
         }
+
+        // 长按法文按钮测试API调用
+        findViewById<ImageButton>(R.id.btn_chinese)?.setOnLongClickListener {
+            Log.d(TAG, "Debug: Test API call")
+            Toast.makeText(this, "测试API调用...", Toast.LENGTH_SHORT).show()
+
+            Thread {
+                try {
+                    val testImei = "test123456789"
+                    Log.d(TAG, "测试API调用，使用测试IMEI: $testImei")
+                    val result = MyApiClient.getQrCode(testImei)
+
+                    runOnUiThread {
+                        val message = "API测试结果: ${result ?: "null"}"
+                        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                        Log.d(TAG, message)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "API测试失败", e)
+                    runOnUiThread {
+                        Toast.makeText(this, "API测试失败: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.start()
+            true
+        }
+    }
+
+    /**
+     * 获取设备信息和QR码
+     */
+    private fun getDeviceInfoAndQrCode() {
+        Log.d(TAG, "=== 开始获取设备信息和QR码 ===")
+
+        // 异步获取设备信息
+        Thread {
+            try {
+                Log.d(TAG, "开始获取设备IMEI...")
+                val imei = getDeviceImei()
+                Log.d(TAG, "Device IMEI: $imei")
+
+                if (imei.isNotEmpty()) {
+                    Log.d(TAG, "开始调用API获取QR码，IMEI: $imei")
+
+                    // 根据IMEI获取QR码
+                    val qrCode = MyApiClient.getQrCode(imei)
+                    Log.d(TAG, "API调用完成，返回的QR码: $qrCode")
+
+                    if (qrCode != null && qrCode.isNotEmpty()) {
+                        // 存储QR码信息
+                        PreferenceManager.setQrCode(qrCode)
+                        PreferenceManager.setDeviceSno(qrCode)
+
+                        Log.d(TAG, "QR码保存成功: $qrCode")
+
+                        // 获取位置ID
+                        getLocationId(qrCode)
+                    } else {
+                        Log.w(TAG, "从服务器获取QR码失败，返回值为空")
+                    }
+                } else {
+                    Log.w(TAG, "获取设备IMEI失败，IMEI为空")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "获取设备信息和QR码时发生异常", e)
+            }
+        }.start()
+
+        Log.d(TAG, "已启动异步线程获取设备信息")
+    }
+
+    /**
+     * 获取设备IMEI（使用ConfigLoader中已加载的IMEI）
+     */
+    private fun getDeviceImei(): String {
+        return try {
+            // 首先使用ConfigLoader中已经加载的IMEI
+            val configImei = ConfigLoader.imei
+            if (configImei.isNotEmpty() && configImei != "123456") {
+                Log.d(TAG, "使用ConfigLoader中的IMEI: $configImei")
+                return configImei
+            }
+
+            // 如果ConfigLoader中的IMEI是默认值，尝试重新从文件读取
+            Log.d(TAG, "ConfigLoader中的IMEI是默认值，尝试重新读取devinfo.txt")
+            val devinfoFile = java.io.File("/sdcard/devinfo.txt")
+            if (devinfoFile.exists() && devinfoFile.canRead()) {
+                val content = devinfoFile.readText().trim()
+                Log.d(TAG, "从devinfo.txt读取到内容: $content")
+
+                if (content.isNotEmpty()) {
+                    Log.d(TAG, "使用devinfo.txt中的IMEI: $content")
+                    return content
+                }
+            } else {
+                Log.w(TAG, "devinfo.txt文件不存在或不可读: /sdcard/devinfo.txt")
+            }
+
+            // 备用方案：使用Android ID
+            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            Log.d(TAG, "使用Android ID作为备用: $androidId")
+            return androidId ?: ""
+
+        } catch (e: Exception) {
+            Log.e(TAG, "获取IMEI时发生异常", e)
+            // 最终备用方案：使用Android ID
+            Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
+        }
+    }
+
+    /**
+     * 获取位置ID
+     */
+    private fun getLocationId(qrCode: String) {
+        Thread {
+            try {
+                val result = MyApiClient.getLocationId(qrCode)
+                if (result?.code == 200 && result.data != null) {
+                    val locationId = result.data as String
+                    PreferenceManager.setLocationId(locationId)
+                    Log.d(TAG, "Location ID saved: $locationId")
+                } else {
+                    Log.w(TAG, "Failed to get location ID: ${result?.message}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting location ID", e)
+            }
+        }.start()
     }
 }

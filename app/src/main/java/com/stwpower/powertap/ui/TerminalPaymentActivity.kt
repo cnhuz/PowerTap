@@ -176,33 +176,50 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         loadingText.setTextColor(getColor(R.color.text_primary))
 
         // 根据状态更新UI
-        when {
-            state.isLoading -> {
-                showLoadingState()
-            }
-            state.isFinal() -> {
-                if (state.canGoBack) {
-                    isProcessing = false
-                    backButton.isEnabled = true
-                    backButton.alpha = 1.0f
-                }
-                if (state == TerminalState.WAITING_FOR_CARD) {
-                    showCompletedState()
-                } else if (state.isError()) {
-                    showCompletedState()
-                    // 错误状态显示红色文本
-                    loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
-                }
-            }
-            state == TerminalState.WAITING_FOR_CARD -> {
+        when (state) {
+            // 等待刷卡状态 - 这时才算完成加载，显示完成状态
+            TerminalState.WAITING_FOR_CARD -> {
                 showCompletedState()
-                if (state.canGoBack) {
-                    isProcessing = false
-                    backButton.isEnabled = true
-                    backButton.alpha = 1.0f
-                }
+                isProcessing = false
+                backButton.isEnabled = true
+                backButton.alpha = 1.0f
                 // 等待刷卡状态显示蓝色文本
                 loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
+            }
+
+            // 最终成功状态
+            TerminalState.PAYMENT_SUCCESSFUL -> {
+                showCompletedState()
+                isProcessing = false
+                backButton.isEnabled = true
+                backButton.alpha = 1.0f
+                loadingText.setTextColor(getColor(android.R.color.holo_green_dark))
+            }
+
+            // 错误状态
+            TerminalState.PAYMENT_FAILED,
+            TerminalState.INITIALIZATION_FAILED,
+            TerminalState.READER_NOT_FOUND,
+            TerminalState.CONNECTION_FAILED,
+            TerminalState.PAYMENT_CANCELLED,
+            TerminalState.TIMEOUT -> {
+                showCompletedState()
+                isProcessing = false
+                backButton.isEnabled = true
+                backButton.alpha = 1.0f
+                // 错误状态显示红色文本
+                loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
+            }
+
+            // 所有其他状态都保持加载状态
+            else -> {
+                showLoadingState()
+                // 加载状态下禁用返回按钮
+                if (state.isLoading) {
+                    isProcessing = true
+                    backButton.isEnabled = false
+                    backButton.alpha = 0.5f
+                }
             }
         }
     }

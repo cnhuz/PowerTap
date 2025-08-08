@@ -39,6 +39,10 @@ echo 授予存储权限...
 adb shell pm grant com.stwpower.powertap android.permission.READ_EXTERNAL_STORAGE
 adb shell pm grant com.stwpower.powertap android.permission.WRITE_EXTERNAL_STORAGE
 
+REM 授予电话状态权限（获取IMEI）
+echo 授予电话状态权限...
+adb shell pm grant com.stwpower.powertap android.permission.READ_PHONE_STATE
+
 echo.
 echo 启用GPS和位置服务...
 REM 启用GPS
