@@ -26,7 +26,7 @@ import kotlinx.coroutines.*
  */
 class StripeTerminalManager(
     private val context: Context,
-    private val stateListener: TerminalStateListener
+    private var stateListener: TerminalStateListener
 ) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener {
 
     companion object {
@@ -60,6 +60,10 @@ class StripeTerminalManager(
     private var connectionRetryCount = 0
     private var paymentRetryCount = 0
 
+    // 状态保持相关
+    private var isReaderConnected = false
+    private var shouldMaintainConnection = true
+
     /**
      * 初始化 Terminal
      */
@@ -69,6 +73,13 @@ class StripeTerminalManager(
 
         if (Terminal.isInitialized()) {
             Log.d(TAG, "Terminal already initialized")
+
+            // 检查是否已有连接的阅读器
+            if (checkExistingConnection()) {
+                Log.d(TAG, "Found existing reader connection, skipping discovery")
+                return
+            }
+
             startDiscovery()
             return
         }
@@ -238,49 +249,244 @@ class StripeTerminalManager(
     }
 
     /**
-     * 取消当前操作
+     * 安全地取消当前操作
      */
     fun cancel() {
-        discoveryCancelable?.cancel(object : Callback {
-            override fun onSuccess() {
-                Log.d(TAG, "Discovery cancelled")
+        // 安全地取消发现操作
+        discoveryCancelable?.let { cancelable ->
+            try {
+                if (!cancelable.isCompleted) {
+                    cancelable.cancel(object : Callback {
+                        override fun onSuccess() {
+                            Log.d(TAG, "Discovery cancelled successfully")
+                        }
+                        override fun onFailure(e: TerminalException) {
+                            Log.w(TAG, "Failed to cancel discovery: ${e.message}")
+                        }
+                    })
+                } else {
+                    Log.d(TAG, "Discovery operation already completed")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Exception while cancelling discovery: ${e.message}")
             }
-            override fun onFailure(e: TerminalException) {
-                Log.e(TAG, "Failed to cancel discovery", e)
-            }
-        })
+            discoveryCancelable = null
+        }
 
-        collectCancelable?.cancel(object : Callback {
-            override fun onSuccess() {
-                Log.d(TAG, "Payment collection cancelled")
-                updateState(TerminalState.PAYMENT_CANCELLED)
+        // 安全地取消支付收集操作
+        collectCancelable?.let { cancelable ->
+            try {
+                if (!cancelable.isCompleted) {
+                    cancelable.cancel(object : Callback {
+                        override fun onSuccess() {
+                            Log.d(TAG, "Payment collection cancelled successfully")
+                        }
+                        override fun onFailure(e: TerminalException) {
+                            Log.w(TAG, "Failed to cancel payment collection: ${e.message}")
+                        }
+                    })
+                } else {
+                    Log.d(TAG, "Payment collection operation already completed")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Exception while cancelling payment collection: ${e.message}")
             }
-            override fun onFailure(e: TerminalException) {
-                Log.e(TAG, "Failed to cancel payment collection", e)
-            }
-        })
+            collectCancelable = null
+        }
 
+        // 取消协程
         paymentJob?.cancel()
+        paymentJob = null
     }
 
     /**
-     * 清理资源
+     * 检查现有连接
+     */
+    private fun checkExistingConnection(): Boolean {
+        return try {
+            val connectionStatus = Terminal.getInstance().connectionStatus
+            val paymentStatus = Terminal.getInstance().paymentStatus
+            val connectedReader = Terminal.getInstance().connectedReader
+
+            Log.d(TAG, "检查现有连接状态:")
+            Log.d(TAG, "  连接状态: $connectionStatus")
+            Log.d(TAG, "  支付状态: $paymentStatus")
+            Log.d(TAG, "  连接的阅读器: ${connectedReader?.serialNumber}")
+
+            if (connectionStatus == ConnectionStatus.CONNECTED && connectedReader != null) {
+                this.connectedReader = connectedReader
+                isReaderConnected = true
+
+                when (paymentStatus) {
+                    PaymentStatus.READY -> {
+                        Log.d(TAG, "阅读器已连接且支付状态为READY，需要重新开始支付收集流程")
+                        updateState(TerminalState.READER_CONNECTED)
+
+                        // 延迟一下再开始支付收集，确保UI状态正确
+                        handler.postDelayed({
+                            Log.d(TAG, "开始重新收集支付方式")
+                            startPaymentCollection()
+                        }, 1000)
+
+                        return true
+                    }
+                    PaymentStatus.NOT_READY -> {
+                        Log.d(TAG, "阅读器已连接但支付状态为NOT_READY，等待状态变化")
+                        updateState(TerminalState.READER_CONNECTED)
+                        return true
+                    }
+                    PaymentStatus.WAITING_FOR_INPUT -> {
+                        Log.d(TAG, "阅读器已连接且正在等待输入，直接进入等待刷卡状态")
+                        updateState(TerminalState.WAITING_FOR_CARD)
+                        return true
+                    }
+                    else -> {
+                        Log.d(TAG, "阅读器已连接，支付状态: $paymentStatus，显示连接状态")
+                        updateState(TerminalState.READER_CONNECTED)
+                        return true
+                    }
+                }
+            }
+
+            Log.d(TAG, "没有找到有效的阅读器连接")
+            return false
+        } catch (e: Exception) {
+            Log.e(TAG, "检查现有连接时发生异常", e)
+            false
+        }
+    }
+
+    /**
+     * 暂停支付收集（保持连接）
+     */
+    fun pausePaymentCollection() {
+        Log.d(TAG, "暂停支付收集，保持阅读器连接")
+
+        try {
+            // 安全地取消当前的支付收集
+            collectCancelable?.let { cancelable ->
+                try {
+                    if (!cancelable.isCompleted) {
+                        cancelable.cancel(object : Callback {
+                            override fun onSuccess() {
+                                Log.d(TAG, "支付收集已取消")
+                            }
+                            override fun onFailure(e: TerminalException) {
+                                Log.w(TAG, "取消支付收集失败: ${e.message}")
+                            }
+                        })
+                    } else {
+                        Log.d(TAG, "支付收集操作已完成，无需取消")
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "取消支付收集时发生异常: ${e.message}")
+                }
+                collectCancelable = null
+            }
+
+            // 取消支付相关的协程
+            paymentJob?.cancel()
+            paymentJob = null
+
+            // 清理Handler中的支付相关回调
+            handler.removeCallbacksAndMessages(null)
+
+            // 保持连接状态
+            shouldMaintainConnection = true
+
+            Log.d(TAG, "支付收集已暂停，阅读器连接保持")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "暂停支付收集时发生异常", e)
+        }
+    }
+
+    /**
+     * 恢复支付收集
+     */
+    fun resumePaymentCollection() {
+        Log.d(TAG, "恢复支付收集")
+
+        try {
+            val connectionStatus = Terminal.getInstance().connectionStatus
+            val paymentStatus = Terminal.getInstance().paymentStatus
+
+            Log.d(TAG, "当前状态 - 连接: $connectionStatus, 支付: $paymentStatus")
+
+            if (connectionStatus == ConnectionStatus.CONNECTED) {
+                when (paymentStatus) {
+                    PaymentStatus.READY -> {
+                        Log.d(TAG, "支付状态为READY，开始支付收集流程")
+                        updateState(TerminalState.READER_CONNECTED)
+
+                        // 延迟一下再开始支付收集
+                        handler.postDelayed({
+                            startPaymentCollection()
+                        }, 1000)
+                    }
+                    PaymentStatus.NOT_READY -> {
+                        Log.d(TAG, "支付状态为NOT_READY，等待状态变化")
+                        updateState(TerminalState.READER_CONNECTED)
+                    }
+                    PaymentStatus.WAITING_FOR_INPUT -> {
+                        Log.d(TAG, "支付状态为WAITING_FOR_INPUT，直接进入等待刷卡状态")
+                        updateState(TerminalState.WAITING_FOR_CARD)
+                    }
+                    else -> {
+                        Log.d(TAG, "当前支付状态: $paymentStatus，显示连接状态")
+                        updateState(TerminalState.READER_CONNECTED)
+                    }
+                }
+            } else {
+                Log.w(TAG, "阅读器未连接，重新开始发现流程")
+                startDiscovery()
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "恢复支付收集时发生异常", e)
+            startDiscovery()
+        }
+    }
+
+    /**
+     * 清理资源（保持连接）
      */
     fun cleanup() {
+        Log.d(TAG, "Cleaning up StripeTerminalManager (maintaining connection)")
+
+        // 暂停支付收集但保持连接
+        pausePaymentCollection()
+
+        Log.d(TAG, "StripeTerminalManager cleanup completed (connection maintained)")
+    }
+
+    /**
+     * 完全断开连接（仅在应用退出时调用）
+     */
+    fun disconnect() {
+        Log.d(TAG, "Disconnecting StripeTerminalManager completely")
+        shouldMaintainConnection = false
+
         cancel()
         scope.cancel()
         handler.removeCallbacksAndMessages(null)
-        
+
         if (Terminal.isInitialized() && connectedReader != null) {
             Terminal.getInstance().disconnectReader(object : Callback {
                 override fun onSuccess() {
-                    Log.d(TAG, "Reader disconnected")
+                    Log.d(TAG, "Reader disconnected successfully")
                 }
                 override fun onFailure(e: TerminalException) {
                     Log.e(TAG, "Failed to disconnect reader", e)
                 }
             })
         }
+
+        // 重置状态
+        connectedReader = null
+        isReaderConnected = false
+
+        Log.d(TAG, "StripeTerminalManager disconnected completely")
     }
 
     // TerminalListener 实现
@@ -512,6 +718,16 @@ class StripeTerminalManager(
                 }
             }
         )
+    }
+
+    /**
+     * 更新状态监听器
+     */
+    fun updateStateListener(newListener: TerminalStateListener) {
+        Log.d(TAG, "更新状态监听器")
+        stateListener = newListener
+        // 立即通知当前状态
+        stateListener.onStateChanged(currentState)
     }
 
     private fun updateState(newState: TerminalState, progress: Int = 0) {

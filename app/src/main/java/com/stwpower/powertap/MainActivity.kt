@@ -36,6 +36,7 @@ import com.stwpower.powertap.ui.AdminSettingsActivity
 import com.stwpower.powertap.ui.AppPaymentActivity
 import com.stwpower.powertap.ui.TerminalPaymentActivity
 import com.stwpower.powertap.data.api.MyApiClient
+import com.stwpower.powertap.terminal.TerminalConnectionManager
 import com.stwpower.powertap.utils.DirectPermissionManager
 import com.stwpower.powertap.utils.PermissionManager
 import com.stwpower.powertap.utils.PreferenceManager
@@ -52,6 +53,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fullscreenManager: ImmersiveFullscreenManager
     private var adminClickArea: View? = null
     private var permissionsReady = false // 权限是否准备完成
+
+    // 不再需要单独的Terminal管理器，使用TerminalConnectionManager
 
     // 权限请求
     private val requestPermissionLauncher = registerForActivityResult(
@@ -429,6 +432,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        Log.d(TAG, "MainActivity onDestroy - 应用退出，完全断开Terminal连接")
+
+        // 完全断开Terminal连接
+        TerminalConnectionManager.disconnect()
+
         // 只有在管理员退出时才真正禁用
         if (::fullscreenManager.isInitialized) {
             fullscreenManager.disableFullscreen()

@@ -22,6 +22,7 @@ import com.stripe.stripeterminal.external.models.PaymentIntent
 import com.stwpower.powertap.HomeKeyInterceptor
 import com.stwpower.powertap.R
 import com.stwpower.powertap.terminal.StripeTerminalManager
+import com.stwpower.powertap.terminal.TerminalConnectionManager
 import com.stwpower.powertap.terminal.TerminalState
 import com.stwpower.powertap.utils.PermissionManager
 import com.stwpower.powertap.utils.PreferenceManager
@@ -61,8 +62,8 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
         startSmoothCountdown()
 
-        // 初始化Terminal管理器
-        terminalManager = StripeTerminalManager(this, this)
+        // 使用TerminalConnectionManager获取Terminal管理器
+        terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
 
         // 检查权限状态并初始化Terminal
         checkPermissionsAndInitialize()
@@ -284,7 +285,11 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         super.onDestroy()
         countDownTimer?.cancel()
         homeKeyInterceptor.stopIntercepting()
-        terminalManager.cleanup()
+
+        // 暂停支付收集但保持阅读器连接
+        TerminalConnectionManager.pausePaymentCollection()
+
+        Log.d("TerminalPayment", "TerminalPaymentActivity destroyed, connection maintained")
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -310,10 +315,13 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         // 打印权限状态报告
         Log.d("TerminalPayment", PermissionManager.getPermissionReport(this))
 
+        // 打印Terminal连接状态报告
+        Log.d("TerminalPayment", TerminalConnectionManager.getStatusReport())
+
         if (PermissionManager.isTerminalReady(this)) {
-            // 权限和GPS都准备好了，开始初始化Terminal
-            Log.d("TerminalPayment", "Terminal ready, initializing...")
-            terminalManager.initialize()
+            // 权限和GPS都准备好了，使用TerminalConnectionManager初始化
+            Log.d("TerminalPayment", "Terminal ready, initializing via TerminalConnectionManager...")
+            TerminalConnectionManager.initializeIfNeeded(this, this)
         } else {
             // 权限或GPS未准备好，显示错误状态
             Log.w("TerminalPayment", "Terminal not ready, showing error state")
