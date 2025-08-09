@@ -22,63 +22,94 @@ enum class BusinessPhase {
 }
 
 /**
+ * UI类型枚举
+ */
+enum class UIType {
+    LOADING,        // 进度环+文字
+    TAP_TO_PAY,     // 文字+图片
+    MESSAGE         // 只展示白色粗体文字
+}
+
+/**
  * 显示状态
  * 用于UI显示的状态枚举
  */
 enum class DisplayState(
     val stringResId: Int,
-    val isLoading: Boolean = true,
+    val uiType: UIType,
     val canGoBack: Boolean = false
 ) {
     // 初始化和连接
-    INITIALIZING(R.string.initializing_terminal, true, false),
-    DISCOVERING_READERS(R.string.scanning_readers, true, false),
-    CONNECTING_READER(R.string.connecting_reader, true, false),
-    READER_CONNECTED(R.string.reader_connected, true, false),
+    INITIALIZING(R.string.initializing_terminal, UIType.LOADING, false),
+    DISCOVERING_READERS(R.string.scanning_readers, UIType.LOADING, false),
+    CONNECTING_READER(R.string.connecting_reader, UIType.LOADING, false),
+    READER_CONNECTED(R.string.reader_connected, UIType.LOADING, false),
     
     // 支付流程
-    WAITING_FOR_CARD(R.string.waiting_for_card, false, true),
-    PROCESSING_PAYMENT(R.string.processing_payment_terminal, true, false),
+    READY_FOR_PAYMENT(R.string.reader_connected, UIType.TAP_TO_PAY, true),
+    WAITING_FOR_CARD(R.string.waiting_for_card, UIType.TAP_TO_PAY, true),
+    PROCESSING_PAYMENT(R.string.processing_payment_terminal, UIType.LOADING, false),
     
     // 业务流程
-    PROCESSING_RENTAL(R.string.calling_rental_api, true, false),
+    PROCESSING_RENTAL(R.string.calling_rental_api, UIType.LOADING, false),
     
     // 结果状态
-    PAYMENT_SUCCESSFUL(R.string.message_payment_successful, false, true),
-    RENTAL_SUCCESSFUL(R.string.rental_successful, false, true),
-    RENTAL_FAILED(R.string.rental_failed, false, true),
-    PAYMENT_FAILED(R.string.payment_failed, false, true),
+    PAYMENT_SUCCESSFUL(R.string.message_payment_successful, UIType.MESSAGE, true),
+    RENTAL_SUCCESSFUL(R.string.rental_successful, UIType.MESSAGE, true),
+    RENTAL_FAILED(R.string.rental_failed, UIType.MESSAGE, true),
+    PAYMENT_FAILED(R.string.payment_failed, UIType.MESSAGE, true),
     
     // 错误状态
-    CONNECTION_FAILED(R.string.connection_failed, false, true),
-    READER_NOT_FOUND(R.string.reader_not_found, false, true),
-    INITIALIZATION_FAILED(R.string.initialization_failed, false, true),
-    CANCELLED(R.string.payment_cancelled, false, true),
-    TIMEOUT(R.string.operation_timeout, false, true);
+    CONNECTION_FAILED(R.string.connection_failed, UIType.MESSAGE, true),
+    READER_NOT_FOUND(R.string.reader_not_found, UIType.MESSAGE, true),
+    INITIALIZATION_FAILED(R.string.initialization_failed, UIType.MESSAGE, true),
+    CANCELLED(R.string.payment_cancelled, UIType.MESSAGE, true),
+    TIMEOUT(R.string.operation_timeout, UIType.MESSAGE, true);
     
     /**
      * 检查是否为错误状态
      */
     fun isError(): Boolean {
         return when (this) {
-            PAYMENT_FAILED, RENTAL_FAILED, CONNECTION_FAILED, 
+            PAYMENT_FAILED, RENTAL_FAILED, CONNECTION_FAILED,
             READER_NOT_FOUND, INITIALIZATION_FAILED, CANCELLED, TIMEOUT -> true
             else -> false
         }
     }
-    
+
     /**
      * 检查是否为成功状态
      */
     fun isSuccess(): Boolean {
         return this == PAYMENT_SUCCESSFUL || this == RENTAL_SUCCESSFUL
     }
-    
+
     /**
      * 检查是否为最终状态
      */
     fun isFinal(): Boolean {
         return isSuccess() || isError()
+    }
+
+    /**
+     * 检查是否为加载状态
+     */
+    fun isLoading(): Boolean {
+        return uiType == UIType.LOADING
+    }
+
+    /**
+     * 检查是否为刷卡状态
+     */
+    fun isTapToPay(): Boolean {
+        return uiType == UIType.TAP_TO_PAY
+    }
+
+    /**
+     * 检查是否为消息状态
+     */
+    fun isMessage(): Boolean {
+        return uiType == UIType.MESSAGE
     }
     
     /**
@@ -102,7 +133,10 @@ class StripeStateManager {
     
     // 业务状态
     private var businessPhase: BusinessPhase = BusinessPhase.NONE
-    
+
+    // 是否已经开始收集付款方式
+    private var paymentCollectionStarted: Boolean = false
+
     // 状态监听器
     private var stateListener: StripeStateListener? = null
     
@@ -158,6 +192,16 @@ class StripeStateManager {
             notifyStateChange()
         }
     }
+
+    /**
+     * 设置收集付款方式开始状态
+     */
+    fun setPaymentCollectionStarted(started: Boolean) {
+        if (paymentCollectionStarted != started) {
+            paymentCollectionStarted = started
+            notifyStateChange()
+        }
+    }
     
     /**
      * 获取当前显示状态
@@ -207,7 +251,14 @@ class StripeStateManager {
             ConnectionStatus.CONNECTED -> {
                 when (paymentStatus) {
                     PaymentStatus.NOT_READY -> DisplayState.READER_CONNECTED
-                    PaymentStatus.READY -> DisplayState.WAITING_FOR_CARD
+                    PaymentStatus.READY -> {
+                        // 区分准备就绪和正在等待刷卡
+                        if (paymentCollectionStarted) {
+                            DisplayState.WAITING_FOR_CARD
+                        } else {
+                            DisplayState.READY_FOR_PAYMENT
+                        }
+                    }
                     PaymentStatus.WAITING_FOR_INPUT -> DisplayState.WAITING_FOR_CARD
                     PaymentStatus.PROCESSING -> DisplayState.PROCESSING_PAYMENT
                 }
@@ -223,6 +274,7 @@ class StripeStateManager {
         paymentStatus = PaymentStatus.NOT_READY
         readerMessage = null
         businessPhase = BusinessPhase.NONE
+        paymentCollectionStarted = false
         notifyStateChange()
     }
     

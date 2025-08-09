@@ -131,6 +131,10 @@ class StripeTerminalManager(
                 this
             )
             Log.d(TAG, "Terminal initialized successfully")
+
+            // 初始化完成，重置业务状态为NONE，让Stripe状态接管
+            updateBusinessPhase(BusinessPhase.NONE)
+
             startDiscovery()
         } catch (e: TerminalException) {
             Log.e(TAG, "Failed to initialize Terminal", e)
@@ -238,6 +242,12 @@ class StripeTerminalManager(
     private fun startPaymentCollection() {
         Log.d(TAG, "开始支付收集流程")
 
+        // 重置业务状态为NONE，让Stripe状态接管
+        updateBusinessPhase(BusinessPhase.NONE)
+
+        // 设置收集付款方式已开始标志
+        stripeStateManager.setPaymentCollectionStarted(true)
+
         scope.launch(Dispatchers.IO) {
             try {
                 // 创建支付意图是支付流程的一部分，保持当前状态
@@ -274,6 +284,9 @@ class StripeTerminalManager(
      * 安全地取消当前操作
      */
     fun cancel() {
+        // 重置收集付款方式标志
+        stripeStateManager.setPaymentCollectionStarted(false)
+
         // 安全地取消发现操作
         discoveryCancelable?.let { cancelable ->
             try {

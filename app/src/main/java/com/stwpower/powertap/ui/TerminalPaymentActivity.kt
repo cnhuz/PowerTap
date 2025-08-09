@@ -24,6 +24,7 @@ import com.stwpower.powertap.R
 import com.stwpower.powertap.terminal.StripeTerminalManager
 import com.stwpower.powertap.terminal.TerminalConnectionManager
 import com.stwpower.powertap.terminal.DisplayState
+import com.stwpower.powertap.terminal.UIType
 import com.stwpower.powertap.utils.PermissionManager
 import com.stwpower.powertap.utils.PreferenceManager
 
@@ -323,63 +324,45 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     private fun updateUIForDisplayState(displayState: DisplayState) {
-        // 更新加载文本
-        loadingText.text = displayState.getFormattedText(this)
+        Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
 
-        // 重置文本颜色
-        loadingText.setTextColor(getColor(R.color.text_primary))
-
-        // 根据显示状态更新UI
-        when (displayState) {
-            // 等待刷卡状态 - 显示完成状态
-            DisplayState.WAITING_FOR_CARD -> {
-                showCompletedState()
-                isProcessing = false
-                backButton.isEnabled = true
-                backButton.alpha = 1.0f
-                // 等待刷卡状态显示蓝色文本
-                loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
-            }
-
-            // 成功状态
-            DisplayState.PAYMENT_SUCCESSFUL,
-            DisplayState.RENTAL_SUCCESSFUL -> {
-                showCompletedState()
-                isProcessing = false
-                backButton.isEnabled = true
-                backButton.alpha = 1.0f
-                loadingText.setTextColor(getColor(android.R.color.holo_green_dark))
-            }
-
-            // 错误状态
-            DisplayState.PAYMENT_FAILED,
-            DisplayState.RENTAL_FAILED,
-            DisplayState.INITIALIZATION_FAILED,
-            DisplayState.READER_NOT_FOUND,
-            DisplayState.CONNECTION_FAILED,
-            DisplayState.CANCELLED,
-            DisplayState.TIMEOUT -> {
-                showCompletedState()
-                isProcessing = false
-                backButton.isEnabled = true
-                backButton.alpha = 1.0f
-                // 错误状态显示红色文本
-                loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
-            }
-
-            // 所有其他状态都保持加载状态
-            else -> {
+        // 根据UIType决定UI展示方式
+        when (displayState.uiType) {
+            UIType.LOADING -> {
+                // Type 1: 进度环+文字
                 showLoadingState()
-                // 根据DisplayState的isLoading属性决定按钮状态
-                if (displayState.isLoading) {
-                    isProcessing = true
-                    backButton.isEnabled = false
-                    backButton.alpha = 0.5f
+                loadingText.text = displayState.getFormattedText(this)
+                loadingText.setTextColor(getColor(R.color.text_primary))
+
+                isProcessing = true
+                backButton.isEnabled = false
+                backButton.alpha = 0.5f
+            }
+
+            UIType.TAP_TO_PAY -> {
+                // Type 2: 文字+图片
+                showCompletedState()
+                loadingText.text = displayState.getFormattedText(this)
+
+                // 等待刷卡状态显示蓝色文本
+                if (displayState == DisplayState.WAITING_FOR_CARD) {
+                    loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
                 } else {
-                    isProcessing = false
-                    backButton.isEnabled = displayState.canGoBack
-                    backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
+                    loadingText.setTextColor(getColor(R.color.text_primary))
                 }
+
+                isProcessing = false
+                backButton.isEnabled = displayState.canGoBack
+                backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
+            }
+
+            UIType.MESSAGE -> {
+                // Type 3: 只展示白色粗体文字
+                showMessage(displayState.getFormattedText(this))
+
+                isProcessing = false
+                backButton.isEnabled = displayState.canGoBack
+                backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
             }
         }
     }
