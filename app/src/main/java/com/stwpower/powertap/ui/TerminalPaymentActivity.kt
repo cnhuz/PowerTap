@@ -39,6 +39,10 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
     // 消息显示相关
     private lateinit var messageText: TextView
+
+    // 消息延迟清除任务
+    private var messageDelayHandler: Handler? = null
+    private var messageDelayRunnable: Runnable? = null
     private lateinit var terminalManager: StripeTerminalManager
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
@@ -190,36 +194,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         }, 2000) // 2秒后重新开始
     }
 
-    /**
-     * 确保最小显示时间（20秒）
-     * 用于租借成功后，如果进度条时间小于20s，重置为20s
-     */
-    private fun ensureMinimumDisplayTime() {
-        // 计算当前剩余时间
-        val currentProgress = progressTimer.getProgress()
-        val remainingTime = (currentProgress / 100f * timeoutDuration).toLong()
 
-        Log.d("TerminalPayment", "当前进度条剩余时间: ${remainingTime}ms")
-
-        if (remainingTime < 20000L) { // 少于20秒
-            Log.d("TerminalPayment", "剩余时间少于20秒，重置为20秒")
-            countDownTimer?.cancel()
-
-            // 重新开始20秒倒计时
-            countDownTimer = object : CountDownTimer(20000L, 33) {
-                override fun onTick(millisUntilFinished: Long) {
-                    val progress = (millisUntilFinished.toFloat() / 20000L) * 100f
-                    progressTimer.setProgress(progress)
-                }
-
-                override fun onFinish() {
-                    progressTimer.setProgress(0f)
-                    returnToMainActivity()
-                }
-            }
-            countDownTimer?.start()
-        }
-    }
 
     /**
      * 重新开始收集付款方式
@@ -235,6 +210,29 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
         // 重新开始收集付款方式
         terminalManager.resumePaymentCollection()
+    }
+
+    /**
+     * 重置进度条为20秒
+     * 用于租借失败后显示错误信息
+     */
+    private fun resetProgressTimerTo20Seconds() {
+        Log.d("TerminalPayment", "重置进度条为20秒")
+        countDownTimer?.cancel()
+
+        // 重新开始20秒倒计时
+        countDownTimer = object : CountDownTimer(20000L, 33) {
+            override fun onTick(millisUntilFinished: Long) {
+                val progress = (millisUntilFinished.toFloat() / 20000L) * 100f
+                progressTimer.setProgress(progress)
+            }
+
+            override fun onFinish() {
+                progressTimer.setProgress(0f)
+                returnToMainActivity()
+            }
+        }
+        countDownTimer?.start()
     }
 
     // TerminalStateListener 实现
@@ -293,9 +291,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             showMessage(getString(R.string.message_rental_successful))
 
             // 根据状态管理逻辑：租借成功则返回主页面
-            Log.d("TerminalPayment", "租借成功，准备返回主页面")
-            // 如果进度条时间小于20s，重置为20s以确保用户能看到成功信息
-            ensureMinimumDisplayTime()
+            Log.d("TerminalPayment", "租借成功，重置进度条为20秒")
+            // 直接重置进度条为20秒
+            resetProgressTimerTo20Seconds()
         }
     }
 
@@ -309,9 +307,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             val safeError = error.takeIf { it.isNotEmpty() } ?: "Unknown error"
             showMessage(getString(R.string.message_rental_failed, safeError))
 
-            // 根据状态管理逻辑：租借失败需要用户重试
-            Log.d("TerminalPayment", "租借失败，需要用户重试，重新进入收集付款方式")
-            resetProgressTimer()
+            // 租借失败：重置进度条为20秒，不重新进入收集付款方式
+            Log.d("TerminalPayment", "租借失败，重置进度条为20秒")
+            resetProgressTimerTo20Seconds()
         }
     }
 
@@ -463,6 +461,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         super.onDestroy()
         countDownTimer?.cancel()
         homeKeyInterceptor.stopIntercepting()
+
+        // 清理消息延迟任务（如果有的话）
+        messageDelayRunnable?.let { messageDelayHandler?.removeCallbacks(it) }
 
         // 如果不是正常finish，说明Activity被系统意外销毁
         if (!isFinishing) {
