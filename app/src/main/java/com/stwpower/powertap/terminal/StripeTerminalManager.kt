@@ -777,8 +777,10 @@ class StripeTerminalManager(
                     "appSecretKey" to ConfigLoader.secretKey
                 )
 
-                // 调用MyApiClient的租借接口（suspend函数）
-                val result = MyApiClient.lendPowerStripeTerminal(requestBody as Map<String, String>)
+                // 在IO线程调用MyApiClient的租借接口（suspend函数）
+                val result = withContext(Dispatchers.IO) {
+                    MyApiClient.lendPowerStripeTerminal(requestBody as Map<String, String>)
+                }
 
                 Log.d(TAG, "租借接口调用完成")
                 Log.d(TAG, "返回结果: $result")
