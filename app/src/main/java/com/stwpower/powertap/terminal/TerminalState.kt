@@ -38,7 +38,7 @@ enum class TerminalState(
     CONFIRMING_PAYMENT(R.string.confirming_payment, true, false),
 
     // 租借阶段
-    CALLING_RENTAL_API(R.string.calling_rental_api, true, false),
+    COLLECTION_SUCCESS(R.string.message_payment_successful, true, false),
     RENTAL_SUCCESSFUL(R.string.rental_successful, false, true),
     RENTAL_FAILED(R.string.rental_failed, false, true),
 

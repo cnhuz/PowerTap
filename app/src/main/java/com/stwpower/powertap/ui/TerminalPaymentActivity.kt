@@ -251,10 +251,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             backButton.alpha = 1.0f
 
             // 在右侧区域显示支付成功消息
-            showMessage(
-                "Payment Successful\nProcessing rental request...",
-                android.R.color.holo_green_dark
-            )
+            showMessage(getString(R.string.message_payment_successful))
 
             // 注意：支付成功后不重新进入收集付款方式
             // 等待租借接口调用结果，根据租借结果决定下一步操作
@@ -270,15 +267,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
             // 在右侧区域显示支付失败消息
             if (isCancelled) {
-                showMessage(
-                    "Payment Cancelled\nPayment was cancelled by user.\nYou can try again or press back to return.",
-                    android.R.color.holo_orange_dark
-                )
+                showMessage(getString(R.string.message_payment_cancelled))
             } else {
-                showMessage(
-                    "Payment Failed\nUnable to process your payment.\nError: $error\nPlease try again with your card.",
-                    android.R.color.holo_red_dark
-                )
+                showMessage(getString(R.string.message_payment_failed))
             }
 
             // 根据状态管理逻辑决定是否重试
@@ -299,11 +290,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             backButton.alpha = 1.0f
 
             // 在右侧区域显示租借成功消息
-            val safeMessage = message.takeIf { it.isNotEmpty() } ?: "Rental successful"
-            showMessage(
-                "Rental Successful!\n$safeMessage\nYou can now use the power bank.",
-                android.R.color.holo_green_dark
-            )
+            showMessage(getString(R.string.message_rental_successful))
 
             // 根据状态管理逻辑：租借成功则返回主页面
             Log.d("TerminalPayment", "租借成功，准备返回主页面")
@@ -318,12 +305,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             backButton.isEnabled = true
             backButton.alpha = 1.0f
 
-            // 在右侧区域显示租借失败消息
+            // 在右侧区域显示租借失败消息，包含服务端返回的具体错误信息
             val safeError = error.takeIf { it.isNotEmpty() } ?: "Unknown error"
-            showMessage(
-                "Rental Failed\nUnable to complete rental request.\nError: $safeError\nPlease try again with your card.",
-                android.R.color.holo_red_dark
-            )
+            showMessage(getString(R.string.message_rental_failed, safeError))
 
             // 根据状态管理逻辑：租借失败需要用户重试
             Log.d("TerminalPayment", "租借失败，需要用户重试，重新进入收集付款方式")
@@ -408,20 +392,15 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     /**
-     * 显示消息提示
+     * 显示消息提示 - 统一白色粗体样式
      * @param message 消息文字
-     * @param textColor 文字颜色（可选）
      */
-    private fun showMessage(message: String, textColor: Int? = null) {
+    private fun showMessage(message: String) {
         showMessageState()
 
-        // 设置消息文字
+        // 设置消息文字 - 统一白色粗体样式
         messageText.text = message
-        if (textColor != null) {
-            messageText.setTextColor(getColor(textColor))
-        } else {
-            messageText.setTextColor(getColor(R.color.text_primary))
-        }
+        messageText.setTextColor(getColor(android.R.color.white))
     }
 
     private fun setupFullscreen() {

@@ -89,12 +89,53 @@ object MyApiClient {
         return null
     }
 
+    /**
+     * 租借接口响应数据类
+     */
+    data class RentalResponse(
+        val success: Boolean,
+        val code: Int,
+        val message: String,
+        val data: String? = null
+    )
+
     @Throws(IOException::class)
-    fun lendPowerStripeTerminal(body: Map<String, String>): String? {
-        val result = service.lendPowerStripeTerminal(body).execute()
-        return if (result.body()?.code == 200) {
-            result.body()?.data as? String
-        } else null
+    fun lendPowerStripeTerminal(body: Map<String, String>): RentalResponse {
+        try {
+            val result = service.lendPowerStripeTerminal(body).execute()
+            val responseBody = result.body()
+
+            return if (result.isSuccessful && responseBody != null) {
+                // HTTP请求成功，解析业务响应
+                val isSuccess = responseBody.code == 200
+                val message = responseBody.message ?: if (isSuccess) "租借成功" else "租借失败"
+                val data = if (isSuccess) responseBody.data as? String else null
+
+                RentalResponse(
+                    success = isSuccess,
+                    code = responseBody.code ?: -1,
+                    message = message,
+                    data = data
+                )
+            } else {
+                // HTTP请求失败
+                val errorMessage = result.errorBody()?.string() ?: "网络请求失败"
+                RentalResponse(
+                    success = false,
+                    code = result.code(),
+                    message = errorMessage,
+                    data = null
+                )
+            }
+        } catch (e: Exception) {
+            // 异常处理
+            return RentalResponse(
+                success = false,
+                code = -1,
+                message = "请求异常: ${e.message}",
+                data = null
+            )
+        }
     }
 
     @Throws(IOException::class)

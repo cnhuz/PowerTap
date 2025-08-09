@@ -750,7 +750,7 @@ class StripeTerminalManager(
     private fun callRentalApiAfterPayment(paymentIntent: PaymentIntent) {
         Log.d(TAG, "=== 开始调用租借接口 ===")
 
-        updateState(TerminalState.CALLING_RENTAL_API)
+        updateState(TerminalState.COLLECTION_SUCCESS)
 
         scope.launch {
             try {
@@ -783,26 +783,18 @@ class StripeTerminalManager(
                     "appSecretKey" to ConfigLoader.secretKey
                 )
 
-                // 在IO线程调用MyApiClient的租借接口（suspend函数）
-                val result = withContext(Dispatchers.IO) {
+                // 在IO线程调用MyApiClient的租借接口
+                val response = withContext(Dispatchers.IO) {
                     MyApiClient.lendPowerStripeTerminal(requestBody as Map<String, String>)
                 }
 
                 Log.d(TAG, "租借接口调用完成")
-                Log.d(TAG, "返回结果: $result")
+                Log.d(TAG, "响应结果: success=${response.success}, code=${response.code}, message=${response.message}")
+                Log.d(TAG, "响应数据: ${response.data}")
 
-                // 安全地处理返回结果
-                val safeResult = result ?: ""
-                val success = safeResult.isNotEmpty() &&
-                             !safeResult.contains("error", ignoreCase = true) &&
-                             !safeResult.contains("fail", ignoreCase = true) &&
-                             !safeResult.contains("exception", ignoreCase = true)
-
-                val message = if (success) {
-                    "租借成功"
-                } else {
-                    if (safeResult.isEmpty()) "租借失败：服务器无响应" else "租借失败：$safeResult"
-                }
+                // 直接使用响应中的成功状态和消息
+                val success = response.success
+                val message = response.message
 
                 if (success) {
                     Log.d(TAG, "租借接口调用成功: $message")
@@ -1009,7 +1001,7 @@ class StripeTerminalManager(
             TerminalState.WAITING_FOR_CARD,
             TerminalState.PROCESSING_PAYMENT,
             TerminalState.CONFIRMING_PAYMENT,
-            TerminalState.CALLING_RENTAL_API -> true
+            TerminalState.COLLECTION_SUCCESS -> true
             else -> false
         }
     }

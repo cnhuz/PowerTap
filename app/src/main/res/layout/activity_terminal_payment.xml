@@ -275,7 +275,7 @@
                     android:layout_height="wrap_content"
                     android:text=""
                     android:textSize="50sp"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@android:color/white"
                     android:textStyle="bold"
                     android:gravity="center"
                     android:lineSpacingExtra="10dp" />

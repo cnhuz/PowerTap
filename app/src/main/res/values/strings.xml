@@ -105,6 +105,17 @@
     <string name="rental_failed">Rental failed. Please try again.</string>
     <string name="payment_successful">Payment successful!</string>
     <string name="payment_failed">Payment failed. Please try again.</string>
+
+    <!-- Terminal右侧消息提示 -->
+    <string name="message_payment_successful">Collection of payment methods successful, please wait.</string>
+    <string name="message_rental_successful">Order created successfully, please check later if the power bank has popped out. If it hasn\'t, please try again.</string>
+    <string name="message_rental_failed">Failed to create order, please try again.\n%1$s</string>
+    <string name="message_payment_failed">Collection of payment methods failed, please try again.</string>
+    <string name="message_payment_cancelled">Payment Cancelled\nPayment was cancelled by user.\nYou can try again or press back to return.</string>
+    <string name="message_rental_default">Order created successfully</string>
+    <string name="message_connect_success">Connect USB Reader Success</string>
+    <string name="message_upgrading_start">Upgrading, please do not turn off the power, progress 0%%.</string>
+    <string name="message_upgrading">Upgrading, please do not turn off the power, progress %1$d%%.</string>
     <string name="initialization_failed">Failed to initialize terminal</string>
     <string name="reader_not_found">No card reader found</string>
     <string name="connection_failed">Failed to connect to card reader</string>

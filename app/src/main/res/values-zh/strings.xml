@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Terminal右侧消息提示 - 中文 -->
+    <string name="message_payment_successful">收集付款方式成功，请稍候。</string>
+    <string name="message_rental_successful">订单创建成功，请稍后查看充电宝是否弹出。如果没有，请重试。</string>
+    <string name="message_rental_failed">创建订单失败，请重试。\n%1$s</string>
+    <string name="message_payment_failed">收集付款方式失败，请重试。</string>
+    <string name="message_payment_cancelled">支付已取消\n用户取消了支付。\n您可以重新尝试或按返回键退出。</string>
+    <string name="message_rental_default">订单创建成功</string>
+    <string name="message_connect_success">USB读卡器连接成功</string>
+    <string name="message_upgrading_start">升级中，请勿断电，进度 0%%。</string>
+    <string name="message_upgrading">升级中，请勿断电，进度 %1$d%%。</string>
+</resources>
