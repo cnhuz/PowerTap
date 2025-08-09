@@ -69,7 +69,8 @@
             android:screenOrientation="landscape"
             android:launchMode="singleTask"
             android:excludeFromRecents="true"
-            android:stateNotNeeded="true" />
+            android:stateNotNeeded="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|uiMode" />
 
         <!-- App Payment Activity -->
         <activity

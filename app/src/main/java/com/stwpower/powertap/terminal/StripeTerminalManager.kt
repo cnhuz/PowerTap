@@ -987,4 +987,24 @@ class StripeTerminalManager(
             stateListener.onPaymentFailed("Failed to discover readers after $MAX_RETRY_ATTEMPTS attempts: no readers found")
         }
     }
+
+    /**
+     * 获取当前Terminal状态
+     */
+    fun getCurrentState(): TerminalState {
+        return currentState
+    }
+
+    /**
+     * 检查是否有支付正在进行中
+     */
+    fun isPaymentInProgress(): Boolean {
+        return when (currentState) {
+            TerminalState.WAITING_FOR_CARD,
+            TerminalState.PROCESSING_PAYMENT,
+            TerminalState.CONFIRMING_PAYMENT,
+            TerminalState.CALLING_RENTAL_API -> true
+            else -> false
+        }
+    }
 }

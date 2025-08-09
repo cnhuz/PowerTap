@@ -68,6 +68,18 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         Log.d("TerminalPayment", "获取Terminal管理器")
         terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
 
+        // 检查是否是Activity重建
+        if (savedInstanceState != null) {
+            Log.d("TerminalPayment", "Activity重建，恢复状态")
+            // 如果Terminal已经在运行，不要重新初始化
+            val terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
+            if (terminalManager.isPaymentInProgress()) {
+                Log.d("TerminalPayment", "Terminal支付正在进行中，恢复监听")
+                this.terminalManager = terminalManager
+                return
+            }
+        }
+
         // 检查权限状态并初始化Terminal
         Log.d("TerminalPayment", "检查权限并初始化Terminal")
         checkPermissionsAndInitialize()
@@ -423,15 +435,23 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
     override fun onDestroy() {
         Log.d("TerminalPayment", "=== onDestroy 被调用 ===")
+        Log.d("TerminalPayment", "isFinishing: $isFinishing")
         Log.d("TerminalPayment", "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
 
         super.onDestroy()
         countDownTimer?.cancel()
         homeKeyInterceptor.stopIntercepting()
 
-        // 暂停支付收集但保持阅读器连接
-        Log.d("TerminalPayment", "暂停支付收集")
-        TerminalConnectionManager.pausePaymentCollection()
+        // 如果不是正常finish，说明Activity被系统意外销毁
+        if (!isFinishing) {
+            Log.w("TerminalPayment", "Activity被系统意外销毁，但用户可能还在Terminal页面")
+            // 不要暂停支付收集，让Terminal继续运行
+            // 用户可能还期望Terminal功能继续工作
+        } else {
+            Log.d("TerminalPayment", "Activity正常结束，暂停支付收集")
+            // 暂停支付收集但保持阅读器连接
+            TerminalConnectionManager.pausePaymentCollection()
+        }
 
         Log.d("TerminalPayment", "TerminalPaymentActivity destroyed, connection maintained")
     }
