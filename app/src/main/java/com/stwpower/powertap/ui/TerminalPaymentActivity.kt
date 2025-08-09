@@ -118,6 +118,10 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             if (!isProcessing) {
                 // 根据状态管理逻辑：离开terminal页面需要主动取消收集付款方式
                 Log.d("TerminalPayment", "用户主动离开Terminal页面，取消收集付款方式")
+
+                // 设置用户离开标识，防止自动重新进入收集付款方式
+                terminalManager.setUserLeftTerminalPage(true)
+
                 terminalManager.cancel()
                 // 取消倒计时器
                 countDownTimer?.cancel()
@@ -160,6 +164,11 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     private fun returnToMainActivity() {
         Log.d("TerminalPayment", "=== 准备返回主页面 ===")
         Log.d("TerminalPayment", "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
+
+        // 设置用户离开标识，防止自动重新进入收集付款方式
+        if (::terminalManager.isInitialized) {
+            terminalManager.setUserLeftTerminalPage(true)
+        }
 
         // 时间到后返回主页面，使用简单的finish()即可
         // 因为MainActivity应该还在任务栈中
@@ -446,12 +455,22 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         homeKeyInterceptor.startIntercepting()
         // 重新应用全屏设置
         setupFullscreen()
+
+        // 通知TerminalManager用户重新进入了Terminal页面
+        if (::terminalManager.isInitialized) {
+            terminalManager.onUserEnteredTerminalPage()
+        }
     }
 
     override fun onPause() {
         Log.d("TerminalPayment", "=== onPause 被调用 ===")
         super.onPause()
         // 不要停止拦截，保持监控
+
+        // 通知TerminalManager用户离开了Terminal页面
+        if (::terminalManager.isInitialized) {
+            terminalManager.setUserLeftTerminalPage(true)
+        }
     }
 
     override fun onStop() {

@@ -49,6 +49,9 @@ class StripeTerminalManager(
     // 使用新的状态管理器
     private val stripeStateManager = StripeStateManager()
     private var discoveryJob: Job? = null
+
+    // 标志：用户是否已经离开了Terminal页面
+    private var userLeftTerminalPage = false
     private var paymentJob: Job? = null
     private var discoveryCancelable: Cancelable? = null
     private var collectCancelable: Cancelable? = null
@@ -559,13 +562,33 @@ class StripeTerminalManager(
             PaymentStatus.READY -> {
                 Log.d(TAG, "支付状态为READY，准备接收支付")
 
-                // 检查当前业务状态，如果不是租借完成，直接进入收集付款方式
+                // 检查是否应该自动开始收集付款方式
                 val (_, _, businessPhase) = stripeStateManager.getCurrentStripeStates()
-                if (businessPhase != BusinessPhase.RENTAL_SUCCESS) {
-                    Log.d(TAG, "当前业务状态: $businessPhase，直接进入收集付款方式")
+
+                val shouldAutoStart = when {
+                    // 用户已经离开了Terminal页面，不自动开始
+                    userLeftTerminalPage -> {
+                        Log.d(TAG, "用户已离开Terminal页面，不自动开始收集付款方式")
+                        false
+                    }
+                    // 租借已完成，不自动开始
+                    businessPhase == BusinessPhase.RENTAL_SUCCESS
+                            || businessPhase == BusinessPhase.RENTAL_FAILED
+                            || businessPhase == BusinessPhase.PAYMENT_SUCCESS
+                            || businessPhase == BusinessPhase.CALLING_RENTAL_API -> {
+                        Log.d(TAG, "已进入租借流程，保持当前状态")
+                        false
+                    }
+                    // 其他情况，自动开始
+                    else -> {
+                        Log.d(TAG, "当前业务状态: $businessPhase，用户在Terminal页面，可以自动开始收集付款方式")
+                        true
+                    }
+                }
+
+                if (shouldAutoStart) {
+                    Log.d(TAG, "自动进入收集付款方式")
                     startPaymentCollection()
-                } else {
-                    Log.d(TAG, "租借已完成，保持当前状态")
                 }
             }
             PaymentStatus.WAITING_FOR_INPUT -> {
@@ -1012,6 +1035,24 @@ class StripeTerminalManager(
      */
     fun getCurrentDisplayState(): DisplayState {
         return stripeStateManager.getCurrentDisplayState()
+    }
+
+    /**
+     * 设置用户离开Terminal页面标志
+     * 当用户退出Terminal页面时调用
+     */
+    fun setUserLeftTerminalPage(left: Boolean) {
+        userLeftTerminalPage = left
+        Log.d(TAG, "用户离开Terminal页面标志设置为: $left")
+    }
+
+    /**
+     * 用户重新进入Terminal页面
+     * 当用户重新进入Terminal页面时调用，重置离开标志
+     */
+    fun onUserEnteredTerminalPage() {
+        userLeftTerminalPage = false
+        Log.d(TAG, "用户重新进入Terminal页面，重置离开标志")
     }
 
     /**
