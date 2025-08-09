@@ -71,7 +71,26 @@ enum class TerminalState(
      * 检查是否为成功状态
      */
     fun isSuccess(): Boolean {
-        return this == PAYMENT_SUCCESSFUL
+        return this == PAYMENT_SUCCESSFUL || this == RENTAL_SUCCESSFUL
+    }
+
+    /**
+     * 检查是否需要重新进入收集付款方式
+     */
+    fun shouldRetryPaymentCollection(): Boolean {
+        return when (this) {
+            PAYMENT_FAILED,  // 卡被拒绝等支付失败
+            RENTAL_FAILED    // 租借失败
+            -> true
+            else -> false
+        }
+    }
+
+    /**
+     * 检查是否为用户取消操作
+     */
+    fun isCancellation(): Boolean {
+        return this == PAYMENT_CANCELLED
     }
     
     /**

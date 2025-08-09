@@ -493,9 +493,15 @@ class StripeTerminalManager(
 
     // TerminalListener 实现
     override fun onUnexpectedReaderDisconnect(reader: Reader) {
-        Log.w(TAG, "Reader unexpectedly disconnected")
-        updateState(TerminalState.CONNECTION_FAILED)
-        stateListener.onPaymentFailed("Card reader disconnected")
+        Log.w(TAG, "阅读器意外断开连接: ${reader.deviceType}")
+        currentReader = null
+
+        // 根据状态管理逻辑：阅读器断开连接需要重新扫描连接
+        Log.d(TAG, "阅读器断开连接，开始重新扫描连接")
+        updateState(TerminalState.DISCOVERING_READERS)
+
+        // 重新开始扫描和连接流程
+        startDiscovery()
     }
 
     override fun onConnectionStatusChange(status: ConnectionStatus) {
@@ -536,12 +542,12 @@ class StripeTerminalManager(
                 updateState(TerminalState.WAITING_FOR_CARD)
 
                 // 如果处于READY，10s后还是处于READY，进入收集付款方式
-                handler.postDelayed({
-                    if (Terminal.getInstance().paymentStatus == PaymentStatus.READY) {
-                        Log.d(TAG, "支付状态超过10s处于READY，进入收集付款方式")
-                        startPaymentCollection()
-                    }
-                }, 10000)
+//                handler.postDelayed({
+//                    if (Terminal.getInstance().paymentStatus == PaymentStatus.READY) {
+//                        Log.d(TAG, "支付状态超过10s处于READY，进入收集付款方式")
+//                        startPaymentCollection()
+//                    }
+//                }, 10000)
             }
             PaymentStatus.WAITING_FOR_INPUT -> {
                 updateState(TerminalState.WAITING_FOR_CARD)

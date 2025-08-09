@@ -33,8 +33,12 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     private lateinit var progressTimer: HighPerformanceProgressBar
     private lateinit var loadingLayout: LinearLayout
     private lateinit var completedLayout: LinearLayout
+    private lateinit var messageLayout: LinearLayout
     private lateinit var loadingText: TextView
     private lateinit var homeKeyInterceptor: HomeKeyInterceptor
+
+    // 消息显示相关
+    private lateinit var messageText: TextView
     private lateinit var terminalManager: StripeTerminalManager
     private var isProcessing = true
     private var countDownTimer: CountDownTimer? = null
@@ -90,7 +94,11 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         progressTimer = findViewById(R.id.progress_timer)
         loadingLayout = findViewById(R.id.loading_layout)
         completedLayout = findViewById(R.id.completed_layout)
+        messageLayout = findViewById(R.id.message_layout)
         loadingText = findViewById(R.id.loading_text)
+
+        // 消息显示相关
+        messageText = findViewById(R.id.message_text)
 
         // 为弱设备启用高性能模式
         progressTimer.setHighPerformanceMode(true)
@@ -104,7 +112,8 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
         backButton.setOnClickListener {
             if (!isProcessing) {
-                // 取消Terminal操作
+                // 根据状态管理逻辑：离开terminal页面需要主动取消收集付款方式
+                Log.d("TerminalPayment", "用户主动离开Terminal页面，取消收集付款方式")
                 terminalManager.cancel()
                 // 取消倒计时器
                 countDownTimer?.cancel()
@@ -240,15 +249,16 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            showCompletedState()
 
-            // 显示成功消息
-            val successMessage = getString(R.string.payment_successful) + "\n" +
-                                getString(R.string.payment_completed)
-            loadingText.text = successMessage
+            // 在右侧区域显示支付成功消息
+            showMessage(
+                "Payment Successful\nProcessing rental request...",
+                android.R.color.holo_green_dark
+            )
 
-            // 可以在这里添加成功的视觉效果，比如绿色背景等
-            loadingText.setTextColor(getColor(android.R.color.holo_green_dark))
+            // 注意：支付成功后不重新进入收集付款方式
+            // 等待租借接口调用结果，根据租借结果决定下一步操作
+            Log.d("TerminalPayment", "支付成功，等待租借接口调用结果")
         }
     }
 
@@ -257,26 +267,27 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            showCompletedState()
 
-            // 显示错误消息
-            val errorMessage = if (isCancelled) {
-                "Payment cancelled"
+            // 在右侧区域显示支付失败消息
+            if (isCancelled) {
+                showMessage(
+                    "Payment Cancelled\nPayment was cancelled by user.\nYou can try again or press back to return.",
+                    android.R.color.holo_orange_dark
+                )
             } else {
-                getString(R.string.payment_failed) + "\n$error"
+                showMessage(
+                    "Payment Failed\nUnable to process your payment.\nError: $error\nPlease try again with your card.",
+                    android.R.color.holo_red_dark
+                )
             }
-            loadingText.text = errorMessage
 
-            // 添加错误的视觉效果
-            loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
-
-            // 只有非取消的支付失败才重新进入收集付款方式
+            // 根据状态管理逻辑决定是否重试
             if (!isCancelled) {
-                Log.d("TerminalPayment", "支付失败（非取消），重新开始收集付款方式")
+                Log.d("TerminalPayment", "支付失败（卡被拒绝等），需要重新进入收集付款方式")
                 resetProgressTimer()
             } else {
-                Log.d("TerminalPayment", "用户取消支付，不重新开始收集付款方式")
-                // 取消情况下，保持当前状态，等待用户操作或超时
+                Log.d("TerminalPayment", "用户主动取消支付，不重新开始收集付款方式")
+                // 用户取消：保持当前状态，等待用户操作或超时
             }
         }
     }
@@ -286,14 +297,17 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            showCompletedState()
 
-            // 安全地显示租借成功信息
-            val safeMessage = message.takeIf { it.isNotEmpty() } ?: "租借成功"
-            loadingText.text = safeMessage
-            loadingText.setTextColor(getColor(android.R.color.holo_green_dark))
+            // 在右侧区域显示租借成功消息
+            val safeMessage = message.takeIf { it.isNotEmpty() } ?: "Rental successful"
+            showMessage(
+                "Rental Successful!\n$safeMessage\nYou can now use the power bank.",
+                android.R.color.holo_green_dark
+            )
 
-            // 租借成功，如果进度条时间小于20s，重置为20s
+            // 根据状态管理逻辑：租借成功则返回主页面
+            Log.d("TerminalPayment", "租借成功，准备返回主页面")
+            // 如果进度条时间小于20s，重置为20s以确保用户能看到成功信息
             ensureMinimumDisplayTime()
         }
     }
@@ -303,14 +317,16 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             isProcessing = false
             backButton.isEnabled = true
             backButton.alpha = 1.0f
-            showCompletedState()
 
-            // 安全地显示租借失败信息
-            val safeError = error.takeIf { it.isNotEmpty() } ?: "未知错误"
-            loadingText.text = "Rental failed: $safeError"
-            loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
+            // 在右侧区域显示租借失败消息
+            val safeError = error.takeIf { it.isNotEmpty() } ?: "Unknown error"
+            showMessage(
+                "Rental Failed\nUnable to complete rental request.\nError: $safeError\nPlease try again with your card.",
+                android.R.color.holo_red_dark
+            )
 
-            // 租借失败，重新进入收集付款方式，重置60s的进度条
+            // 根据状态管理逻辑：租借失败需要用户重试
+            Log.d("TerminalPayment", "租借失败，需要用户重试，重新进入收集付款方式")
             resetProgressTimer()
         }
     }
@@ -379,6 +395,33 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     private fun showCompletedState() {
         loadingLayout.visibility = View.GONE
         completedLayout.visibility = View.VISIBLE
+        messageLayout.visibility = View.GONE
+    }
+
+    /**
+     * 显示消息状态
+     */
+    private fun showMessageState() {
+        loadingLayout.visibility = View.GONE
+        completedLayout.visibility = View.GONE
+        messageLayout.visibility = View.VISIBLE
+    }
+
+    /**
+     * 显示消息提示
+     * @param message 消息文字
+     * @param textColor 文字颜色（可选）
+     */
+    private fun showMessage(message: String, textColor: Int? = null) {
+        showMessageState()
+
+        // 设置消息文字
+        messageText.text = message
+        if (textColor != null) {
+            messageText.setTextColor(getColor(textColor))
+        } else {
+            messageText.setTextColor(getColor(R.color.text_primary))
+        }
     }
 
     private fun setupFullscreen() {
