@@ -58,6 +58,8 @@
     <string name="language_chinese">中文</string>
     <string name="language_english">English</string>
     <string name="language_japanese">日本語</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_russian">Русский</string>
     <string name="default_language_set">Default language set to: %s</string>
 
     <!-- Exit Confirmation -->
@@ -68,4 +70,49 @@
     <string name="using_basic_protection">Using basic protection mode</string>
     <string name="enable_full_protection">Enable full protection mode</string>
     <string name="insufficient_permission">Insufficient permission, using basic protection mode</string>
+
+    <!-- Pricing -->
+    <string name="pricing_title">Rental Price</string>
+    <string name="pricing_description">Hourly billing, minimum charge 1 hour</string>
+    <string name="hourly_rate">$2.99 per hour</string>
+    <string name="daily_rate">$9.99 per day</string>
+    <string name="additional_charges_info">Additional charges may apply for late return or damage</string>
+
+    <!-- QR Code Payment -->
+    <string name="scan_qr_code_payment">Scan QR Code Payment</string>
+
+    <!-- Terminal Status Messages -->
+    <string name="initializing">Initializing...</string>
+    <string name="discovering_readers">Searching for card reader...</string>
+    <string name="reader_found">Card reader found</string>
+    <string name="connecting_to_reader">Connecting to card reader...</string>
+    <string name="reader_connected">Card reader connected</string>
+    <string name="waiting_for_card">Please swipe card or insert chip card</string>
+    <string name="confirming_payment">Confirming payment...</string>
+    <string name="payment_successful">Payment successful!</string>
+    <string name="payment_failed">Payment failed, please try again</string>
+    <string name="payment_cancelled">Payment cancelled</string>
+    <string name="reader_not_found">Card reader not found</string>
+    <string name="connection_failed">Connection failed</string>
+    <string name="initialization_failed">Initialization failed</string>
+    <string name="timeout">Operation timeout</string>
+    <string name="calling_rental_api">Calling rental API...</string>
+    <string name="rental_successful">Rental successful!</string>
+    <string name="rental_failed">Rental failed. Please try again.</string>
+
+    <!-- Terminal右侧消息提示 -->
+    <string name="message_payment_successful">Collection of payment methods successful, please wait.</string>
+    <string name="message_rental_successful">Order created successfully, please check later if the power bank has popped out. If it hasn\'t, please try again.</string>
+    <string name="message_rental_failed">Failed to create order, please try again.\n%1$s</string>
+    <string name="message_payment_failed">Collection of payment methods failed, please try again.</string>
+    <string name="message_payment_cancelled">Payment Cancelled\nPayment was cancelled by user.\nYou can try again or press back to return.</string>
+    <string name="message_rental_default">Order created successfully</string>
+    <string name="message_connect_success">Connect USB Reader Success</string>
+    <string name="message_upgrading_start">Upgrading, please do not turn off the power, progress 0%%.</string>
+    <string name="message_upgrading">Upgrading, please do not turn off the power, progress %1$d%%.</string>
+
+    <!-- Main Page -->
+    <string name="brand_name">STW</string>
+    <string name="main_title">RENT A\nPOWER BANK</string>
+    <string name="or_text">OR</string>
 </resources>

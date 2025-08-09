@@ -58,6 +58,8 @@
     <string name="language_chinese">中文</string>
     <string name="language_english">English</string>
     <string name="language_japanese">日本語</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_russian">Русский</string>
     <string name="default_language_set">デフォルト言語が設定されました：%s</string>
 
     <!-- Exit Confirmation -->
@@ -68,4 +70,49 @@
     <string name="using_basic_protection">基本保護モードを使用</string>
     <string name="enable_full_protection">完全保護モードを有効化</string>
     <string name="insufficient_permission">権限不足、基本保護モードを使用</string>
+
+    <!-- Pricing -->
+    <string name="pricing_title">レンタル料金</string>
+    <string name="pricing_description">時間制課金、最低1時間</string>
+    <string name="hourly_rate">1時間 $2.99</string>
+    <string name="daily_rate">1日 $9.99</string>
+    <string name="additional_charges_info">返却遅延や損傷により追加料金が発生する場合があります</string>
+
+    <!-- QR Code Payment -->
+    <string name="scan_qr_code_payment">QRコード決済をスキャン</string>
+
+    <!-- Terminal Status Messages -->
+    <string name="initializing">初期化中...</string>
+    <string name="discovering_readers">カードリーダーを検索中...</string>
+    <string name="reader_found">カードリーダーが見つかりました</string>
+    <string name="connecting_to_reader">カードリーダーに接続中...</string>
+    <string name="reader_connected">カードリーダーが接続されました</string>
+    <string name="waiting_for_card">カードをスワイプまたはチップカードを挿入してください</string>
+    <string name="confirming_payment">決済確認中...</string>
+    <string name="payment_successful">決済成功！</string>
+    <string name="payment_failed">決済失敗、再試行してください</string>
+    <string name="payment_cancelled">決済がキャンセルされました</string>
+    <string name="reader_not_found">カードリーダーが見つかりません</string>
+    <string name="connection_failed">接続失敗</string>
+    <string name="initialization_failed">初期化失敗</string>
+    <string name="timeout">操作タイムアウト</string>
+    <string name="calling_rental_api">レンタルAPIを呼び出し中...</string>
+    <string name="rental_successful">レンタル成功！</string>
+    <string name="rental_failed">レンタル失敗。再試行してください。</string>
+
+    <!-- Terminal右侧消息提示 -->
+    <string name="message_payment_successful">決済方法の収集が成功しました。お待ちください。</string>
+    <string name="message_rental_successful">注文が正常に作成されました。後でモバイルバッテリーが出てきたかご確認ください。出てこない場合は再試行してください。</string>
+    <string name="message_rental_failed">注文の作成に失敗しました。再試行してください。\n%1$s</string>
+    <string name="message_payment_failed">決済方法の収集に失敗しました。再試行してください。</string>
+    <string name="message_payment_cancelled">決済がキャンセルされました\nユーザーによって決済がキャンセルされました。\n再試行するか、戻るボタンを押して戻ってください。</string>
+    <string name="message_rental_default">注文が正常に作成されました</string>
+    <string name="message_connect_success">USBリーダー接続成功</string>
+    <string name="message_upgrading_start">アップグレード中、電源を切らないでください、進行状況 0%%。</string>
+    <string name="message_upgrading">アップグレード中、電源を切らないでください、進行状況 %1$d%%。</string>
+
+    <!-- Main Page -->
+    <string name="brand_name">STW</string>
+    <string name="main_title">モバイルバッテリーを\nレンタル</string>
+    <string name="or_text">または</string>
 </resources>

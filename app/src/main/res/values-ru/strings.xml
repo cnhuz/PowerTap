@@ -40,11 +40,79 @@
     <string name="direct_exit">Прямой выход</string>
     <string name="select_operation">Выберите операцию:</string>
 
+    <!-- Change Password Dialog -->
+    <string name="change_password_title">Изменить пароль администратора</string>
+    <string name="current_password">Текущий пароль:</string>
+    <string name="new_password">Новый пароль:</string>
+    <string name="confirm_password">Подтвердить новый пароль:</string>
+    <string name="enter_current_password">Пожалуйста, введите текущий пароль</string>
+    <string name="enter_new_password">Пожалуйста, введите новый пароль</string>
+    <string name="enter_confirm_password">Пожалуйста, введите новый пароль еще раз</string>
+    <string name="current_password_incorrect">Текущий пароль неверен</string>
+    <string name="new_password_empty">Новый пароль не может быть пустым</string>
+    <string name="password_mismatch">Пароли не совпадают</string>
+    <string name="password_changed_success">Пароль успешно изменен</string>
+
     <!-- Language Settings -->
+    <string name="set_default_language_title">Установить язык по умолчанию</string>
     <string name="language_chinese">中文</string>
     <string name="language_english">English</string>
     <string name="language_japanese">日本語</string>
     <string name="language_german">Deutsch</string>
     <string name="language_russian">Русский</string>
     <string name="default_language_set">Язык по умолчанию установлен: %s</string>
+
+    <!-- Exit Confirmation -->
+    <string name="exit_confirmation_title">Подтвердить выход</string>
+    <string name="exit_confirmation_message">Вы уверены, что хотите выйти из приложения?</string>
+
+    <!-- Toast Messages -->
+    <string name="using_basic_protection">Использование базового режима защиты</string>
+    <string name="enable_full_protection">Включить полный режим защиты</string>
+    <string name="insufficient_permission">Недостаточно разрешений, использование базового режима защиты</string>
+
+    <!-- Pricing -->
+    <string name="pricing_title">Цена аренды</string>
+    <string name="pricing_description">Почасовая оплата, минимум 1 час</string>
+    <string name="hourly_rate">$2.99 в час</string>
+    <string name="daily_rate">$9.99 в день</string>
+    <string name="additional_charges_info">Дополнительные сборы могут применяться за позднее возвращение или повреждение</string>
+
+    <!-- QR Code Payment -->
+    <string name="scan_qr_code_payment">Сканировать QR-код для оплаты</string>
+
+    <!-- Terminal Status Messages -->
+    <string name="initializing">Инициализация...</string>
+    <string name="discovering_readers">Поиск картридера...</string>
+    <string name="reader_found">Картридер найден</string>
+    <string name="connecting_to_reader">Подключение к картридеру...</string>
+    <string name="reader_connected">Картридер подключен</string>
+    <string name="waiting_for_card">Пожалуйста, проведите карту или вставьте чип-карту</string>
+    <string name="confirming_payment">Подтверждение платежа...</string>
+    <string name="payment_successful">Оплата успешна!</string>
+    <string name="payment_failed">Оплата не удалась, попробуйте еще раз</string>
+    <string name="payment_cancelled">Оплата отменена</string>
+    <string name="reader_not_found">Картридер не найден</string>
+    <string name="connection_failed">Ошибка подключения</string>
+    <string name="initialization_failed">Ошибка инициализации</string>
+    <string name="timeout">Время операции истекло</string>
+    <string name="calling_rental_api">Вызов API аренды...</string>
+    <string name="rental_successful">Аренда успешна!</string>
+    <string name="rental_failed">Аренда не удалась. Попробуйте еще раз.</string>
+
+    <!-- Terminal右侧消息提示 -->
+    <string name="message_payment_successful">Сбор способов оплаты успешен, пожалуйста, подождите.</string>
+    <string name="message_rental_successful">Заказ успешно создан, пожалуйста, проверьте позже, выскочил ли павербанк. Если нет, попробуйте еще раз.</string>
+    <string name="message_rental_failed">Не удалось создать заказ, попробуйте еще раз.\n%1$s</string>
+    <string name="message_payment_failed">Сбор способов оплаты не удался, попробуйте еще раз.</string>
+    <string name="message_payment_cancelled">Оплата отменена\nОплата была отменена пользователем.\nВы можете попробовать еще раз или нажать назад для возврата.</string>
+    <string name="message_rental_default">Заказ успешно создан</string>
+    <string name="message_connect_success">USB-ридер успешно подключен</string>
+    <string name="message_upgrading_start">Обновление, пожалуйста, не выключайте питание, прогресс 0%%.</string>
+    <string name="message_upgrading">Обновление, пожалуйста, не выключайте питание, прогресс %1$d%%.</string>
+
+    <!-- Main Page -->
+    <string name="brand_name">STW</string>
+    <string name="main_title">АРЕНДОВАТЬ\nПАВЕРБАНК</string>
+    <string name="or_text">ИЛИ</string>
 </resources>
