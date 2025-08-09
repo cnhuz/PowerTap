@@ -23,7 +23,7 @@ import com.stwpower.powertap.HomeKeyInterceptor
 import com.stwpower.powertap.R
 import com.stwpower.powertap.terminal.StripeTerminalManager
 import com.stwpower.powertap.terminal.TerminalConnectionManager
-import com.stwpower.powertap.terminal.TerminalState
+import com.stwpower.powertap.terminal.DisplayState
 import com.stwpower.powertap.utils.PermissionManager
 import com.stwpower.powertap.utils.PreferenceManager
 
@@ -236,9 +236,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     // TerminalStateListener 实现
-    override fun onStateChanged(state: TerminalState, progress: Int) {
+    override fun onDisplayStateChanged(displayState: DisplayState) {
         runOnUiThread {
-            updateUIForState(state, progress)
+            updateUIForDisplayState(displayState)
         }
     }
 
@@ -313,17 +313,17 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         }
     }
 
-    private fun updateUIForState(state: TerminalState, progress: Int = 0) {
+    private fun updateUIForDisplayState(displayState: DisplayState) {
         // 更新加载文本
-        loadingText.text = state.getFormattedText(this, progress)
+        loadingText.text = displayState.getFormattedText(this)
 
         // 重置文本颜色
         loadingText.setTextColor(getColor(R.color.text_primary))
 
-        // 根据状态更新UI
-        when (state) {
-            // 等待刷卡状态 - 这时才算完成加载，显示完成状态
-            TerminalState.WAITING_FOR_CARD -> {
+        // 根据显示状态更新UI
+        when (displayState) {
+            // 等待刷卡状态 - 显示完成状态
+            DisplayState.WAITING_FOR_CARD -> {
                 showCompletedState()
                 isProcessing = false
                 backButton.isEnabled = true
@@ -332,8 +332,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                 loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
             }
 
-            // 最终成功状态
-            TerminalState.PAYMENT_SUCCESSFUL -> {
+            // 成功状态
+            DisplayState.PAYMENT_SUCCESSFUL,
+            DisplayState.RENTAL_SUCCESSFUL -> {
                 showCompletedState()
                 isProcessing = false
                 backButton.isEnabled = true
@@ -342,12 +343,13 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             }
 
             // 错误状态
-            TerminalState.PAYMENT_FAILED,
-            TerminalState.INITIALIZATION_FAILED,
-            TerminalState.READER_NOT_FOUND,
-            TerminalState.CONNECTION_FAILED,
-            TerminalState.PAYMENT_CANCELLED,
-            TerminalState.TIMEOUT -> {
+            DisplayState.PAYMENT_FAILED,
+            DisplayState.RENTAL_FAILED,
+            DisplayState.INITIALIZATION_FAILED,
+            DisplayState.READER_NOT_FOUND,
+            DisplayState.CONNECTION_FAILED,
+            DisplayState.CANCELLED,
+            DisplayState.TIMEOUT -> {
                 showCompletedState()
                 isProcessing = false
                 backButton.isEnabled = true
@@ -359,11 +361,15 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             // 所有其他状态都保持加载状态
             else -> {
                 showLoadingState()
-                // 加载状态下禁用返回按钮
-                if (state.isLoading) {
+                // 根据DisplayState的isLoading属性决定按钮状态
+                if (displayState.isLoading) {
                     isProcessing = true
                     backButton.isEnabled = false
                     backButton.alpha = 0.5f
+                } else {
+                    isProcessing = false
+                    backButton.isEnabled = displayState.canGoBack
+                    backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
                 }
             }
         }
@@ -512,7 +518,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         } else {
             // 权限或GPS未准备好，显示错误状态
             Log.w("TerminalPayment", "Terminal not ready, showing error state")
-            updateUIForState(TerminalState.INITIALIZATION_FAILED)
+            updateUIForDisplayState(DisplayState.INITIALIZATION_FAILED)
 
             val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)
             val gpsEnabled = PermissionManager.isGpsEnabled(this)
