@@ -57,15 +57,19 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         setupViews()
 
         // 显示初始加载状态
+        Log.d("TerminalPayment", "显示初始加载状态")
         showLoadingState()
         loadingText.text = "正在初始化..."
 
+        Log.d("TerminalPayment", "开始倒计时")
         startSmoothCountdown()
 
         // 使用TerminalConnectionManager获取Terminal管理器
+        Log.d("TerminalPayment", "获取Terminal管理器")
         terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
 
         // 检查权限状态并初始化Terminal
+        Log.d("TerminalPayment", "检查权限并初始化Terminal")
         checkPermissionsAndInitialize()
     }
     
@@ -105,6 +109,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
     
     private fun startSmoothCountdown() {
+        Log.d("TerminalPayment", "开始倒计时，取消之前的倒计时器")
+        countDownTimer?.cancel()
+
         // 使用优化的更新频率，在性能和丝滑度之间取得平衡
         // 对于弱设备，使用33ms间隔（约30fps）既保证丝滑又节省性能
         countDownTimer = object : CountDownTimer(timeoutDuration, 33) {
@@ -115,18 +122,98 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             }
 
             override fun onFinish() {
+                Log.d("TerminalPayment", "倒计时结束，返回主页面")
                 // 确保进度条到0，然后返回主页面
                 progressTimer.setProgress(0f)
                 returnToMainActivity()
             }
         }
         countDownTimer?.start()
+        Log.d("TerminalPayment", "倒计时器已启动，持续时间: ${timeoutDuration}ms")
     }
 
     private fun returnToMainActivity() {
+        Log.d("TerminalPayment", "=== 准备返回主页面 ===")
+        Log.d("TerminalPayment", "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
+
         // 时间到后返回主页面，使用简单的finish()即可
         // 因为MainActivity应该还在任务栈中
         finish()
+    }
+
+    /**
+     * 重置60s的进度条
+     * 用于支付失败或租借失败后重新进入收集付款方式
+     */
+    private fun resetProgressTimer() {
+        Log.d("TerminalPayment", "重置进度条为60秒")
+        countDownTimer?.cancel()
+
+        // 重新开始60秒倒计时
+        countDownTimer = object : CountDownTimer(timeoutDuration, 33) {
+            override fun onTick(millisUntilFinished: Long) {
+                val progress = (millisUntilFinished.toFloat() / timeoutDuration) * 100f
+                progressTimer.setProgress(progress)
+            }
+
+            override fun onFinish() {
+                progressTimer.setProgress(0f)
+                returnToMainActivity()
+            }
+        }
+        countDownTimer?.start()
+
+        // 重新开始收集付款方式
+        Handler(Looper.getMainLooper()).postDelayed({
+            restartPaymentCollection()
+        }, 2000) // 2秒后重新开始
+    }
+
+    /**
+     * 确保最小显示时间（20秒）
+     * 用于租借成功后，如果进度条时间小于20s，重置为20s
+     */
+    private fun ensureMinimumDisplayTime() {
+        // 计算当前剩余时间
+        val currentProgress = progressTimer.getProgress()
+        val remainingTime = (currentProgress / 100f * timeoutDuration).toLong()
+
+        Log.d("TerminalPayment", "当前进度条剩余时间: ${remainingTime}ms")
+
+        if (remainingTime < 20000L) { // 少于20秒
+            Log.d("TerminalPayment", "剩余时间少于20秒，重置为20秒")
+            countDownTimer?.cancel()
+
+            // 重新开始20秒倒计时
+            countDownTimer = object : CountDownTimer(20000L, 33) {
+                override fun onTick(millisUntilFinished: Long) {
+                    val progress = (millisUntilFinished.toFloat() / 20000L) * 100f
+                    progressTimer.setProgress(progress)
+                }
+
+                override fun onFinish() {
+                    progressTimer.setProgress(0f)
+                    returnToMainActivity()
+                }
+            }
+            countDownTimer?.start()
+        }
+    }
+
+    /**
+     * 重新开始收集付款方式
+     */
+    private fun restartPaymentCollection() {
+        Log.d("TerminalPayment", "重新开始收集付款方式")
+
+        // 重置UI状态
+        isProcessing = true
+        backButton.isEnabled = false
+        backButton.alpha = 0.5f
+        showLoadingState()
+
+        // 重新开始收集付款方式
+        terminalManager.resumePaymentCollection()
     }
 
     // TerminalStateListener 实现
@@ -153,7 +240,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         }
     }
 
-    override fun onPaymentFailed(error: String) {
+    override fun onPaymentFailed(error: String, isCancelled: Boolean) {
         runOnUiThread {
             isProcessing = false
             backButton.isEnabled = true
@@ -161,11 +248,58 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             showCompletedState()
 
             // 显示错误消息
-            val errorMessage = getString(R.string.payment_failed) + "\n$error"
+            val errorMessage = if (isCancelled) {
+                "Payment cancelled"
+            } else {
+                getString(R.string.payment_failed) + "\n$error"
+            }
             loadingText.text = errorMessage
 
             // 添加错误的视觉效果
             loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
+
+            // 只有非取消的支付失败才重新进入收集付款方式
+            if (!isCancelled) {
+                Log.d("TerminalPayment", "支付失败（非取消），重新开始收集付款方式")
+                resetProgressTimer()
+            } else {
+                Log.d("TerminalPayment", "用户取消支付，不重新开始收集付款方式")
+                // 取消情况下，保持当前状态，等待用户操作或超时
+            }
+        }
+    }
+
+    override fun onRentalSuccess(paymentIntent: PaymentIntent, message: String) {
+        runOnUiThread {
+            isProcessing = false
+            backButton.isEnabled = true
+            backButton.alpha = 1.0f
+            showCompletedState()
+
+            // 安全地显示租借成功信息
+            val safeMessage = message.takeIf { it.isNotEmpty() } ?: "租借成功"
+            loadingText.text = safeMessage
+            loadingText.setTextColor(getColor(android.R.color.holo_green_dark))
+
+            // 租借成功，如果进度条时间小于20s，重置为20s
+            ensureMinimumDisplayTime()
+        }
+    }
+
+    override fun onRentalFailed(paymentIntent: PaymentIntent, error: String) {
+        runOnUiThread {
+            isProcessing = false
+            backButton.isEnabled = true
+            backButton.alpha = 1.0f
+            showCompletedState()
+
+            // 安全地显示租借失败信息
+            val safeError = error.takeIf { it.isNotEmpty() } ?: "未知错误"
+            loadingText.text = "Rental failed: $safeError"
+            loadingText.setTextColor(getColor(android.R.color.holo_red_dark))
+
+            // 租借失败，重新进入收集付款方式，重置60s的进度条
+            resetProgressTimer()
         }
     }
 
@@ -277,16 +411,26 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     override fun onPause() {
+        Log.d("TerminalPayment", "=== onPause 被调用 ===")
         super.onPause()
         // 不要停止拦截，保持监控
     }
 
+    override fun onStop() {
+        Log.d("TerminalPayment", "=== onStop 被调用 ===")
+        super.onStop()
+    }
+
     override fun onDestroy() {
+        Log.d("TerminalPayment", "=== onDestroy 被调用 ===")
+        Log.d("TerminalPayment", "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
+
         super.onDestroy()
         countDownTimer?.cancel()
         homeKeyInterceptor.stopIntercepting()
 
         // 暂停支付收集但保持阅读器连接
+        Log.d("TerminalPayment", "暂停支付收集")
         TerminalConnectionManager.pausePaymentCollection()
 
         Log.d("TerminalPayment", "TerminalPaymentActivity destroyed, connection maintained")

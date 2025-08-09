@@ -41,7 +41,9 @@ class StripeTerminalManager(
     interface TerminalStateListener {
         fun onStateChanged(state: TerminalState, progress: Int = 0)
         fun onPaymentSuccess(paymentIntent: PaymentIntent)
-        fun onPaymentFailed(error: String)
+        fun onPaymentFailed(error: String, isCancelled: Boolean = false)
+        fun onRentalSuccess(paymentIntent: PaymentIntent, message: String)
+        fun onRentalFailed(paymentIntent: PaymentIntent, error: String)
     }
 
     private var currentState = TerminalState.INITIALIZING
@@ -235,14 +237,14 @@ class StripeTerminalManager(
                         )
                     } else {
                         updateState(TerminalState.PAYMENT_FAILED)
-                        stateListener.onPaymentFailed("Failed to create payment intent")
+                        stateListener.onPaymentFailed("Failed to create payment intent", false)
                     }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to start payment collection", e)
                 withContext(Dispatchers.Main) {
                     updateState(TerminalState.PAYMENT_FAILED)
-                    stateListener.onPaymentFailed("Failed to start payment: ${e.message}")
+                    stateListener.onPaymentFailed("Failed to start payment: ${e.message}", false)
                 }
             }
         }
@@ -623,7 +625,7 @@ class StripeTerminalManager(
             override fun onFailure(e: TerminalException) {
                 Log.e(TAG, "Failed to retrieve payment intent", e)
                 updateState(TerminalState.PAYMENT_FAILED)
-                stateListener.onPaymentFailed("Failed to retrieve payment intent: ${e.message}")
+                stateListener.onPaymentFailed("Failed to retrieve payment intent: ${e.message}", false)
             }
         }
     }
@@ -689,8 +691,14 @@ class StripeTerminalManager(
 
                 override fun onFailure(e: TerminalException) {
                     Log.e(TAG, "Failed to collect payment method", e)
+
+                    // 检查是否是用户取消操作
+                    val isCancelled = e.errorCode == TerminalException.TerminalErrorCode.CANCELED ||
+                                     e.message?.contains("cancel", ignoreCase = true) == true ||
+                                     e.message?.contains("abort", ignoreCase = true) == true
+
                     updateState(TerminalState.PAYMENT_FAILED)
-                    stateListener.onPaymentFailed("Failed to collect payment: ${e.message}")
+                    stateListener.onPaymentFailed("Failed to collect payment: ${e.message}", isCancelled)
                 }
             },
             collectConfig
@@ -707,14 +715,14 @@ class StripeTerminalManager(
             object : PaymentIntentCallback {
                 override fun onSuccess(paymentIntent: PaymentIntent) {
                     Log.d(TAG, "Payment processed successfully")
-                    updateState(TerminalState.PAYMENT_SUCCESSFUL)
-                    stateListener.onPaymentSuccess(paymentIntent)
+                    // 支付成功后调用租借接口
+                    callRentalApiAfterPayment(paymentIntent)
                 }
 
                 override fun onFailure(e: TerminalException) {
                     Log.e(TAG, "Failed to process payment", e)
                     updateState(TerminalState.PAYMENT_FAILED)
-                    stateListener.onPaymentFailed("Payment processing failed: ${e.message}")
+                    stateListener.onPaymentFailed("Payment processing failed: ${e.message}", false)
                 }
             }
         )
@@ -728,6 +736,82 @@ class StripeTerminalManager(
         stateListener = newListener
         // 立即通知当前状态
         stateListener.onStateChanged(currentState)
+    }
+
+    /**
+     * 支付成功后调用租借接口
+     */
+    private fun callRentalApiAfterPayment(paymentIntent: PaymentIntent) {
+        Log.d(TAG, "=== 开始调用租借接口 ===")
+
+        updateState(TerminalState.CALLING_RENTAL_API)
+
+        scope.launch {
+            try {
+                // 获取设备信息
+                val qrCode = PreferenceManager.getQrCode()
+
+                if (qrCode.isNullOrEmpty()) {
+                    Log.e(TAG, "设备序列号为空")
+                    updateState(TerminalState.RENTAL_FAILED)
+                    stateListener.onRentalFailed(paymentIntent, "设备序列号未配置")
+                    return@launch
+                }
+
+                Log.d(TAG, "qrCode: $qrCode")
+                Log.d(TAG, "PaymentIntent ID: ${paymentIntent.id}")
+                Log.d(TAG, "appSecretKey: ${ConfigLoader.secretKey}")
+
+                // 检查PaymentIntent的必要字段
+                if (paymentIntent.id.isNullOrEmpty()) {
+                    Log.e(TAG, "PaymentIntent ID为空")
+                    updateState(TerminalState.RENTAL_FAILED)
+                    stateListener.onRentalFailed(paymentIntent, "PaymentIntent ID无效")
+                    return@launch
+                }
+
+                // 构建请求参数（确保所有值都是非null的String）
+                val requestBody = mapOf(
+                    "qrCode" to qrCode,
+                    "paymentIntentId" to (paymentIntent.id ?: ""),
+                    "appSecretKey" to ConfigLoader.secretKey
+                )
+
+                // 调用MyApiClient的租借接口（suspend函数）
+                val result = MyApiClient.lendPowerStripeTerminal(requestBody as Map<String, String>)
+
+                Log.d(TAG, "租借接口调用完成")
+                Log.d(TAG, "返回结果: $result")
+
+                // 安全地处理返回结果
+                val safeResult = result ?: ""
+                val success = safeResult.isNotEmpty() &&
+                             !safeResult.contains("error", ignoreCase = true) &&
+                             !safeResult.contains("fail", ignoreCase = true) &&
+                             !safeResult.contains("exception", ignoreCase = true)
+
+                val message = if (success) {
+                    "租借成功"
+                } else {
+                    if (safeResult.isEmpty()) "租借失败：服务器无响应" else "租借失败：$safeResult"
+                }
+
+                if (success) {
+                    Log.d(TAG, "租借接口调用成功: $message")
+                    updateState(TerminalState.RENTAL_SUCCESSFUL)
+                    stateListener.onRentalSuccess(paymentIntent, message)
+                } else {
+                    Log.e(TAG, "租借接口调用失败: $message")
+                    updateState(TerminalState.RENTAL_FAILED)
+                    stateListener.onRentalFailed(paymentIntent, message)
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "调用租借接口时发生异常", e)
+                updateState(TerminalState.RENTAL_FAILED)
+                stateListener.onRentalFailed(paymentIntent, "网络请求失败: ${e.message}")
+            }
+        }
     }
 
     private fun updateState(newState: TerminalState, progress: Int = 0) {

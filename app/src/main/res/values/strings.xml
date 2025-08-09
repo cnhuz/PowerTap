@@ -100,6 +100,9 @@
     <string name="card_detected">Card detected, processing...</string>
     <string name="processing_payment_terminal">Processing payment...</string>
     <string name="confirming_payment">Confirming payment...</string>
+    <string name="calling_rental_api">Calling rental API...</string>
+    <string name="rental_successful">Rental successful!</string>
+    <string name="rental_failed">Rental failed. Please try again.</string>
     <string name="payment_successful">Payment successful!</string>
     <string name="payment_failed">Payment failed. Please try again.</string>
     <string name="initialization_failed">Failed to initialize terminal</string>
