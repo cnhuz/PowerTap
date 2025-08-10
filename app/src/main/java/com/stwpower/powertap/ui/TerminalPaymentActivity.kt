@@ -245,13 +245,29 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         countDownTimer?.start()
     }
 
-    // TerminalStateListener 实现
+    /**
+     * 统一UI更新监听器实现
+     *
+     * 完整调用链：
+     * StripeTerminalManager.updateDisplayState（业务层统一入口）
+     *    ↓
+     * StripeStateManager.updateDisplayState（状态层存储和通知）
+     *    ↓
+     * StripeStateManager.StripeStateListener.onDisplayStateChanged（状态层监听器接口）
+     *    ↓
+     * StripeTerminalManager匿名监听器（业务层监听器实现（init阶段），负责转发）
+     *    ↓
+     * TerminalPaymentActivity.onDisplayStateChanged（UI层监听器实现）
+     *    ↓
+     * updateUIForDisplayState（最终UI更新执行）
+     */
     override fun onDisplayStateChanged(displayState: DisplayState) {
         runOnUiThread {
             updateUIForDisplayState(displayState)
         }
     }
 
+    // 进度条重置监听器实现
     override fun onProgressTimerReset() {
         runOnUiThread {
             // 统一重置进度条为20秒
@@ -260,6 +276,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         }
     }
 
+    // 重试进入收集付款方式监听器实现
     override fun onRestartPayment() {
         runOnUiThread {
             // 统一重置进度条为60秒
@@ -269,6 +286,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
 
+    // 根据DisplayState更新UI
     private fun updateUIForDisplayState(displayState: DisplayState) {
         Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
 

@@ -134,7 +134,7 @@ class StripeStateManager {
     private var stateListener: StripeStateListener? = null
     
     interface StripeStateListener {
-        fun onDisplayStateChanged(displayState: DisplayState)
+        fun onDisplayStateChanged(displayState: DisplayState) // 统一状态管理监听器
     }
 
     fun setStateListener(listener: StripeStateListener) {
@@ -149,7 +149,8 @@ class StripeStateManager {
         if (currentDisplayState != newState) {
             currentDisplayState = newState
             Log.d("StripeStateManager", "DisplayState更新: $currentDisplayState")
-            notifyStateChange()
+            // 通知状态变化
+            stateListener?.onDisplayStateChanged(currentDisplayState)
         }
     }
     
@@ -158,19 +159,5 @@ class StripeStateManager {
      */
     fun getCurrentDisplayState(): DisplayState {
         return currentDisplayState
-    }
-    
-    /**
-     * 通知状态变化
-     */
-    private fun notifyStateChange() {
-        stateListener?.onDisplayStateChanged(currentDisplayState)
-    }
-    
-    /**
-     * 重置到初始状态
-     */
-    fun reset() {
-        updateDisplayState(DisplayState.INITIALIZING)
     }
 }
