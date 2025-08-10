@@ -180,7 +180,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      * 重置60s的进度条
      * 用于支付失败或租借失败后重新进入收集付款方式
      */
-    private fun resetProgressTimer() {
+    private fun restartPaymentTimer() {
         Log.d("TerminalPayment", "重置进度条为60秒")
         countDownTimer?.cancel()
 
@@ -252,76 +252,22 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         }
     }
 
-    override fun onPaymentSuccess(paymentIntent: PaymentIntent) {
+    override fun onProgressTimerReset() {
         runOnUiThread {
-            isProcessing = false
-            backButton.isEnabled = true
-            backButton.alpha = 1.0f
-
-            // 在右侧区域显示支付成功消息
-            showMessage(getString(R.string.message_payment_successful))
-
-            // 注意：支付成功后不重新进入收集付款方式
-            // 等待租借接口调用结果，根据租借结果决定下一步操作
-            Log.d("TerminalPayment", "支付成功，等待租借接口调用结果")
-        }
-    }
-
-    override fun onPaymentFailed(error: String, isCancelled: Boolean) {
-        runOnUiThread {
-            isProcessing = false
-            backButton.isEnabled = true
-            backButton.alpha = 1.0f
-
-            // 在右侧区域显示支付失败消息
-            if (isCancelled) {
-                showMessage(getString(R.string.message_payment_cancelled))
-            } else {
-                showMessage(getString(R.string.message_payment_failed))
-            }
-
-            // 根据状态管理逻辑决定是否重试
-            if (!isCancelled) {
-                Log.d("TerminalPayment", "支付失败（卡被拒绝等），需要重新进入收集付款方式")
-                resetProgressTimer()
-            } else {
-                Log.d("TerminalPayment", "用户主动取消支付，不重新开始收集付款方式")
-                // 用户取消：保持当前状态，等待用户操作或超时
-            }
-        }
-    }
-
-    override fun onRentalSuccess(paymentIntent: PaymentIntent, message: String) {
-        runOnUiThread {
-            isProcessing = false
-            backButton.isEnabled = true
-            backButton.alpha = 1.0f
-
-            // 在右侧区域显示租借成功消息
-            showMessage(getString(R.string.message_rental_successful))
-
-            // 根据状态管理逻辑：租借成功则返回主页面
-            Log.d("TerminalPayment", "租借成功，重置进度条为20秒")
-            // 直接重置进度条为20秒
+            // 统一重置进度条为20秒
+            Log.d("TerminalPayment", "收到进度条重置信号，重置为20秒")
             resetProgressTimerTo20Seconds()
         }
     }
 
-    override fun onRentalFailed(paymentIntent: PaymentIntent, error: String) {
+    override fun onRestartPayment() {
         runOnUiThread {
-            isProcessing = false
-            backButton.isEnabled = true
-            backButton.alpha = 1.0f
-
-            // 在右侧区域显示租借失败消息，包含服务端返回的具体错误信息
-            val safeError = error.takeIf { it.isNotEmpty() } ?: "Unknown error"
-            showMessage(getString(R.string.message_rental_failed, safeError))
-
-            // 租借失败：重置进度条为20秒，不重新进入收集付款方式
-            Log.d("TerminalPayment", "租借失败，重置进度条为20秒")
-            resetProgressTimerTo20Seconds()
+            // 统一重置进度条为60秒
+            Log.d("TerminalPayment", "收到重试进入收集付款方式信号，重置为60秒并重试")
+            restartPaymentTimer()
         }
     }
+
 
     private fun updateUIForDisplayState(displayState: DisplayState) {
         Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
@@ -365,6 +311,8 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                 backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
             }
         }
+
+
     }
 
     private fun showLoadingState() {
@@ -518,9 +466,15 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             Log.d("TerminalPayment", "Terminal ready, initializing via TerminalConnectionManager...")
             TerminalConnectionManager.initializeIfNeeded(this, this)
         } else {
-            // 权限或GPS未准备好，显示错误状态
-            Log.w("TerminalPayment", "Terminal not ready, showing error state")
-            updateUIForDisplayState(DisplayState.INITIALIZATION_FAILED)
+            // 权限或GPS未准备好，通过TerminalManager更新状态
+            Log.w("TerminalPayment", "Terminal not ready, updating state through TerminalManager")
+            if (::terminalManager.isInitialized) {
+                // 通过统一入口更新状态
+                terminalManager.updateDisplayState(DisplayState.INITIALIZATION_FAILED)
+            } else {
+                // 如果TerminalManager还没初始化，直接更新UI（这种情况很少见）
+                updateUIForDisplayState(DisplayState.INITIALIZATION_FAILED)
+            }
 
             val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)
             val gpsEnabled = PermissionManager.isGpsEnabled(this)

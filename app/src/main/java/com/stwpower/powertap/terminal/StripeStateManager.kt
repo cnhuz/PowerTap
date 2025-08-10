@@ -1,6 +1,7 @@
 package com.stwpower.powertap.terminal
 
 import android.content.Context
+import android.util.Log
 import com.stripe.stripeterminal.external.models.ConnectionStatus
 import com.stripe.stripeterminal.external.models.PaymentStatus
 import com.stripe.stripeterminal.external.models.ReaderDisplayMessage
@@ -121,84 +122,33 @@ enum class DisplayState(
 }
 
 /**
- * Stripe状态管理器
- * 直接使用Stripe SDK的原生状态，只添加业务层状态
+ * 统一状态管理器
+ * 所有状态变化都通过统一入口更新DisplayState
  */
 class StripeStateManager {
-    
-    // Stripe原生状态
-    private var connectionStatus: ConnectionStatus = ConnectionStatus.NOT_CONNECTED
-    private var paymentStatus: PaymentStatus = PaymentStatus.NOT_READY
-    private var readerMessage: ReaderDisplayMessage? = null
-    
-    // 业务状态
-    private var businessPhase: BusinessPhase = BusinessPhase.NONE
 
-    // 是否已经开始收集付款方式
-    private var paymentCollectionStarted: Boolean = false
+    // 当前的显示状态 - 这是唯一的UI状态源
+    private var currentDisplayState: DisplayState = DisplayState.INITIALIZING
 
     // 状态监听器
     private var stateListener: StripeStateListener? = null
     
     interface StripeStateListener {
         fun onDisplayStateChanged(displayState: DisplayState)
-        fun onStripeStateChanged(
-            connectionStatus: ConnectionStatus,
-            paymentStatus: PaymentStatus,
-            businessPhase: BusinessPhase
-        )
     }
-    
+
     fun setStateListener(listener: StripeStateListener) {
         this.stateListener = listener
     }
-    
-    /**
-     * 更新Stripe连接状态
-     */
-    fun updateConnectionStatus(status: ConnectionStatus) {
-        if (connectionStatus != status) {
-            connectionStatus = status
-            notifyStateChange()
-        }
-    }
-    
-    /**
-     * 更新Stripe支付状态
-     */
-    fun updatePaymentStatus(status: PaymentStatus) {
-        if (paymentStatus != status) {
-            paymentStatus = status
-            notifyStateChange()
-        }
-    }
-    
-    /**
-     * 更新读卡器显示消息
-     */
-    fun updateReaderMessage(message: ReaderDisplayMessage?) {
-        if (readerMessage != message) {
-            readerMessage = message
-            notifyStateChange()
-        }
-    }
-    
-    /**
-     * 更新业务阶段
-     */
-    fun updateBusinessPhase(phase: BusinessPhase) {
-        if (businessPhase != phase) {
-            businessPhase = phase
-            notifyStateChange()
-        }
-    }
 
     /**
-     * 设置收集付款方式开始状态
+     * 统一的状态更新入口
+     * 所有状态变化都通过这个方法更新DisplayState
      */
-    fun setPaymentCollectionStarted(started: Boolean) {
-        if (paymentCollectionStarted != started) {
-            paymentCollectionStarted = started
+    fun updateDisplayState(newState: DisplayState) {
+        if (currentDisplayState != newState) {
+            currentDisplayState = newState
+            Log.d("StripeStateManager", "DisplayState更新: $currentDisplayState")
             notifyStateChange()
         }
     }
@@ -207,88 +157,20 @@ class StripeStateManager {
      * 获取当前显示状态
      */
     fun getCurrentDisplayState(): DisplayState {
-        return getDisplayState()
-    }
-    
-    /**
-     * 获取当前Stripe状态
-     */
-    fun getCurrentStripeStates(): Triple<ConnectionStatus, PaymentStatus, BusinessPhase> {
-        return Triple(connectionStatus, paymentStatus, businessPhase)
+        return currentDisplayState
     }
     
     /**
      * 通知状态变化
      */
     private fun notifyStateChange() {
-        val displayState = getDisplayState()
-        stateListener?.onDisplayStateChanged(displayState)
-        stateListener?.onStripeStateChanged(connectionStatus, paymentStatus, businessPhase)
-    }
-    
-    /**
-     * 根据当前状态计算显示状态
-     */
-    private fun getDisplayState(): DisplayState {
-        // 业务状态优先
-        when (businessPhase) {
-            BusinessPhase.INITIALIZING -> return DisplayState.INITIALIZING
-            BusinessPhase.CALLING_RENTAL_API -> return DisplayState.PROCESSING_RENTAL
-            BusinessPhase.PAYMENT_SUCCESS -> return DisplayState.PAYMENT_SUCCESSFUL
-            BusinessPhase.RENTAL_SUCCESS -> return DisplayState.RENTAL_SUCCESSFUL
-            BusinessPhase.RENTAL_FAILED -> return DisplayState.RENTAL_FAILED
-            BusinessPhase.PAYMENT_FAILED -> return DisplayState.PAYMENT_FAILED
-            BusinessPhase.CANCELLED -> return DisplayState.CANCELLED
-            BusinessPhase.NONE -> {
-                // 继续检查Stripe状态
-            }
-        }
-        
-        // 然后是Stripe状态
-        return when (connectionStatus) {
-            ConnectionStatus.NOT_CONNECTED -> DisplayState.DISCOVERING_READERS
-            ConnectionStatus.CONNECTING -> DisplayState.CONNECTING_READER
-            ConnectionStatus.CONNECTED -> {
-                when (paymentStatus) {
-                    PaymentStatus.NOT_READY -> DisplayState.READER_CONNECTED
-                    PaymentStatus.READY -> {
-                        // 区分准备就绪和正在等待刷卡
-                        if (paymentCollectionStarted) {
-                            DisplayState.WAITING_FOR_CARD
-                        } else {
-                            DisplayState.READY_FOR_PAYMENT
-                        }
-                    }
-                    PaymentStatus.WAITING_FOR_INPUT -> DisplayState.WAITING_FOR_CARD
-                    PaymentStatus.PROCESSING -> DisplayState.PROCESSING_PAYMENT
-                }
-            }
-        }
+        stateListener?.onDisplayStateChanged(currentDisplayState)
     }
     
     /**
      * 重置到初始状态
      */
     fun reset() {
-        connectionStatus = ConnectionStatus.NOT_CONNECTED
-        paymentStatus = PaymentStatus.NOT_READY
-        readerMessage = null
-        businessPhase = BusinessPhase.NONE
-        paymentCollectionStarted = false
-        notifyStateChange()
-    }
-    
-    /**
-     * 获取状态报告（用于调试）
-     */
-    fun getStateReport(): String {
-        return """
-            === Stripe状态报告 ===
-            连接状态: $connectionStatus
-            支付状态: $paymentStatus
-            读卡器消息: $readerMessage
-            业务阶段: $businessPhase
-            显示状态: ${getDisplayState()}
-        """.trimIndent()
+        updateDisplayState(DisplayState.INITIALIZING)
     }
 }

@@ -40,10 +40,8 @@ class StripeTerminalManager(
 
     interface TerminalStateListener {
         fun onDisplayStateChanged(displayState: DisplayState)
-        fun onPaymentSuccess(paymentIntent: PaymentIntent)
-        fun onPaymentFailed(error: String, isCancelled: Boolean = false)
-        fun onRentalSuccess(paymentIntent: PaymentIntent, message: String)
-        fun onRentalFailed(paymentIntent: PaymentIntent, error: String)
+        fun onProgressTimerReset() // 统一的进度条重置监听器
+        fun onRestartPayment() // 统一的重试进入收集付款方式监听器
     }
 
     // 使用新的状态管理器
@@ -79,17 +77,10 @@ class StripeTerminalManager(
             override fun onDisplayStateChanged(displayState: DisplayState) {
                 stateListener.onDisplayStateChanged(displayState)
             }
-
-            override fun onStripeStateChanged(
-                connectionStatus: ConnectionStatus,
-                paymentStatus: PaymentStatus,
-                businessPhase: BusinessPhase
-            ) {
-                Log.d(TAG, "Stripe状态变化: connection=$connectionStatus, payment=$paymentStatus, business=$businessPhase")
-            }
         })
 
-        updateBusinessPhase(BusinessPhase.INITIALIZING)
+        // 开始初始化
+        updateDisplayState(DisplayState.INITIALIZING)
         resetRetryCounters() // 重置所有重试计数器
 
         if (Terminal.isInitialized()) {
@@ -107,16 +98,13 @@ class StripeTerminalManager(
 
         // 检查权限
         if (!hasRequiredPermissions()) {
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            // 权限检查失败，通知调用者需要请求权限
-            stateListener.onPaymentFailed("Required permissions not granted")
+            updateDisplayState(DisplayState.INITIALIZATION_FAILED)
             return
         }
 
         // 检查GPS
         if (!isGpsEnabled()) {
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("GPS must be enabled for Terminal to work")
+            updateDisplayState(DisplayState.INITIALIZATION_FAILED)
             return
         }
 
@@ -132,14 +120,13 @@ class StripeTerminalManager(
             )
             Log.d(TAG, "Terminal initialized successfully")
 
-            // 初始化完成，重置业务状态为NONE，让Stripe状态接管
-            updateBusinessPhase(BusinessPhase.NONE)
+            // 初始化完成，开始发现读卡器
+            updateDisplayState(DisplayState.DISCOVERING_READERS)
 
             startDiscovery()
         } catch (e: TerminalException) {
             Log.e(TAG, "Failed to initialize Terminal", e)
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Failed to initialize terminal: ${e.message}")
+            updateDisplayState(DisplayState.INITIALIZATION_FAILED)
         }
     }
 
@@ -219,8 +206,7 @@ class StripeTerminalManager(
 
         val locationId = getLocationId()
         if (locationId.isNullOrEmpty()) {
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Location ID not configured")
+            updateDisplayState(DisplayState.CONNECTION_FAILED)
             return
         }
 
@@ -242,11 +228,8 @@ class StripeTerminalManager(
     private fun startPaymentCollection() {
         Log.d(TAG, "开始支付收集流程")
 
-        // 重置业务状态为NONE，让Stripe状态接管
-        updateBusinessPhase(BusinessPhase.NONE)
-
-        // 设置收集付款方式已开始标志
-        stripeStateManager.setPaymentCollectionStarted(true)
+        // 直接更新为等待刷卡状态
+        updateDisplayState(DisplayState.WAITING_FOR_CARD)
 
         scope.launch(Dispatchers.IO) {
             try {
@@ -266,15 +249,14 @@ class StripeTerminalManager(
                             createPaymentIntentCallback()
                         )
                     } else {
-                        updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-                        stateListener.onPaymentFailed("Failed to create payment intent", false)
+                        updateDisplayState(DisplayState.PAYMENT_FAILED)
                     }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to start payment collection", e)
                 withContext(Dispatchers.Main) {
-                    updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-                    stateListener.onPaymentFailed("Failed to start payment: ${e.message}", false)
+                    updateDisplayState(DisplayState.PAYMENT_FAILED)
+                    stateListener.onRestartPayment()
                 }
             }
         }
@@ -284,8 +266,8 @@ class StripeTerminalManager(
      * 安全地取消当前操作
      */
     fun cancel() {
-        // 重置收集付款方式标志
-        stripeStateManager.setPaymentCollectionStarted(false)
+        // 取消操作，回到准备状态
+        updateDisplayState(DisplayState.READY_FOR_PAYMENT)
 
         // 安全地取消发现操作
         discoveryCancelable?.let { cancelable ->
@@ -539,31 +521,29 @@ class StripeTerminalManager(
 
     override fun onConnectionStatusChange(status: ConnectionStatus) {
         Log.d(TAG, "Connection status changed: $status")
-        stripeStateManager.updateConnectionStatus(status)
 
         when (status) {
-            ConnectionStatus.CONNECTED -> {
-                Log.d(TAG, "阅读器连接成功")
-                // 连接成功后，等待支付状态变为READY
-                // 不需要手动开始支付，等待onPaymentStatusChange回调
-            }
             ConnectionStatus.CONNECTING -> {
                 Log.d(TAG, "正在连接阅读器")
+                updateDisplayState(DisplayState.CONNECTING_READER)
+            }
+            ConnectionStatus.CONNECTED -> {
+                Log.d(TAG, "阅读器连接成功")
+                updateDisplayState(DisplayState.READER_CONNECTED)
             }
             ConnectionStatus.NOT_CONNECTED -> {
                 Log.w(TAG, "阅读器断开连接")
-                // 可以根据需要设置错误的业务阶段
-                // updateBusinessPhase(BusinessPhase.CONNECTION_ERROR)
+                updateDisplayState(DisplayState.DISCOVERING_READERS)
             }
         }
     }
 
     override fun onPaymentStatusChange(status: PaymentStatus) {
         Log.d(TAG, "Payment status changed: $status")
-        stripeStateManager.updatePaymentStatus(status)
 
         when (status) {
             PaymentStatus.NOT_READY -> {
+                updateDisplayState(DisplayState.READER_CONNECTED)
                 // 如果处于NOT_READY，30s后还是处于NOT_READY，进行重连
                 handler.postDelayed({
                     if (Terminal.getInstance().paymentStatus == PaymentStatus.NOT_READY) {
@@ -574,30 +554,10 @@ class StripeTerminalManager(
             }
             PaymentStatus.READY -> {
                 Log.d(TAG, "支付状态为READY，准备接收支付")
+                updateDisplayState(DisplayState.READY_FOR_PAYMENT)
 
                 // 检查是否应该自动开始收集付款方式
-                val (_, _, businessPhase) = stripeStateManager.getCurrentStripeStates()
-
-                val shouldAutoStart = when {
-                    // 用户已经离开了Terminal页面，不自动开始
-                    userLeftTerminalPage -> {
-                        Log.d(TAG, "用户已离开Terminal页面，不自动开始收集付款方式")
-                        false
-                    }
-                    // 租借已完成，不自动开始
-                    businessPhase == BusinessPhase.RENTAL_SUCCESS
-                            || businessPhase == BusinessPhase.RENTAL_FAILED
-                            || businessPhase == BusinessPhase.PAYMENT_SUCCESS
-                            || businessPhase == BusinessPhase.CALLING_RENTAL_API -> {
-                        Log.d(TAG, "已进入租借流程，保持当前状态")
-                        false
-                    }
-                    // 其他情况，自动开始
-                    else -> {
-                        Log.d(TAG, "当前业务状态: $businessPhase，用户在Terminal页面，可以自动开始收集付款方式")
-                        true
-                    }
-                }
+                val shouldAutoStart = !userLeftTerminalPage
 
                 if (shouldAutoStart) {
                     Log.d(TAG, "自动进入收集付款方式")
@@ -606,9 +566,11 @@ class StripeTerminalManager(
             }
             PaymentStatus.WAITING_FOR_INPUT -> {
                 Log.d(TAG, "支付状态为WAITING_FOR_INPUT，等待用户输入")
+                updateDisplayState(DisplayState.WAITING_FOR_CARD)
             }
             PaymentStatus.PROCESSING -> {
                 Log.d(TAG, "支付状态为PROCESSING，正在处理支付")
+                updateDisplayState(DisplayState.PROCESSING_PAYMENT)
             }
         }
     }
@@ -627,8 +589,7 @@ class StripeTerminalManager(
         Log.d(TAG, "Update finished")
         if (e != null) {
             Log.e(TAG, "Update failed", e)
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Reader update failed: ${e.message}")
+            updateDisplayState(DisplayState.CONNECTION_FAILED)
         } else {
             // 更新成功，连接状态会通过ConnectionStatus自动更新
             // 连接成功后等待支付状态变化，不需要手动调用
@@ -665,8 +626,7 @@ class StripeTerminalManager(
                 currentReader?.let { reader ->
                     retryConnection(reader, e)
                 } ?: run {
-                    updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-                    stateListener.onPaymentFailed("Failed to connect to reader: ${e.message}")
+                    updateDisplayState(DisplayState.CONNECTION_FAILED)
                 }
             }
         }
@@ -685,8 +645,8 @@ class StripeTerminalManager(
 
             override fun onFailure(e: TerminalException) {
                 Log.e(TAG, "Failed to retrieve payment intent", e)
-                updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-                stateListener.onPaymentFailed("Failed to retrieve payment intent: ${e.message}", false)
+                updateDisplayState(DisplayState.PAYMENT_FAILED)
+                stateListener.onRestartPayment()
             }
         }
     }
@@ -746,7 +706,7 @@ class StripeTerminalManager(
             object : PaymentIntentCallback {
                 override fun onSuccess(paymentIntent: PaymentIntent) {
                     Log.d(TAG, "Payment method collected")
-                    updateBusinessPhase(BusinessPhase.PAYMENT_SUCCESS)
+                    updateDisplayState(DisplayState.PAYMENT_SUCCESSFUL)
                     confirmPayment(paymentIntent)
                 }
 
@@ -758,8 +718,10 @@ class StripeTerminalManager(
                                      e.message?.contains("cancel", ignoreCase = true) == true ||
                                      e.message?.contains("abort", ignoreCase = true) == true
 
-                    updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-                    stateListener.onPaymentFailed("Failed to collect payment: ${e.message}", isCancelled)
+                    updateDisplayState(DisplayState.PAYMENT_FAILED)
+                    if(!isCancelled){
+                        stateListener.onRestartPayment()
+                    }
                 }
             },
             collectConfig
@@ -782,8 +744,8 @@ class StripeTerminalManager(
 
                 override fun onFailure(e: TerminalException) {
                     Log.e(TAG, "Failed to process payment", e)
-                    updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-                    stateListener.onPaymentFailed("Payment processing failed: ${e.message}", false)
+                    updateDisplayState(DisplayState.PAYMENT_FAILED)
+                    stateListener.onRestartPayment()
                 }
             }
         )
@@ -805,7 +767,7 @@ class StripeTerminalManager(
     private fun callRentalApiAfterPayment(paymentIntent: PaymentIntent) {
         Log.d(TAG, "=== 开始调用租借接口 ===")
 
-        updateBusinessPhase(BusinessPhase.CALLING_RENTAL_API)
+        updateDisplayState(DisplayState.PROCESSING_RENTAL)
 
         scope.launch {
             try {
@@ -814,8 +776,8 @@ class StripeTerminalManager(
 
                 if (qrCode.isNullOrEmpty()) {
                     Log.e(TAG, "设备序列号为空")
-                    updateBusinessPhase(BusinessPhase.RENTAL_FAILED)
-                    stateListener.onRentalFailed(paymentIntent, "设备序列号未配置")
+                    updateDisplayState(DisplayState.RENTAL_FAILED)
+                    stateListener.onProgressTimerReset() // 配置错误，重置进度条
                     return@launch
                 }
 
@@ -826,8 +788,8 @@ class StripeTerminalManager(
                 // 检查PaymentIntent的必要字段
                 if (paymentIntent.id.isNullOrEmpty()) {
                     Log.e(TAG, "PaymentIntent ID为空")
-                    updateBusinessPhase(BusinessPhase.RENTAL_FAILED)
-                    stateListener.onRentalFailed(paymentIntent, "PaymentIntent ID无效")
+                    updateDisplayState(DisplayState.RENTAL_FAILED)
+                    stateListener.onProgressTimerReset() // PaymentIntent无效，重置进度条
                     return@launch
                 }
 
@@ -853,28 +815,29 @@ class StripeTerminalManager(
 
                 if (success) {
                     Log.d(TAG, "租借接口调用成功: $message")
-                    updateBusinessPhase(BusinessPhase.RENTAL_SUCCESS)
-                    stateListener.onRentalSuccess(paymentIntent, message)
+                    updateDisplayState(DisplayState.RENTAL_SUCCESSFUL)
+                    stateListener.onProgressTimerReset() // 租借成功，重置进度条
                 } else {
                     Log.e(TAG, "租借接口调用失败: $message")
-                    updateBusinessPhase(BusinessPhase.RENTAL_FAILED)
-                    stateListener.onRentalFailed(paymentIntent, message)
+                    updateDisplayState(DisplayState.RENTAL_FAILED)
+                    stateListener.onProgressTimerReset() // 租借失败，重置进度条
                 }
 
             } catch (e: Exception) {
                 Log.e(TAG, "调用租借接口时发生异常", e)
-                updateBusinessPhase(BusinessPhase.RENTAL_FAILED)
-                stateListener.onRentalFailed(paymentIntent, "网络请求失败: ${e.message}")
+                updateDisplayState(DisplayState.RENTAL_FAILED)
+                stateListener.onProgressTimerReset() // 租借异常，重置进度条
             }
         }
     }
 
     /**
-     * 更新业务阶段
+     * 更新显示状态 - 统一入口
+     * 供内部和外部调用的统一状态更新入口
      */
-    private fun updateBusinessPhase(phase: BusinessPhase) {
-        Log.d(TAG, "Business phase changed to: $phase")
-        stripeStateManager.updateBusinessPhase(phase)
+    fun updateDisplayState(displayState: DisplayState) {
+        Log.d(TAG, "Display state changed to: $displayState")
+        stripeStateManager.updateDisplayState(displayState)
     }
 
     private fun hasRequiredPermissions(): Boolean {
@@ -953,8 +916,7 @@ class StripeTerminalManager(
             }, RETRY_DELAY)
         } else {
             Log.e(TAG, "Discovery failed after $MAX_RETRY_ATTEMPTS attempts")
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Failed to discover readers after $MAX_RETRY_ATTEMPTS attempts: ${error.message}")
+            updateDisplayState(DisplayState.READER_NOT_FOUND)
         }
     }
 
@@ -972,8 +934,7 @@ class StripeTerminalManager(
             }, RETRY_DELAY)
         } else {
             Log.e(TAG, "Connection failed after $MAX_RETRY_ATTEMPTS attempts")
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Failed to connect to reader after $MAX_RETRY_ATTEMPTS attempts: ${error.message}")
+            updateDisplayState(DisplayState.CONNECTION_FAILED)
         }
     }
 
@@ -991,8 +952,7 @@ class StripeTerminalManager(
             }, RETRY_DELAY)
         } else {
             Log.e(TAG, "Payment failed after $MAX_RETRY_ATTEMPTS attempts")
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Payment failed after $MAX_RETRY_ATTEMPTS attempts: ${error.message}")
+            updateDisplayState(DisplayState.PAYMENT_FAILED)
         }
     }
 
@@ -1019,8 +979,7 @@ class StripeTerminalManager(
             }, RETRY_DELAY)
         } else {
             Log.e(TAG, "Discovery failed after $MAX_RETRY_ATTEMPTS attempts due to timeout")
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Failed to discover readers after $MAX_RETRY_ATTEMPTS attempts: timeout")
+            updateDisplayState(DisplayState.TIMEOUT)
         }
     }
 
@@ -1038,8 +997,7 @@ class StripeTerminalManager(
             }, RETRY_DELAY)
         } else {
             Log.e(TAG, "Discovery failed after $MAX_RETRY_ATTEMPTS attempts: no readers found")
-            updateBusinessPhase(BusinessPhase.PAYMENT_FAILED)
-            stateListener.onPaymentFailed("Failed to discover readers after $MAX_RETRY_ATTEMPTS attempts: no readers found")
+            updateDisplayState(DisplayState.READER_NOT_FOUND)
         }
     }
 
@@ -1072,22 +1030,14 @@ class StripeTerminalManager(
      * 检查是否有支付正在进行中
      */
     fun isPaymentInProgress(): Boolean {
-        val (connectionStatus, paymentStatus, businessPhase) = stripeStateManager.getCurrentStripeStates()
+        val currentState = stripeStateManager.getCurrentDisplayState()
 
-        // 检查业务阶段
-        when (businessPhase) {
-            BusinessPhase.CALLING_RENTAL_API,
-            BusinessPhase.PAYMENT_SUCCESS -> return true
-            BusinessPhase.RENTAL_SUCCESS,
-            BusinessPhase.RENTAL_FAILED,
-            BusinessPhase.PAYMENT_FAILED,
-            BusinessPhase.CANCELLED -> return false
-            else -> {
-                // 检查Stripe状态
-                return connectionStatus == ConnectionStatus.CONNECTED &&
-                       (paymentStatus == PaymentStatus.WAITING_FOR_INPUT ||
-                        paymentStatus == PaymentStatus.PROCESSING)
-            }
+        return when (currentState) {
+            DisplayState.WAITING_FOR_CARD,
+            DisplayState.PROCESSING_PAYMENT,
+            DisplayState.PAYMENT_SUCCESSFUL,
+            DisplayState.PROCESSING_RENTAL -> true
+            else -> false
         }
     }
 }
