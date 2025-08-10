@@ -338,11 +338,15 @@ class MainActivity : AppCompatActivity() {
         // 这个方法现在只处理逻辑，UI在setupAdminClickArea中处理
     }
 
+    /**
+     * 触发管理员密码框区域
+     */
     private fun setupAdminClickArea() {
         // 创建半透明的点击区域
         adminClickArea = View(this).apply {
-            setBackgroundColor(Color.argb(30, 255, 0, 0)) // 半透明红色
-            layoutParams = FrameLayout.LayoutParams(100, 100).apply {
+//            setBackgroundColor(Color.argb(30, 255, 0, 0)) // 半透明红色
+            setBackgroundColor(Color.argb(0, 0, 0, 0)) // 透明
+            layoutParams = FrameLayout.LayoutParams(125, 125).apply {
                 gravity = Gravity.BOTTOM or Gravity.END
             }
 
