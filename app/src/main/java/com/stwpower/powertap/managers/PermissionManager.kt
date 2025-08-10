@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
  */
 object PermissionManager {
     
-    private const val TAG = "PermissionManager"
+    private const val TAG = "powertap"
     
     /**
      * Terminal支付所需的权限

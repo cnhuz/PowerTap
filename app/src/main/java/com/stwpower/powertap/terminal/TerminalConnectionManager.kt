@@ -12,7 +12,7 @@ import com.stripe.stripeterminal.Terminal
  */
 object TerminalConnectionManager {
     
-    private const val TAG = "TerminalConnectionManager"
+    private const val TAG = "powertap"
     
     private var terminalManager: StripeTerminalManager? = null
     private var isInitialized = false

@@ -10,7 +10,7 @@ import kotlinx.coroutines.*
  */
 object OptimizedQRGenerator {
     
-    private const val TAG = "OptimizedQRGenerator"
+    private const val TAG = "powertap"
     
     /**
      * 异步生成二维码（带缓存）

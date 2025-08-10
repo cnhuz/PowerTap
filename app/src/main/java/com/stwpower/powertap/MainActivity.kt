@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         var isAdminExiting = false
-        private const val TAG = "MainActivity"
+        private const val TAG = "powertap"
     }
 
     private fun loadAndUseConfig() {

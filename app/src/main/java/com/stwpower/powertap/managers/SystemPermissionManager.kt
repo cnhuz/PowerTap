@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
  */
 object SystemPermissionManager {
     
-    private const val TAG = "SystemPermissionManager"
+    private const val TAG = "powertap"
     
     /**
      * 检查是否为系统应用

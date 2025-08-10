@@ -11,7 +11,7 @@ import java.security.MessageDigest
  */
 object QRCodeCache {
     
-    private const val TAG = "QRCodeCache"
+    private const val TAG = "powertap"
     
     // 缓存大小：最多缓存10个二维码
     private const val CACHE_SIZE = 10

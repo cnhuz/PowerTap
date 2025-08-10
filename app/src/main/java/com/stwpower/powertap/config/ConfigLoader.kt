@@ -6,7 +6,7 @@ import android.util.Log
 class ConfigLoader(private val context: Context) {
 
     companion object {
-        private const val TAG = "ConfigLoader"
+        private const val TAG = "powertap"
         private const val CONFIG_FILE = "/sdcard/Player/config.txt"
 
         // 静态配置变量 - 可以直接引用

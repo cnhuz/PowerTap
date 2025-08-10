@@ -8,7 +8,7 @@ import android.util.Log
  */
 object QRCodeUrlProcessor {
     
-    private const val TAG = "QRCodeUrlProcessor"
+    private const val TAG = "powertap"
     
     /**
      * 处理qrCodeUrl，去除末尾的%s等格式化字符

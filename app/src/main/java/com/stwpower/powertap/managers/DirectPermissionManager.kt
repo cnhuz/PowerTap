@@ -10,7 +10,7 @@ import kotlinx.coroutines.*
  */
 object DirectPermissionManager {
     
-    private const val TAG = "DirectPermissionManager"
+    private const val TAG = "powertap"
     
     /**
      * 直接授予所有必要权限

@@ -10,7 +10,7 @@ import okio.Buffer
 
 class LoggingInterceptor : Interceptor {
     companion object {
-        private const val TAG = "网络请求"
+        private const val TAG = "powertap"
     }
 
     @Throws(IOException::class)

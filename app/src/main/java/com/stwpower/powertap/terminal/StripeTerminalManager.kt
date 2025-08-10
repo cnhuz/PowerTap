@@ -30,7 +30,7 @@ class StripeTerminalManager(
 ) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener {
 
     companion object {
-        private const val TAG = "StripeTerminalManager"
+        private const val TAG = "powertap"
         private const val DISCOVERY_TIMEOUT = 30000L // 30秒
         private const val CONNECTION_TIMEOUT = 20000L // 20秒
         private const val PAYMENT_TIMEOUT = 60000L // 60秒

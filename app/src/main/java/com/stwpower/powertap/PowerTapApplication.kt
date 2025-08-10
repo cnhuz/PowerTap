@@ -7,7 +7,7 @@ import com.stwpower.powertap.config.ConfigLoader
 class PowerTapApplication : Application() {
 
     companion object {
-        private const val TAG = "PowerTapApplication"
+        private const val TAG = "powertap"
 
         @Volatile
         private var INSTANCE: PowerTapApplication? = null
