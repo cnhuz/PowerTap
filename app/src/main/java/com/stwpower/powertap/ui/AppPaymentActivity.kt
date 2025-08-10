@@ -20,12 +20,11 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import com.stwpower.powertap.HomeKeyInterceptor
+import com.stwpower.powertap.core.kiosk.HomeKeyInterceptor
 import com.stwpower.powertap.R
-import com.stwpower.powertap.ConfigLoader
-import com.stwpower.powertap.utils.BeautifulQRGenerator
+import com.stwpower.powertap.config.ConfigLoader
 import com.stwpower.powertap.utils.OptimizedQRGenerator
-import com.stwpower.powertap.utils.PreferenceManager
+import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.QRCodeUrlProcessor
 import kotlinx.coroutines.*
 

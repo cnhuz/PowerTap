@@ -14,10 +14,10 @@ import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.*
 import com.stripe.stripeterminal.external.models.*
 import com.stripe.stripeterminal.log.LogLevel
-import com.stwpower.powertap.ConfigLoader
+import com.stwpower.powertap.config.ConfigLoader
 import com.stwpower.powertap.data.api.MyApiClient
 import com.stwpower.powertap.data.provider.TokenProvider
-import com.stwpower.powertap.utils.PreferenceManager
+import com.stwpower.powertap.managers.PreferenceManager
 import kotlinx.coroutines.*
 
 /**

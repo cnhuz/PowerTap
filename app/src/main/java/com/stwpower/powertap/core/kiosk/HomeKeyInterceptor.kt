@@ -1,4 +1,4 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.core.kiosk
 
 import android.app.Activity
 import android.content.BroadcastReceiver
@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
+import com.stwpower.powertap.MainActivity
 
 class HomeKeyInterceptor(private val activity: Activity) {
     

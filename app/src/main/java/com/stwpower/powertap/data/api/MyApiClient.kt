@@ -4,7 +4,7 @@ import android.util.Log
 import java.util.concurrent.TimeUnit
 import com.google.gson.Gson
 import com.stripe.stripeterminal.external.models.ConnectionTokenException
-import com.stwpower.powertap.ConfigLoader
+import com.stwpower.powertap.config.ConfigLoader
 import com.stwpower.powertap.domain.MyResponse
 import com.stwpower.powertap.utils.LoggingInterceptor
 import java.io.IOException

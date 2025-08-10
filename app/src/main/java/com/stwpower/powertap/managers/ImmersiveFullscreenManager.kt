@@ -1,4 +1,4 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.managers
 
 import android.app.Activity
 import android.os.Build
@@ -9,8 +9,7 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import com.stwpower.powertap.MainActivity
 
 class ImmersiveFullscreenManager(private val activity: Activity) {
     

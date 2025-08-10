@@ -1,4 +1,4 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.core.kiosk
 
 import android.app.ActivityManager
 import android.app.Service
@@ -7,7 +7,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
+import com.stwpower.powertap.MainActivity
 
 class KioskWatchdogService : Service() {
 

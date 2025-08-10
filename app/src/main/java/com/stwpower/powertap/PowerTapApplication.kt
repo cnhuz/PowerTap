@@ -2,6 +2,7 @@ package com.stwpower.powertap
 
 import android.app.Application
 import android.util.Log
+import com.stwpower.powertap.config.ConfigLoader
 
 class PowerTapApplication : Application() {
 

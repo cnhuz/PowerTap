@@ -16,8 +16,8 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import com.stwpower.powertap.HomeKeyInterceptor
-import com.stwpower.powertap.KioskWatchdogService
+import com.stwpower.powertap.core.kiosk.HomeKeyInterceptor
+import com.stwpower.powertap.core.kiosk.KioskWatchdogService
 import com.stwpower.powertap.MainActivity
 import com.stwpower.powertap.R
 import java.util.*

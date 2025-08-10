@@ -18,15 +18,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import com.stripe.stripeterminal.external.models.PaymentIntent
-import com.stwpower.powertap.HomeKeyInterceptor
+import com.stwpower.powertap.core.kiosk.HomeKeyInterceptor
 import com.stwpower.powertap.R
 import com.stwpower.powertap.terminal.StripeTerminalManager
 import com.stwpower.powertap.terminal.TerminalConnectionManager
 import com.stwpower.powertap.terminal.DisplayState
 import com.stwpower.powertap.terminal.UIType
-import com.stwpower.powertap.utils.PermissionManager
-import com.stwpower.powertap.utils.PreferenceManager
+import com.stwpower.powertap.managers.PermissionManager
+import com.stwpower.powertap.managers.PreferenceManager
 
 class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.TerminalStateListener {
 

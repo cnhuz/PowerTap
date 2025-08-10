@@ -1,4 +1,4 @@
-package com.stwpower.powertap.utils
+package com.stwpower.powertap.managers
 
 import android.content.Context
 import android.util.Log

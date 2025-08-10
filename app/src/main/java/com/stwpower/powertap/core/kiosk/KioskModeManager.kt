@@ -1,4 +1,4 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.core.kiosk
 
 import android.app.Activity
 import android.app.ActivityManager
@@ -9,14 +9,12 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import com.stwpower.powertap.MainActivity
 
 class KioskModeManager(private val activity: Activity) {
 

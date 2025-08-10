@@ -1,11 +1,9 @@
 package com.stwpower.powertap
 
-import android.Manifest
 import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -14,7 +12,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
@@ -29,20 +26,23 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
-import com.stwpower.powertap.ConfigLoader
+import com.stwpower.powertap.config.ConfigLoader
+import com.stwpower.powertap.core.kiosk.HomeKeyInterceptor
+import com.stwpower.powertap.core.kiosk.KioskModeManager
+import com.stwpower.powertap.core.kiosk.KioskWatchdogService
 import com.stwpower.powertap.ui.AdminSettingsActivity
 import com.stwpower.powertap.ui.AppPaymentActivity
 import com.stwpower.powertap.ui.TerminalPaymentActivity
 import com.stwpower.powertap.data.api.MyApiClient
+import com.stwpower.powertap.managers.ImmersiveFullscreenManager
 import com.stwpower.powertap.terminal.TerminalConnectionManager
-import com.stwpower.powertap.utils.DirectPermissionManager
+import com.stwpower.powertap.managers.DirectPermissionManager
 import com.stwpower.powertap.utils.OptimizedQRGenerator
-import com.stwpower.powertap.utils.PermissionManager
-import com.stwpower.powertap.utils.PreferenceManager
+import com.stwpower.powertap.managers.PermissionManager
+import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.QRCodeUrlProcessor
-import com.stwpower.powertap.utils.SystemPermissionManager
+import com.stwpower.powertap.managers.SystemPermissionManager
 import java.util.*
 
 class MainActivity : AppCompatActivity() {

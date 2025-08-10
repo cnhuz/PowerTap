@@ -1,9 +1,7 @@
-package com.stwpower.powertap
+package com.stwpower.powertap.config
 
 import android.content.Context
 import android.util.Log
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 class ConfigLoader(private val context: Context) {
 
@@ -75,9 +73,9 @@ class ConfigLoader(private val context: Context) {
         val value = parts[1].trim()
         
         when (key) {
-            "baseUrl" -> Companion.apiUrl = value
-            "secretKey" -> Companion.secretKey = value
-            "qrCodeUrl" -> Companion.qrCodeUrl = value
+            "baseUrl" -> apiUrl = value
+            "secretKey" -> secretKey = value
+            "qrCodeUrl" -> qrCodeUrl = value
             else -> Log.w(TAG, "Unknown config key: $key")
         }
     }
@@ -92,19 +90,19 @@ class ConfigLoader(private val context: Context) {
             if (file.exists() && file.canRead()) {
                 val imeiValue = file.readText().trim()
                 if (imeiValue.isNotEmpty()) {
-                    Companion.imei = imeiValue
+                    imei = imeiValue
                     Log.d(TAG, "IMEI loaded from $devinfoFile: $imeiValue")
                 } else {
                     Log.w(TAG, "IMEI file is empty: $devinfoFile")
-                    Companion.imei = "123456"
+                    imei = "123456"
                 }
             } else {
                 Log.w(TAG, "IMEI file not found or not readable: $devinfoFile")
-                Companion.imei = "123456"
+                imei = "123456"
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to read IMEI from $devinfoFile", e)
-            Companion.imei = "123456"
+            imei = "123456"
         }
     }
 
@@ -112,11 +110,11 @@ class ConfigLoader(private val context: Context) {
      * 设置默认值
      */
     private fun setDefaultValues() {
-        Companion.apiUrl = "https://powerweb-stw.stwpower.com/power_bank"
-        Companion.qrCodeUrl = "https://powerweb-stw.stwpower.com/appWeb/store?id="
-        Companion.secretKey = "q6b56jCopc7UW91eMON0wbAEeZdsd96x"
-        Companion.imei = "123456"
-        Companion.enableDebug = false
+        apiUrl = "https://powerweb-stw.stwpower.com/power_bank"
+        qrCodeUrl = "https://powerweb-stw.stwpower.com/appWeb/store?id="
+        secretKey = "q6b56jCopc7UW91eMON0wbAEeZdsd96x"
+        imei = "123456"
+        enableDebug = false
         Log.d(TAG, "Using default config values")
     }
     

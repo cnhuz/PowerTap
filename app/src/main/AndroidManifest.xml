@@ -94,7 +94,7 @@
 
         <!-- Kiosk Watchdog Service -->
         <service
-            android:name=".KioskWatchdogService"
+            android:name=".core.kiosk.KioskWatchdogService"
             android:enabled="true"
             android:exported="false" />
 
