@@ -373,14 +373,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAdminPasswordDialog() {
+        // 创建输入框
         val editText = EditText(this)
         editText.hint = getString(R.string.admin_password_hint)
         editText.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
 
+        // 设置输入框样式
+        val density = resources.displayMetrics.density
+        val paddingHorizontal = (12 * density).toInt() // 12dp
+        val paddingVertical = (8 * density).toInt() // 8dp
+        editText.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
+        editText.textSize = 16f
+        editText.minHeight = (48 * density).toInt() // 48dp 最小高度
+
+        // 创建容器布局并设置边距
+        val container = android.widget.LinearLayout(this)
+        container.orientation = android.widget.LinearLayout.VERTICAL
+        val layoutParams = android.widget.LinearLayout.LayoutParams(
+            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        // 设置边距 (left, top, right, bottom)
+        val margin = (20 * density).toInt() // 20dp转换为像素
+        layoutParams.setMargins(margin, margin, margin, margin)
+        editText.layoutParams = layoutParams
+
+        container.addView(editText)
+
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.admin_password_title))
             .setMessage(getString(R.string.select_operation))
-            .setView(editText)
+            .setView(container)
             .setPositiveButton(getString(R.string.admin_settings)) { _, _ ->
                 val inputPassword = editText.text.toString()
                 val adminPassword = AdminSettingsActivity.getAdminPassword(this@MainActivity)
