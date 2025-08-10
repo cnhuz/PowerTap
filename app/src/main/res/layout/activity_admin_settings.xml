@@ -24,8 +24,7 @@
         android:orientation="vertical"
         android:gravity="center"
         android:background="@color/background_main"
-        android:padding="30dp"
-        android:elevation="3dp">
+        android:padding="30dp">
 
         <!-- 修改密码按钮 -->
         <Button
@@ -37,8 +36,7 @@
             android:textColor="@color/white"
             android:textStyle="bold"
             android:background="@drawable/btn_primary"
-            android:layout_marginBottom="24dp"
-            android:elevation="2dp" />
+            android:layout_marginBottom="24dp" />
 
         <!-- 设置默认语言按钮 -->
         <Button
@@ -50,8 +48,7 @@
             android:textColor="@color/white"
             android:textStyle="bold"
             android:background="@drawable/btn_primary"
-            android:layout_marginBottom="24dp"
-            android:elevation="2dp" />
+            android:layout_marginBottom="24dp" />
 
         <!-- 退出应用按钮 -->
         <Button
@@ -62,9 +59,8 @@
             android:textSize="19sp"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:background="@color/background_main"
-            android:layout_marginBottom="40dp"
-            android:elevation="2dp" />
+            android:background="@drawable/btn_primary"
+            android:layout_marginBottom="40dp" />
 
         <!-- 返回主界面按钮 -->
         <Button
@@ -76,8 +72,7 @@
             android:textColor="@color/text_primary"
             android:textStyle="bold"
             android:background="@drawable/btn_language"
-            android:layout_marginBottom="20dp"
-            android:elevation="2dp" />
+            android:layout_marginBottom="20dp" />
 
     </LinearLayout>
 
