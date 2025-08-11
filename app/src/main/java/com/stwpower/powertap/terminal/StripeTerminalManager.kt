@@ -554,7 +554,6 @@ class StripeTerminalManager(
             }
             PaymentStatus.READY -> {
                 Log.d(TAG, "支付状态为READY，准备接收支付")
-                updateDisplayState(DisplayState.ENTER_COLLECTION_METHOD)
 
                 // 检查是否应该自动开始收集付款方式
                 val shouldAutoStart = shouldAutoStart()
