@@ -304,23 +304,31 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
             UIType.TAP_TO_PAY -> {
                 // Type 2: 文字+图片
-                showCompletedState()
-                loadingText.text = displayState.getFormattedText(this)
+                try {
+                    Log.d("TerminalPayment", "开始更新TAP_TO_PAY页面")
+                    showCompletedState()
+                    loadingText.text = displayState.getFormattedText(this)
 
-                // 等待刷卡状态显示蓝色文本
-                if (displayState == DisplayState.WAITING_FOR_CARD) {
-                    loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
-                } else {
-                    loadingText.setTextColor(getColor(R.color.text_primary))
+                    // 等待刷卡状态显示蓝色文本
+                    if (displayState == DisplayState.COLLECTING_PAYMENT_METHOD) {
+                        loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
+                    } else {
+                        loadingText.setTextColor(getColor(R.color.text_primary))
+                    }
+
+                    isProcessing = false
+                    backButton.isEnabled = displayState.canGoBack
+                    backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
+                    Log.d("TerminalPayment", "成功更新TAP_TO_PAY页面")
+                }catch (e:Exception){
+                    Log.d("PowerTap","进入TapToPay UI异常",e)
                 }
 
-                isProcessing = false
-                backButton.isEnabled = displayState.canGoBack
-                backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
             }
 
             UIType.MESSAGE -> {
                 // Type 3: 只展示白色粗体文字
+                //TODO 需要支持代入动态文本，如具体的报错信息
                 showMessage(displayState.getFormattedText(this))
 
                 isProcessing = false
@@ -487,10 +495,10 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             Log.w("TerminalPayment", "Terminal not ready, updating state through TerminalManager")
             if (::terminalManager.isInitialized) {
                 // 通过统一入口更新状态
-                terminalManager.updateDisplayState(DisplayState.INITIALIZATION_FAILED)
+                terminalManager.updateDisplayState(DisplayState.LOADING)
             } else {
                 // 如果TerminalManager还没初始化，直接更新UI（这种情况很少见）
-                updateUIForDisplayState(DisplayState.INITIALIZATION_FAILED)
+                updateUIForDisplayState(DisplayState.INIT_FAILED)
             }
 
             val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)

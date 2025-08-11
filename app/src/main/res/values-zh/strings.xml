@@ -1,129 +1,99 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App Name -->
     <string name="app_name">PowerTap</string>
 
-    <!-- Main Activity -->
-    <string name="main_description">欢迎使用PowerTap共享充电宝！\n\n请选择您的支付方式：\n• 终端支付：使用设备上的支付终端\n• 手机支付：扫描二维码使用手机支付</string>
+    <!-- terminal页提示词 -->
+    <string name="loading">加载中…</string>
+    <string name="init_failed">终端初始化失败。</string>
+    <string name="scanning_reader">正在扫描阅读器，请稍候。</string>
+    <string name="connecting_reader">正在连接阅读器，请稍候。</string>
+    <string name="connect_reader_failed">连接阅读器失败，请重试。</string>
 
-    <!-- Common -->
-    <string name="back">返回</string>
+    <string name="start_upgrading_reader">正在升级，请勿关闭电源，进度 0%。</string>
+    <string name="upgrading">正在升级，请勿关闭电源，进度 %d%%。</string>
+    <string name="upgrade_failed">升级失败，请重试。</string>
 
-    <!-- Terminal Payment -->
-    <string name="terminal_payment_title">终端支付</string>
-    <string name="terminal_instructions">请按照以下步骤完成支付：\n\n1. 在支付终端上选择支付方式\n2. 插入银行卡或使用NFC支付\n3. 输入密码或验证指纹\n4. 等待支付完成\n5. 取出充电宝</string>
-    <string name="processing_payment">正在处理支付...</string>
-    <string name="payment_completed">支付完成！请取出充电宝</string>
-    <string name="terminal_status_info">支付状态将在此显示</string>
+    <string name="enter_collection_method">正在进入收款模式，请稍候。</string>
+    <string name="enter_collection_method_failed">进入收款模式失败，请重试。</string>
 
-    <!-- App Payment -->
-    <string name="app_payment_title">手机支付</string>
-    <string name="app_instructions">请使用您的手机扫描右侧二维码：\n\n1. 打开支付宝或微信\n2. 扫描二维码\n3. 确认支付金额\n4. 完成支付\n5. 等待充电宝弹出</string>
-    <string name="scan_qr_code">请扫描二维码完成支付</string>
-    <string name="scan_with_app">使用手机扫描此二维码</string>
+    <string name="collecting_payment_method">正在收集付款方式，请稍候。</string>
+    <string name="collect_payment_method_success">收集付款方式成功，请稍候。</string>
+    <string name="collect_payment_method_failed">收集付款方式失败，请重试。</string>
 
-    <!-- Admin -->
+    <string name="renting">正在创建订单，请稍候。</string>
+    <string name="rent_success">订单创建成功，请稍后检查充电宝是否弹出，如未弹出，请重试。</string>
+    <string name="rent_failed">订单创建失败，请重试。</string>
+
+    <string name="tap_card_instruction">将您的银行卡或手机轻触终端。</string>
+    <string name="card_reader_instruction">不是非接触式卡？请使用键盘下方的刷卡口</string>
+
+    <!-- 主页 -->
+    <string name="brand_name">STW</string>
+    <string name="main_title">租一个\n充电宝</string>
+    <string name="pay_with_terminal">终端支付</string>
+    <string name="or_text">或</string>
+    <string name="pay_with_app">应用支付</string>
+
+    <!-- 管理员弹框 -->
     <string name="admin_password_title">管理员验证</string>
-    <string name="admin_password_message">请输入管理员密码以退出应用</string>
+    <string name="select_operation">请选择操作：</string>
     <string name="admin_password_hint">请输入管理员密码</string>
+    <string name="direct_exit">直接退出</string>
     <string name="confirm">确认</string>
     <string name="cancel">取消</string>
     <string name="password_incorrect">密码错误</string>
 
-    <!-- Admin Settings -->
-    <string name="admin_settings_title">管理员设置</string>
+    <!-- Common -->
+    <string name="back">返回</string>
+
+    <!-- 刷卡租借页 -->
+    <string name="terminal_payment_title">终端支付</string>
+    <string name="terminal_instructions">请按以下步骤完成支付：\n\n1. 在终端选择支付方式\n2. 插入银行卡或使用NFC支付\n3. 输入密码或验证指纹\n4. 等待支付完成\n5. 取出充电宝</string>
+    <string name="processing_payment">正在处理支付...</string>
+    <string name="payment_completed">支付完成！请取出充电宝</string>
+    <string name="terminal_status_info">支付状态将在此显示</string>
+
+    <!-- 扫码租借页 -->
+    <string name="scan_qr_code_payment">使用相机扫码下载应用</string>
+
+    <!-- 租借页价格信息 -->
+    <string name="pricing">价格</string>
+    <string name="temporary_deposit">临时押金</string>
+    <string name="deposit_refund_info">归还充电宝后押金将退还</string>
+    <string name="additional_charges_info">逾期归还或损坏可能产生额外费用</string>
+
+    <!-- 管理员设置页按钮 -->
+    <string name="admin_settings">管理员设置</string>
     <string name="change_password">修改管理员密码</string>
     <string name="set_default_language">设置默认语言</string>
     <string name="exit_app">退出应用</string>
-    <string name="back_to_main">返回主界面</string>
-    <string name="admin_settings">管理员设置</string>
-    <string name="direct_exit">直接退出</string>
-    <string name="select_operation">选择操作：</string>
+    <string name="back_to_main">返回主页</string>
 
-    <!-- Change Password Dialog -->
+    <!-- 修改管理员密码弹窗 -->
     <string name="change_password_title">修改管理员密码</string>
-    <string name="current_password">当前密码：</string>
-    <string name="new_password">新密码：</string>
-    <string name="confirm_password">确认新密码：</string>
     <string name="enter_current_password">请输入当前密码</string>
     <string name="enter_new_password">请输入新密码</string>
     <string name="enter_confirm_password">请再次输入新密码</string>
     <string name="current_password_incorrect">当前密码错误</string>
     <string name="new_password_empty">新密码不能为空</string>
-    <string name="password_mismatch">两次输入的密码不一致</string>
     <string name="password_changed_success">密码修改成功</string>
+    <string name="password_mismatch">两次密码输入不一致</string>
 
-    <!-- Language Settings -->
+    <!-- 计划移除 -->
+    <string name="new_password">新密码：</string>
+    <string name="current_password">当前密码：</string>
+    <string name="confirm_password">确认新密码：</string>
+
+    <!-- 修改默认语言弹窗 -->
     <string name="set_default_language_title">设置默认语言</string>
     <string name="language_chinese">中文</string>
-    <string name="language_english">English</string>
-    <string name="language_japanese">日本語</string>
-    <string name="language_german">Deutsch</string>
-    <string name="language_russian">Русский</string>
+    <string name="language_english">英文</string>
+    <string name="language_japanese">日语</string>
+    <string name="language_german">德语</string>
+    <string name="language_russian">俄语</string>
     <string name="default_language_set">默认语言已设置为：%s</string>
 
-    <!-- Exit Confirmation -->
+    <!-- 退出app弹窗 -->
     <string name="exit_confirmation_title">确认退出</string>
     <string name="exit_confirmation_message">确定要退出应用吗？</string>
 
-    <!-- Toast Messages -->
-    <string name="using_basic_protection">使用基础保护模式</string>
-    <string name="enable_full_protection">启用完整保护模式</string>
-    <string name="insufficient_permission">权限不足，启用基础保护模式</string>
-
-    <!-- Pricing -->
-    <string name="pricing_title">租借价格</string>
-    <string name="pricing_description">按小时计费，最低收费1小时</string>
-    <string name="hourly_rate">每小时 $2.99</string>
-    <string name="daily_rate">每天 $9.99</string>
-    <string name="additional_charges_info">逾期归还或损坏可能产生额外费用</string>
-
-    <!-- QR Code Payment -->
-    <string name="scan_qr_code_payment">扫描二维码支付</string>
-    <string name="processing_payment_loading">正在处理支付...</string>
-
-    <!-- Terminal Payment Instructions -->
-    <string name="tap_card_instruction">请在终端上刷卡或使用手机支付。</string>
-    <string name="card_reader_instruction">非接触式卡片？读卡器在键盘下方</string>
-
-    <!-- Terminal Status Messages -->
-    <string name="initializing_terminal">正在初始化终端...</string>
-    <string name="requesting_permissions">正在请求权限...</string>
-    <string name="scanning_readers">正在扫描读卡器...</string>
-    <string name="connecting_reader">正在连接读卡器...</string>
-    <string name="reader_connected">读卡器已连接</string>
-    <string name="updating_reader">正在更新读卡器...</string>
-    <string name="preparing_payment">正在准备支付...</string>
-    <string name="starting_payment">正在开始收集付款...</string>
-    <string name="waiting_for_card">请在终端上刷卡或使用手机支付</string>
-    <string name="card_detected">检测到卡片，正在处理...</string>
-    <string name="processing_payment_terminal">正在处理支付...</string>
-    <string name="confirming_payment">正在确认支付...</string>
-    <string name="calling_rental_api">正在调用租借接口...</string>
-    <string name="rental_successful">租借成功！</string>
-    <string name="rental_failed">租借失败，请重试。</string>
-    <string name="payment_successful">支付成功！</string>
-    <string name="payment_failed">支付失败，请重试。</string>
-
-    <!-- Terminal右侧消息提示 -->
-    <string name="message_payment_successful">收集付款方式成功，请稍候。</string>
-    <string name="message_rental_successful">订单创建成功，请稍后查看充电宝是否弹出。如果没有，请重试。</string>
-    <string name="message_rental_failed">创建订单失败，请重试。\n%1$s</string>
-    <string name="message_payment_failed">收集付款方式失败，请重试。</string>
-    <string name="message_payment_cancelled">支付已取消\n用户取消了支付。\n您可以重新尝试或按返回键退出。</string>
-    <string name="message_rental_default">订单创建成功</string>
-    <string name="message_connect_success">USB读卡器连接成功</string>
-    <string name="message_upgrading_start">升级中，请勿断电，进度 0%%。</string>
-    <string name="message_upgrading">升级中，请勿断电，进度 %1$d%%。</string>
-    <string name="initialization_failed">终端初始化失败</string>
-    <string name="reader_not_found">未找到读卡器</string>
-    <string name="connection_failed">连接读卡器失败</string>
-    <string name="payment_cancelled">支付已取消</string>
-    <string name="operation_timeout">操作超时</string>
-    <string name="retrying">正在重试...</string>
-
-    <!-- Main Page -->
-    <string name="brand_name">STW</string>
-    <string name="main_title">租借\n充电宝</string>
-    <string name="or_text">或</string>
 </resources>

@@ -1,118 +1,99 @@
 <resources>
     <string name="app_name">PowerTap</string>
 
-    <!-- Main Activity -->
-    <string name="main_description">Willkommen bei PowerTap Powerbank-Verleih!\n\nBitte wählen Sie Ihre Zahlungsmethode:\n• Terminal-Zahlung: Verwenden Sie das Zahlungsterminal am Gerät\n• Handy-Zahlung: Scannen Sie den QR-Code für mobile Zahlung</string>
-    <string name="pay_with_terminal">MIT TERMINAL BEZAHLEN</string>
-    <string name="pay_with_app">MIT APP BEZAHLEN</string>
+    <!-- terminal页提示词 -->
+    <string name="loading">Laden…</string>
+    <string name="init_failed">Terminal konnte nicht initialisiert werden.</string>
+    <string name="scanning_reader">Lesegerät wird gesucht, bitte warten.</string>
+    <string name="connecting_reader">Verbindung zum Lesegerät wird hergestellt, bitte warten.</string>
+    <string name="connect_reader_failed">Verbindung zum Lesegerät fehlgeschlagen, bitte erneut versuchen.</string>
 
-    <!-- Common -->
-    <string name="back">Zurück</string>
+    <string name="start_upgrading_reader">Wird aktualisiert, bitte schalten Sie das Gerät nicht aus. Fortschritt 0%.</string>
+    <string name="upgrading">Wird aktualisiert, bitte schalten Sie das Gerät nicht aus. Fortschritt %d%%.</string>
+    <string name="upgrade_failed">Aktualisierung fehlgeschlagen, bitte erneut versuchen.</string>
 
-    <!-- Terminal Payment -->
-    <string name="terminal_payment_title">Terminal-Zahlung</string>
-    <string name="terminal_instructions">Bitte folgen Sie diesen Schritten zur Zahlung:\n\n1. Wählen Sie die Zahlungsmethode am Terminal\n2. Stecken Sie Ihre Bankkarte ein oder verwenden Sie NFC\n3. Geben Sie Ihr Passwort ein oder verifizieren Sie per Fingerabdruck\n4. Warten Sie auf die Zahlungsbestätigung\n5. Entnehmen Sie die Powerbank</string>
-    <string name="processing_payment">Zahlung wird verarbeitet...</string>
-    <string name="payment_completed">Zahlung abgeschlossen! Bitte entnehmen Sie die Powerbank</string>
-    <string name="terminal_status_info">Zahlungsstatus wird hier angezeigt</string>
+    <string name="enter_collection_method">Wechsel in den Zahlungsmodus, bitte warten.</string>
+    <string name="enter_collection_method_failed">Wechsel in den Zahlungsmodus fehlgeschlagen, bitte erneut versuchen.</string>
 
-    <!-- App Payment -->
-    <string name="app_payment_title">Handy-Zahlung</string>
-    <string name="app_instructions">Bitte scannen Sie den QR-Code rechts mit Ihrem Handy:\n\n1. Öffnen Sie Alipay oder WeChat\n2. Scannen Sie den QR-Code\n3. Bestätigen Sie den Zahlungsbetrag\n4. Schließen Sie die Zahlung ab\n5. Warten Sie, bis die Powerbank ausgegeben wird</string>
-    <string name="scan_qr_code">Bitte scannen Sie den QR-Code zur Zahlung</string>
-    <string name="scan_with_app">Scannen Sie diesen QR-Code mit Ihrem Handy</string>
+    <string name="collecting_payment_method">Zahlungsmethode wird erfasst, bitte warten.</string>
+    <string name="collect_payment_method_success">Zahlungsmethode erfolgreich erfasst, bitte warten.</string>
+    <string name="collect_payment_method_failed">Erfassung der Zahlungsmethode fehlgeschlagen, bitte erneut versuchen.</string>
 
-    <!-- Admin -->
+    <string name="renting">Bestellung wird erstellt, bitte warten.</string>
+    <string name="rent_success">Bestellung erfolgreich erstellt. Bitte prüfen Sie später, ob die Powerbank ausgegeben wurde. Falls nicht, bitte erneut versuchen.</string>
+    <string name="rent_failed">Bestellung konnte nicht erstellt werden, bitte erneut versuchen.</string>
+
+    <string name="tap_card_instruction">Halten Sie Ihre Karte oder Ihr Telefon an das Terminal.</string>
+    <string name="card_reader_instruction">Keine kontaktlose Karte? Kartenleser unter der Tastatur</string>
+
+    <!-- 主页 -->
+    <string name="brand_name">STW</string>
+    <string name="main_title">MIETE EINE\nPOWERBANK</string>
+    <string name="pay_with_terminal">ZAHLUNG AM TERMINAL</string>
+    <string name="or_text">ODER</string>
+    <string name="pay_with_app">ZAHLUNG MIT APP</string>
+
+    <!-- 管理员弹框 -->
     <string name="admin_password_title">Administrator-Verifizierung</string>
-    <string name="admin_password_message">Bitte geben Sie das Administrator-Passwort ein, um die App zu beenden</string>
-    <string name="admin_password_hint">Administrator-Passwort eingeben</string>
+    <string name="select_operation">Vorgang auswählen:</string>
+    <string name="admin_password_hint">Bitte Administrator-Passwort eingeben</string>
+    <string name="direct_exit">Direkt beenden</string>
     <string name="confirm">Bestätigen</string>
     <string name="cancel">Abbrechen</string>
     <string name="password_incorrect">Falsches Passwort</string>
 
-    <!-- Admin Settings -->
-    <string name="admin_settings_title">Administrator-Einstellungen</string>
+    <!-- Common -->
+    <string name="back">Zurück</string>
+
+    <!-- 刷卡租借页 -->
+    <string name="terminal_payment_title">Zahlung am Terminal</string>
+    <string name="terminal_instructions">Bitte folgen Sie diesen Schritten, um die Zahlung abzuschließen:\n\n1. Zahlungsmethode am Terminal auswählen\n2. Bankkarte einführen oder NFC-Zahlung verwenden\n3. Passwort eingeben oder Fingerabdruck bestätigen\n4. Auf Abschluss der Zahlung warten\n5. Powerbank entnehmen</string>
+    <string name="processing_payment">Zahlung wird verarbeitet...</string>
+    <string name="payment_completed">Zahlung abgeschlossen! Bitte entnehmen Sie die Powerbank.</string>
+    <string name="terminal_status_info">Der Zahlungsstatus wird hier angezeigt</string>
+
+    <!-- 扫码租借页 -->
+    <string name="scan_qr_code_payment">Mit der Kamera QR-Code scannen, um die App herunterzuladen</string>
+
+    <!-- 租借页价格信息 -->
+    <string name="pricing">PREISE</string>
+    <string name="temporary_deposit">KAUTION</string>
+    <string name="deposit_refund_info">Die Kaution wird bei Rückgabe der Powerbank zurückerstattet</string>
+    <string name="additional_charges_info">Zusätzliche Gebühren können bei verspäteter Rückgabe oder Beschädigung anfallen</string>
+
+    <!-- 管理员设置页按钮 -->
+    <string name="admin_settings">Administrator-Einstellungen</string>
     <string name="change_password">Administrator-Passwort ändern</string>
     <string name="set_default_language">Standardsprache festlegen</string>
-    <string name="exit_app">App beenden</string>
-    <string name="back_to_main">Zurück zum Hauptmenü</string>
-    <string name="admin_settings">Administrator-Einstellungen</string>
-    <string name="direct_exit">Direkt beenden</string>
-    <string name="select_operation">Operation auswählen:</string>
+    <string name="exit_app">Anwendung beenden</string>
+    <string name="back_to_main">Zurück zur Hauptseite</string>
 
-    <!-- Change Password Dialog -->
+    <!-- 修改管理员密码弹窗 -->
     <string name="change_password_title">Administrator-Passwort ändern</string>
-    <string name="current_password">Aktuelles Passwort:</string>
-    <string name="new_password">Neues Passwort:</string>
-    <string name="confirm_password">Neues Passwort bestätigen:</string>
-    <string name="enter_current_password">Bitte geben Sie das aktuelle Passwort ein</string>
-    <string name="enter_new_password">Bitte geben Sie das neue Passwort ein</string>
-    <string name="enter_confirm_password">Bitte geben Sie das neue Passwort erneut ein</string>
-    <string name="current_password_incorrect">Aktuelles Passwort falsch</string>
+    <string name="enter_current_password">Bitte aktuelles Passwort eingeben</string>
+    <string name="enter_new_password">Bitte neues Passwort eingeben</string>
+    <string name="enter_confirm_password">Bitte neues Passwort erneut eingeben</string>
+    <string name="current_password_incorrect">Aktuelles Passwort ist falsch</string>
     <string name="new_password_empty">Neues Passwort darf nicht leer sein</string>
-    <string name="password_mismatch">Passwörter stimmen nicht überein</string>
     <string name="password_changed_success">Passwort erfolgreich geändert</string>
+    <string name="password_mismatch">Die Passwörter stimmen nicht überein</string>
 
-    <!-- Language Settings -->
+    <!-- 计划移除 -->
+    <string name="new_password">Neues Passwort:</string>
+    <string name="current_password">Aktuelles Passwort:</string>
+    <string name="confirm_password">Neues Passwort bestätigen:</string>
+
+    <!-- 修改默认语言弹窗 -->
     <string name="set_default_language_title">Standardsprache festlegen</string>
-    <string name="language_chinese">中文</string>
-    <string name="language_english">English</string>
-    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">Chinesisch</string>
+    <string name="language_english">Englisch</string>
+    <string name="language_japanese">Japanisch</string>
     <string name="language_german">Deutsch</string>
-    <string name="language_russian">Русский</string>
-    <string name="default_language_set">Standardsprache festgelegt auf: %s</string>
+    <string name="language_russian">Russisch</string>
+    <string name="default_language_set">Standardsprache wurde festgelegt auf: %s</string>
 
-    <!-- Exit Confirmation -->
+    <!-- 退出app弹窗 -->
     <string name="exit_confirmation_title">Beenden bestätigen</string>
-    <string name="exit_confirmation_message">Sind Sie sicher, dass Sie die Anwendung beenden möchten?</string>
+    <string name="exit_confirmation_message">Möchten Sie die Anwendung wirklich beenden?</string>
 
-    <!-- Toast Messages -->
-    <string name="using_basic_protection">Verwende Basis-Schutzmodus</string>
-    <string name="enable_full_protection">Vollständigen Schutzmodus aktivieren</string>
-    <string name="insufficient_permission">Unzureichende Berechtigungen, verwende Basis-Schutzmodus</string>
-
-    <!-- Pricing -->
-    <string name="pricing_title">Mietpreis</string>
-    <string name="pricing_description">Stündliche Abrechnung, Mindestgebühr 1 Stunde</string>
-    <string name="hourly_rate">Pro Stunde $2.99</string>
-    <string name="daily_rate">Pro Tag $9.99</string>
-    <string name="additional_charges_info">Zusätzliche Gebühren können für verspätete Rückgabe oder Schäden anfallen</string>
-
-    <!-- QR Code Payment -->
-    <string name="scan_qr_code_payment">QR-Code-Zahlung scannen</string>
-
-    <!-- Terminal Status Messages -->
-    <string name="initializing">Initialisierung...</string>
-    <string name="discovering_readers">Suche nach Kartenlesern...</string>
-    <string name="reader_found">Kartenleser gefunden</string>
-    <string name="connecting_to_reader">Verbindung zum Kartenleser...</string>
-    <string name="reader_connected">Kartenleser verbunden</string>
-    <string name="waiting_for_card">Bitte Karte durchziehen oder Chipkarte einführen</string>
-    <string name="confirming_payment">Zahlung wird bestätigt...</string>
-    <string name="payment_successful">Zahlung erfolgreich!</string>
-    <string name="payment_failed">Zahlung fehlgeschlagen, bitte versuchen Sie es erneut</string>
-    <string name="payment_cancelled">Zahlung abgebrochen</string>
-    <string name="reader_not_found">Kartenleser nicht gefunden</string>
-    <string name="connection_failed">Verbindung fehlgeschlagen</string>
-    <string name="initialization_failed">Initialisierung fehlgeschlagen</string>
-    <string name="timeout">Operation abgelaufen</string>
-    <string name="calling_rental_api">Miet-API wird aufgerufen...</string>
-    <string name="rental_successful">Miete erfolgreich!</string>
-    <string name="rental_failed">Miete fehlgeschlagen. Bitte versuchen Sie es erneut.</string>
-
-    <!-- Terminal右侧消息提示 -->
-    <string name="message_payment_successful">Erfassung der Zahlungsmethoden erfolgreich, bitte warten.</string>
-    <string name="message_rental_successful">Bestellung erfolgreich erstellt, bitte prüfen Sie später, ob die Powerbank herausgesprungen ist. Falls nicht, versuchen Sie es erneut.</string>
-    <string name="message_rental_failed">Bestellung konnte nicht erstellt werden, bitte versuchen Sie es erneut.\n%1$s</string>
-    <string name="message_payment_failed">Erfassung der Zahlungsmethoden fehlgeschlagen, bitte versuchen Sie es erneut.</string>
-    <string name="message_payment_cancelled">Zahlung abgebrochen\nZahlung wurde vom Benutzer abgebrochen.\nSie können es erneut versuchen oder zurück drücken, um zurückzukehren.</string>
-    <string name="message_rental_default">Bestellung erfolgreich erstellt</string>
-    <string name="message_connect_success">USB-Leser erfolgreich verbunden</string>
-    <string name="message_upgrading_start">Upgrade läuft, bitte schalten Sie das Gerät nicht aus, Fortschritt 0%%.</string>
-    <string name="message_upgrading">Upgrade läuft, bitte schalten Sie das Gerät nicht aus, Fortschritt %1$d%%.</string>
-
-    <!-- Main Page -->
-    <string name="brand_name">STW</string>
-    <string name="main_title">MIETEN SIE EINE\nPOWERBANK</string>
-    <string name="or_text">ODER</string>
 </resources>

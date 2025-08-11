@@ -40,79 +40,38 @@ enum class DisplayState(
     val uiType: UIType,
     val canGoBack: Boolean = false
 ) {
-    // 初始化和连接
-    INITIALIZING(R.string.initializing_terminal, UIType.LOADING, false),
-    DISCOVERING_READERS(R.string.scanning_readers, UIType.LOADING, false),
+
+    // 默认状态
+    LOADING(R.string.loading, UIType.LOADING, false),
+    // 初始化失败
+    INIT_FAILED(R.string.init_failed, UIType.MESSAGE, true),
+    // 扫描阅读器
+    SCANNING_READER(R.string.scanning_reader, UIType.LOADING, false),
+    // 连接阅读器
     CONNECTING_READER(R.string.connecting_reader, UIType.LOADING, false),
-    READER_CONNECTED(R.string.reader_connected, UIType.LOADING, false),
-    
-    // 支付流程
-    READY_FOR_PAYMENT(R.string.reader_connected, UIType.TAP_TO_PAY, true),
-    WAITING_FOR_CARD(R.string.waiting_for_card, UIType.TAP_TO_PAY, true),
-    PROCESSING_PAYMENT(R.string.processing_payment_terminal, UIType.LOADING, false),
-    
-    // 业务流程
-    PROCESSING_RENTAL(R.string.calling_rental_api, UIType.LOADING, false),
-    
-    // 结果状态
-    PAYMENT_SUCCESSFUL(R.string.message_payment_successful, UIType.MESSAGE, true),
-    RENTAL_SUCCESSFUL(R.string.rental_successful, UIType.MESSAGE, true),
-    RENTAL_FAILED(R.string.rental_failed, UIType.MESSAGE, true),
-    PAYMENT_FAILED(R.string.payment_failed, UIType.MESSAGE, true),
-    
-    // 错误状态
-    CONNECTION_FAILED(R.string.connection_failed, UIType.MESSAGE, true),
-    READER_NOT_FOUND(R.string.reader_not_found, UIType.MESSAGE, true),
-    INITIALIZATION_FAILED(R.string.initialization_failed, UIType.MESSAGE, true),
-    CANCELLED(R.string.payment_cancelled, UIType.MESSAGE, true),
-    TIMEOUT(R.string.operation_timeout, UIType.MESSAGE, true);
-    
-    /**
-     * 检查是否为错误状态
-     */
-    fun isError(): Boolean {
-        return when (this) {
-            PAYMENT_FAILED, RENTAL_FAILED, CONNECTION_FAILED,
-            READER_NOT_FOUND, INITIALIZATION_FAILED, CANCELLED, TIMEOUT -> true
-            else -> false
-        }
-    }
+    // 连接阅读器失败
+    CONNECT_READER_FAILED(R.string.connect_reader_failed, UIType.MESSAGE, true),
+    // 开始升级阅读器
+    START_UPGRADING_READER(R.string.start_upgrading_reader, UIType.LOADING, false),
+    // 升级中
+    UPGRADING(R.string.upgrading, UIType.LOADING, false),
+    // 升级失败
+    UPGRADE_FAILED(R.string.upgrade_failed, UIType.MESSAGE, true),
+    // 进入收集方式
+    ENTER_COLLECTION_METHOD(R.string.enter_collection_method, UIType.LOADING, false),
+    // 进入收集方式失败
+    ENTER_COLLECTION_METHOD_FAILED(R.string.enter_collection_method_failed, UIType.MESSAGE, true),
+    // 收集付款方式
+    COLLECTING_PAYMENT_METHOD(R.string.collecting_payment_method, UIType.TAP_TO_PAY, true),
+    // 收集付款方式失败
+    COLLECT_PAYMENT_METHOD_FAILED(R.string.collect_payment_method_failed, UIType.MESSAGE, true),
+    // 租借中
+    RENTING(R.string.renting, UIType.LOADING, true),
+    // 租借成功
+    RENT_SUCCESS(R.string.rent_success, UIType.MESSAGE, true),
+    // 租借失败
+    RENT_FAILED(R.string.rent_failed, UIType.MESSAGE, true);
 
-    /**
-     * 检查是否为成功状态
-     */
-    fun isSuccess(): Boolean {
-        return this == PAYMENT_SUCCESSFUL || this == RENTAL_SUCCESSFUL
-    }
-
-    /**
-     * 检查是否为最终状态
-     */
-    fun isFinal(): Boolean {
-        return isSuccess() || isError()
-    }
-
-    /**
-     * 检查是否为加载状态
-     */
-    fun isLoading(): Boolean {
-        return uiType == UIType.LOADING
-    }
-
-    /**
-     * 检查是否为刷卡状态
-     */
-    fun isTapToPay(): Boolean {
-        return uiType == UIType.TAP_TO_PAY
-    }
-
-    /**
-     * 检查是否为消息状态
-     */
-    fun isMessage(): Boolean {
-        return uiType == UIType.MESSAGE
-    }
-    
     /**
      * 获取格式化的显示文本
      */
@@ -128,7 +87,7 @@ enum class DisplayState(
 class StripeStateManager {
 
     // 当前的显示状态 - 这是唯一的UI状态源
-    private var currentDisplayState: DisplayState = DisplayState.INITIALIZING
+    private var currentDisplayState: DisplayState = DisplayState.LOADING
 
     // 状态监听器
     private var stateListener: StripeStateListener? = null

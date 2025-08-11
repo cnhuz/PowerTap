@@ -1,118 +1,99 @@
 <resources>
     <string name="app_name">PowerTap</string>
-    
-    <!-- Main Activity -->
-    <string name="main_description">PowerTapシェアモバイルバッテリーへようこそ！\n\nお支払い方法をお選びください：\n• ターミナル決済：デバイスの決済端末を使用\n• アプリ決済：QRコードをスキャンしてスマホで決済</string>
-    <string name="pay_with_terminal">ターミナルで支払う</string>
-    <string name="pay_with_app">アプリで支払う</string>
-    
-    <!-- Common -->
-    <string name="back">戻る</string>
-    
-    <!-- Terminal Payment -->
-    <string name="terminal_payment_title">ターミナル決済</string>
-    <string name="terminal_instructions">以下の手順で決済を完了してください：\n\n1. ターミナルで決済方法を選択\n2. カードを挿入またはNFC決済を使用\n3. パスワード入力または指紋認証\n4. 決済完了まで待機\n5. モバイルバッテリーを取り出し</string>
-    <string name="processing_payment">決済処理中...</string>
-    <string name="payment_completed">決済完了！モバイルバッテリーをお取りください</string>
-    <string name="terminal_status_info">決済状況がここに表示されます</string>
-    
-    <!-- App Payment -->
-    <string name="app_payment_title">モバイル決済</string>
-    <string name="app_instructions">右側のQRコードをスマートフォンでスキャンしてください：\n\n1. AlipayまたはWeChatを開く\n2. QRコードをスキャン\n3. 決済金額を確認\n4. 決済を完了\n5. モバイルバッテリーが出てくるまで待機</string>
-    <string name="scan_qr_code">QRコードをスキャンして決済を完了してください</string>
-    <string name="scan_with_app">このQRコードをスマートフォンでスキャン</string>
 
-    <!-- Admin -->
+    <!-- terminal页提示词 -->
+    <string name="loading">読み込み中…</string>
+    <string name="init_failed">ターミナルの初期化に失敗しました。</string>
+    <string name="scanning_reader">リーダーをスキャンしています。しばらくお待ちください。</string>
+    <string name="connecting_reader">リーダーに接続しています。しばらくお待ちください。</string>
+    <string name="connect_reader_failed">リーダーへの接続に失敗しました。もう一度お試しください。</string>
+
+    <string name="start_upgrading_reader">アップグレード中です。電源を切らないでください。進捗 0%。</string>
+    <string name="upgrading">アップグレード中です。電源を切らないでください。進捗 %d%%。</string>
+    <string name="upgrade_failed">アップグレードに失敗しました。もう一度お試しください。</string>
+
+    <string name="enter_collection_method">支払い収集モードに入ります。しばらくお待ちください。</string>
+    <string name="enter_collection_method_failed">支払い収集モードへの切り替えに失敗しました。もう一度お試しください。</string>
+
+    <string name="collecting_payment_method">支払い方法を収集中です。しばらくお待ちください。</string>
+    <string name="collect_payment_method_success">支払い方法の収集に成功しました。しばらくお待ちください。</string>
+    <string name="collect_payment_method_failed">支払い方法の収集に失敗しました。もう一度お試しください。</string>
+
+    <string name="renting">注文を作成しています。しばらくお待ちください。</string>
+    <string name="rent_success">注文が正常に作成されました。後でモバイルバッテリーが取り出されたかご確認ください。取り出されていない場合は、もう一度お試しください。</string>
+    <string name="rent_failed">注文の作成に失敗しました。もう一度お試しください。</string>
+
+    <string name="tap_card_instruction">カードまたはスマートフォンを端末にかざしてください。</string>
+    <string name="card_reader_instruction">非接触型カードではありませんか？キーパッド下のカードリーダーをご利用ください</string>
+
+    <!-- 主页 -->
+    <string name="brand_name">STW</string>
+    <string name="main_title">モバイルバッテリーを\nレンタル</string>
+    <string name="pay_with_terminal">端末で支払う</string>
+    <string name="or_text">または</string>
+    <string name="pay_with_app">アプリで支払う</string>
+
+    <!-- 管理员弹框 -->
     <string name="admin_password_title">管理者認証</string>
-    <string name="admin_password_message">アプリを終了するには管理者パスワードを入力してください</string>
+    <string name="select_operation">操作を選択してください：</string>
     <string name="admin_password_hint">管理者パスワードを入力してください</string>
+    <string name="direct_exit">直接終了</string>
     <string name="confirm">確認</string>
     <string name="cancel">キャンセル</string>
     <string name="password_incorrect">パスワードが間違っています</string>
 
-    <!-- Admin Settings -->
-    <string name="admin_settings_title">管理者設定</string>
+    <!-- Common -->
+    <string name="back">戻る</string>
+
+    <!-- 刷卡租借页 -->
+    <string name="terminal_payment_title">端末での支払い</string>
+    <string name="terminal_instructions">次の手順に従って支払いを完了してください：\n\n1. 端末で支払い方法を選択\n2. 銀行カードを挿入するかNFC決済を使用\n3. パスワード入力または指紋認証\n4. 支払い完了までお待ちください\n5. モバイルバッテリーを取り出す</string>
+    <string name="processing_payment">支払い処理中...</string>
+    <string name="payment_completed">支払いが完了しました！ モバイルバッテリーを取り出してください。</string>
+    <string name="terminal_status_info">支払い状況はここに表示されます</string>
+
+    <!-- 扫码租借页 -->
+    <string name="scan_qr_code_payment">カメラでQRコードをスキャンしてアプリをダウンロード</string>
+
+    <!-- 租借页价格信息 -->
+    <string name="pricing">料金</string>
+    <string name="temporary_deposit">一時預かり金</string>
+    <string name="deposit_refund_info">モバイルバッテリー返却後に預かり金は返金されます</string>
+    <string name="additional_charges_info">返却遅延や破損の場合、追加料金が発生する場合があります</string>
+
+    <!-- 管理员设置页按钮 -->
+    <string name="admin_settings">管理者設定</string>
     <string name="change_password">管理者パスワードを変更</string>
     <string name="set_default_language">デフォルト言語を設定</string>
     <string name="exit_app">アプリを終了</string>
-    <string name="back_to_main">メイン画面に戻る</string>
-    <string name="admin_settings">管理者設定</string>
-    <string name="direct_exit">直接終了</string>
-    <string name="select_operation">操作を選択：</string>
+    <string name="back_to_main">メインに戻る</string>
 
-    <!-- Change Password Dialog -->
+    <!-- 修改管理员密码弹窗 -->
     <string name="change_password_title">管理者パスワードを変更</string>
-    <string name="current_password">現在のパスワード：</string>
-    <string name="new_password">新しいパスワード：</string>
-    <string name="confirm_password">新しいパスワードを確認：</string>
     <string name="enter_current_password">現在のパスワードを入力してください</string>
     <string name="enter_new_password">新しいパスワードを入力してください</string>
     <string name="enter_confirm_password">新しいパスワードをもう一度入力してください</string>
     <string name="current_password_incorrect">現在のパスワードが間違っています</string>
     <string name="new_password_empty">新しいパスワードは空にできません</string>
-    <string name="password_mismatch">2回入力したパスワードが一致しません</string>
     <string name="password_changed_success">パスワードが正常に変更されました</string>
+    <string name="password_mismatch">パスワードが一致しません</string>
 
-    <!-- Language Settings -->
+    <!-- 计划移除 -->
+    <string name="new_password">新しいパスワード：</string>
+    <string name="current_password">現在のパスワード：</string>
+    <string name="confirm_password">新しいパスワードの確認：</string>
+
+    <!-- 修改默认语言弹窗 -->
     <string name="set_default_language_title">デフォルト言語を設定</string>
-    <string name="language_chinese">中文</string>
-    <string name="language_english">English</string>
+    <string name="language_chinese">中国語</string>
+    <string name="language_english">英語</string>
     <string name="language_japanese">日本語</string>
-    <string name="language_german">Deutsch</string>
-    <string name="language_russian">Русский</string>
-    <string name="default_language_set">デフォルト言語が設定されました：%s</string>
+    <string name="language_german">ドイツ語</string>
+    <string name="language_russian">ロシア語</string>
+    <string name="default_language_set">デフォルト言語が設定されました: %s</string>
 
-    <!-- Exit Confirmation -->
-    <string name="exit_confirmation_title">終了確認</string>
-    <string name="exit_confirmation_message">本当にアプリを終了しますか？</string>
+    <!-- 退出app弹窗 -->
+    <string name="exit_confirmation_title">終了の確認</string>
+    <string name="exit_confirmation_message">アプリを終了してもよろしいですか？</string>
 
-    <!-- Toast Messages -->
-    <string name="using_basic_protection">基本保護モードを使用</string>
-    <string name="enable_full_protection">完全保護モードを有効化</string>
-    <string name="insufficient_permission">権限不足、基本保護モードを使用</string>
-
-    <!-- Pricing -->
-    <string name="pricing_title">レンタル料金</string>
-    <string name="pricing_description">時間制課金、最低1時間</string>
-    <string name="hourly_rate">1時間 $2.99</string>
-    <string name="daily_rate">1日 $9.99</string>
-    <string name="additional_charges_info">返却遅延や損傷により追加料金が発生する場合があります</string>
-
-    <!-- QR Code Payment -->
-    <string name="scan_qr_code_payment">QRコード決済をスキャン</string>
-
-    <!-- Terminal Status Messages -->
-    <string name="initializing">初期化中...</string>
-    <string name="discovering_readers">カードリーダーを検索中...</string>
-    <string name="reader_found">カードリーダーが見つかりました</string>
-    <string name="connecting_to_reader">カードリーダーに接続中...</string>
-    <string name="reader_connected">カードリーダーが接続されました</string>
-    <string name="waiting_for_card">カードをスワイプまたはチップカードを挿入してください</string>
-    <string name="confirming_payment">決済確認中...</string>
-    <string name="payment_successful">決済成功！</string>
-    <string name="payment_failed">決済失敗、再試行してください</string>
-    <string name="payment_cancelled">決済がキャンセルされました</string>
-    <string name="reader_not_found">カードリーダーが見つかりません</string>
-    <string name="connection_failed">接続失敗</string>
-    <string name="initialization_failed">初期化失敗</string>
-    <string name="timeout">操作タイムアウト</string>
-    <string name="calling_rental_api">レンタルAPIを呼び出し中...</string>
-    <string name="rental_successful">レンタル成功！</string>
-    <string name="rental_failed">レンタル失敗。再試行してください。</string>
-
-    <!-- Terminal右侧消息提示 -->
-    <string name="message_payment_successful">決済方法の収集が成功しました。お待ちください。</string>
-    <string name="message_rental_successful">注文が正常に作成されました。後でモバイルバッテリーが出てきたかご確認ください。出てこない場合は再試行してください。</string>
-    <string name="message_rental_failed">注文の作成に失敗しました。再試行してください。\n%1$s</string>
-    <string name="message_payment_failed">決済方法の収集に失敗しました。再試行してください。</string>
-    <string name="message_payment_cancelled">決済がキャンセルされました\nユーザーによって決済がキャンセルされました。\n再試行するか、戻るボタンを押して戻ってください。</string>
-    <string name="message_rental_default">注文が正常に作成されました</string>
-    <string name="message_connect_success">USBリーダー接続成功</string>
-    <string name="message_upgrading_start">アップグレード中、電源を切らないでください、進行状況 0%%。</string>
-    <string name="message_upgrading">アップグレード中、電源を切らないでください、進行状況 %1$d%%。</string>
-
-    <!-- Main Page -->
-    <string name="brand_name">STW</string>
-    <string name="main_title">モバイルバッテリーを\nレンタル</string>
-    <string name="or_text">または</string>
 </resources>

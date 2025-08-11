@@ -79,7 +79,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/per_60_minutes"
+                        android:text="/per_60_minutes"
                         android:textSize="28sp"
                         android:textColor="@color/text_secondary"
                         android:gravity="start" />
@@ -106,7 +106,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/per_1_day"
+                        android:text="/per_1_day"
                         android:textSize="28sp"
                         android:textColor="@color/text_secondary"
                         android:gravity="start" />
@@ -200,7 +200,7 @@
                     android:id="@+id/loading_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/processing_payment_loading"
+                    android:text="@string/loading"
                     android:textSize="70sp"
                     android:textColor="@color/text_primary"
                     android:textStyle="normal"

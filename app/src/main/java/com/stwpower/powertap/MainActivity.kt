@@ -407,7 +407,6 @@ class MainActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.admin_password_title))
-            .setMessage(getString(R.string.select_operation))
             .setView(container)
             .setPositiveButton(getString(R.string.admin_settings)) { _, _ ->
                 val inputPassword = editText.text.toString()

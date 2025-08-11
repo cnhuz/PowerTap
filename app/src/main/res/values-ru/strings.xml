@@ -1,118 +1,99 @@
 <resources>
     <string name="app_name">PowerTap</string>
 
-    <!-- Main Activity -->
-    <string name="main_description">Добро пожаловать в PowerTap - аренда павербанков!\n\nПожалуйста, выберите способ оплаты:\n• Оплата через терминал: Используйте платёжный терминал на устройстве\n• Оплата через телефон: Отсканируйте QR-код для мобильной оплаты</string>
-    <string name="pay_with_terminal">ОПЛАТА ЧЕРЕЗ ТЕРМИНАЛ</string>
-    <string name="pay_with_app">ОПЛАТА ЧЕРЕЗ ПРИЛОЖЕНИЕ</string>
+    <!-- terminal页提示词 -->
+    <string name="loading">Загрузка…</string>
+    <string name="init_failed">Не удалось инициализировать терминал.</string>
+    <string name="scanning_reader">Поиск считывателя, пожалуйста, подождите.</string>
+    <string name="connecting_reader">Подключение к считывателю, пожалуйста, подождите.</string>
+    <string name="connect_reader_failed">Не удалось подключиться к считывателю, повторите попытку.</string>
 
-    <!-- Common -->
-    <string name="back">Назад</string>
+    <string name="start_upgrading_reader">Обновление, не выключайте питание. Прогресс 0%.</string>
+    <string name="upgrading">Обновление, не выключайте питание. Прогресс %d%%.</string>
+    <string name="upgrade_failed">Сбой обновления, повторите попытку.</string>
 
-    <!-- Terminal Payment -->
-    <string name="terminal_payment_title">Оплата через терминал</string>
-    <string name="terminal_instructions">Пожалуйста, следуйте этим шагам для оплаты:\n\n1. Выберите способ оплаты на терминале\n2. Вставьте банковскую карту или используйте NFC\n3. Введите пароль или подтвердите отпечатком пальца\n4. Дождитесь подтверждения оплаты\n5. Извлеките павербанк</string>
-    <string name="processing_payment">Обработка платежа...</string>
-    <string name="payment_completed">Оплата завершена! Пожалуйста, извлеките павербанк</string>
-    <string name="terminal_status_info">Статус платежа будет отображён здесь</string>
+    <string name="enter_collection_method">Переход в режим приема платежей, пожалуйста, подождите.</string>
+    <string name="enter_collection_method_failed">Не удалось войти в режим приема платежей, повторите попытку.</string>
 
-    <!-- App Payment -->
-    <string name="app_payment_title">Оплата через телефон</string>
-    <string name="app_instructions">Пожалуйста, отсканируйте QR-код справа вашим телефоном:\n\n1. Откройте Alipay или WeChat\n2. Отсканируйте QR-код\n3. Подтвердите сумму платежа\n4. Завершите оплату\n5. Дождитесь выдачи павербанка</string>
-    <string name="scan_qr_code">Пожалуйста, отсканируйте QR-код для оплаты</string>
-    <string name="scan_with_app">Отсканируйте этот QR-код вашим телефоном</string>
+    <string name="collecting_payment_method">Сбор информации о способе оплаты, пожалуйста, подождите.</string>
+    <string name="collect_payment_method_success">Способ оплаты успешно собран, пожалуйста, подождите.</string>
+    <string name="collect_payment_method_failed">Не удалось собрать способ оплаты, повторите попытку.</string>
 
-    <!-- Admin -->
+    <string name="renting">Создание заказа, пожалуйста, подождите.</string>
+    <string name="rent_success">Заказ успешно создан. Позже проверьте, выдана ли пауэрбанк. Если нет, повторите попытку.</string>
+    <string name="rent_failed">Не удалось создать заказ, повторите попытку.</string>
+
+    <string name="tap_card_instruction">Приложите карту или телефон к терминалу.</string>
+    <string name="card_reader_instruction">Не бесконтактная карта? Картридер под клавиатурой</string>
+
+    <!-- 主页 -->
+    <string name="brand_name">STW</string>
+    <string name="main_title">АРЕНДУЙТЕ\nПАУЭРБАНК</string>
+    <string name="pay_with_terminal">ОПЛАТИТЬ ЧЕРЕЗ ТЕРМИНАЛ</string>
+    <string name="or_text">ИЛИ</string>
+    <string name="pay_with_app">ОПЛАТИТЬ ЧЕРЕЗ ПРИЛОЖЕНИЕ</string>
+
+    <!-- 管理员弹框 -->
     <string name="admin_password_title">Проверка администратора</string>
-    <string name="admin_password_message">Пожалуйста, введите пароль администратора для выхода из приложения</string>
+    <string name="select_operation">Выберите операцию:</string>
     <string name="admin_password_hint">Введите пароль администратора</string>
+    <string name="direct_exit">Выйти напрямую</string>
     <string name="confirm">Подтвердить</string>
     <string name="cancel">Отмена</string>
     <string name="password_incorrect">Неверный пароль</string>
 
-    <!-- Admin Settings -->
-    <string name="admin_settings_title">Настройки администратора</string>
+    <!-- Common -->
+    <string name="back">Назад</string>
+
+    <!-- 刷卡租借页 -->
+    <string name="terminal_payment_title">Оплата через терминал</string>
+    <string name="terminal_instructions">Пожалуйста, выполните следующие шаги для завершения оплаты:\n\n1. Выберите способ оплаты на терминале\n2. Вставьте банковскую карту или используйте NFC-оплату\n3. Введите пароль или подтвердите отпечатком пальца\n4. Дождитесь завершения оплаты\n5. Заберите пауэрбанк</string>
+    <string name="processing_payment">Обработка платежа...</string>
+    <string name="payment_completed">Оплата завершена! Заберите пауэрбанк.</string>
+    <string name="terminal_status_info">Статус платежа будет отображаться здесь</string>
+
+    <!-- 扫码租借页 -->
+    <string name="scan_qr_code_payment">Отсканируйте QR-код камерой, чтобы скачать приложение</string>
+
+    <!-- 租借页价格信息 -->
+    <string name="pricing">ЦЕНЫ</string>
+    <string name="temporary_deposit">ЗАЛОГ</string>
+    <string name="deposit_refund_info">Залог будет возвращен после возврата пауэрбанка</string>
+    <string name="additional_charges_info">Могут взиматься дополнительные сборы за поздний возврат или повреждения</string>
+
+    <!-- 管理员设置页按钮 -->
+    <string name="admin_settings">Настройки администратора</string>
     <string name="change_password">Изменить пароль администратора</string>
     <string name="set_default_language">Установить язык по умолчанию</string>
     <string name="exit_app">Выйти из приложения</string>
-    <string name="back_to_main">Вернуться в главное меню</string>
-    <string name="admin_settings">Настройки администратора</string>
-    <string name="direct_exit">Прямой выход</string>
-    <string name="select_operation">Выберите операцию:</string>
+    <string name="back_to_main">Вернуться на главный экран</string>
 
-    <!-- Change Password Dialog -->
+    <!-- 修改管理员密码弹窗 -->
     <string name="change_password_title">Изменить пароль администратора</string>
-    <string name="current_password">Текущий пароль:</string>
-    <string name="new_password">Новый пароль:</string>
-    <string name="confirm_password">Подтвердить новый пароль:</string>
-    <string name="enter_current_password">Пожалуйста, введите текущий пароль</string>
-    <string name="enter_new_password">Пожалуйста, введите новый пароль</string>
-    <string name="enter_confirm_password">Пожалуйста, введите новый пароль еще раз</string>
+    <string name="enter_current_password">Введите текущий пароль</string>
+    <string name="enter_new_password">Введите новый пароль</string>
+    <string name="enter_confirm_password">Введите новый пароль еще раз</string>
     <string name="current_password_incorrect">Текущий пароль неверен</string>
     <string name="new_password_empty">Новый пароль не может быть пустым</string>
-    <string name="password_mismatch">Пароли не совпадают</string>
     <string name="password_changed_success">Пароль успешно изменен</string>
+    <string name="password_mismatch">Пароли не совпадают</string>
 
-    <!-- Language Settings -->
+    <!-- 计划移除 -->
+    <string name="new_password">Новый пароль:</string>
+    <string name="current_password">Текущий пароль:</string>
+    <string name="confirm_password">Подтвердите новый пароль:</string>
+
+    <!-- 修改默认语言弹窗 -->
     <string name="set_default_language_title">Установить язык по умолчанию</string>
-    <string name="language_chinese">中文</string>
-    <string name="language_english">English</string>
-    <string name="language_japanese">日本語</string>
-    <string name="language_german">Deutsch</string>
+    <string name="language_chinese">Китайский</string>
+    <string name="language_english">Английский</string>
+    <string name="language_japanese">Японский</string>
+    <string name="language_german">Немецкий</string>
     <string name="language_russian">Русский</string>
     <string name="default_language_set">Язык по умолчанию установлен: %s</string>
 
-    <!-- Exit Confirmation -->
-    <string name="exit_confirmation_title">Подтвердить выход</string>
-    <string name="exit_confirmation_message">Вы уверены, что хотите выйти из приложения?</string>
+    <!-- 退出app弹窗 -->
+    <string name="exit_confirmation_title">Подтверждение выхода</string>
+    <string name="exit_confirmation_message">Вы действительно хотите выйти из приложения?</string>
 
-    <!-- Toast Messages -->
-    <string name="using_basic_protection">Использование базового режима защиты</string>
-    <string name="enable_full_protection">Включить полный режим защиты</string>
-    <string name="insufficient_permission">Недостаточно разрешений, использование базового режима защиты</string>
-
-    <!-- Pricing -->
-    <string name="pricing_title">Цена аренды</string>
-    <string name="pricing_description">Почасовая оплата, минимум 1 час</string>
-    <string name="hourly_rate">$2.99 в час</string>
-    <string name="daily_rate">$9.99 в день</string>
-    <string name="additional_charges_info">Дополнительные сборы могут применяться за позднее возвращение или повреждение</string>
-
-    <!-- QR Code Payment -->
-    <string name="scan_qr_code_payment">Сканировать QR-код для оплаты</string>
-
-    <!-- Terminal Status Messages -->
-    <string name="initializing">Инициализация...</string>
-    <string name="discovering_readers">Поиск картридера...</string>
-    <string name="reader_found">Картридер найден</string>
-    <string name="connecting_to_reader">Подключение к картридеру...</string>
-    <string name="reader_connected">Картридер подключен</string>
-    <string name="waiting_for_card">Пожалуйста, проведите карту или вставьте чип-карту</string>
-    <string name="confirming_payment">Подтверждение платежа...</string>
-    <string name="payment_successful">Оплата успешна!</string>
-    <string name="payment_failed">Оплата не удалась, попробуйте еще раз</string>
-    <string name="payment_cancelled">Оплата отменена</string>
-    <string name="reader_not_found">Картридер не найден</string>
-    <string name="connection_failed">Ошибка подключения</string>
-    <string name="initialization_failed">Ошибка инициализации</string>
-    <string name="timeout">Время операции истекло</string>
-    <string name="calling_rental_api">Вызов API аренды...</string>
-    <string name="rental_successful">Аренда успешна!</string>
-    <string name="rental_failed">Аренда не удалась. Попробуйте еще раз.</string>
-
-    <!-- Terminal右侧消息提示 -->
-    <string name="message_payment_successful">Сбор способов оплаты успешен, пожалуйста, подождите.</string>
-    <string name="message_rental_successful">Заказ успешно создан, пожалуйста, проверьте позже, выскочил ли павербанк. Если нет, попробуйте еще раз.</string>
-    <string name="message_rental_failed">Не удалось создать заказ, попробуйте еще раз.\n%1$s</string>
-    <string name="message_payment_failed">Сбор способов оплаты не удался, попробуйте еще раз.</string>
-    <string name="message_payment_cancelled">Оплата отменена\nОплата была отменена пользователем.\nВы можете попробовать еще раз или нажать назад для возврата.</string>
-    <string name="message_rental_default">Заказ успешно создан</string>
-    <string name="message_connect_success">USB-ридер успешно подключен</string>
-    <string name="message_upgrading_start">Обновление, пожалуйста, не выключайте питание, прогресс 0%%.</string>
-    <string name="message_upgrading">Обновление, пожалуйста, не выключайте питание, прогресс %1$d%%.</string>
-
-    <!-- Main Page -->
-    <string name="brand_name">STW</string>
-    <string name="main_title">АРЕНДОВАТЬ\nПАВЕРБАНК</string>
-    <string name="or_text">ИЛИ</string>
 </resources>
