@@ -260,9 +260,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      *    ↓
      * updateUIForDisplayState（最终UI更新执行）
      */
-    override fun onDisplayStateChanged(displayState: DisplayState) {
+    override fun onDisplayStateChanged(displayState: DisplayState, message: String) {
         runOnUiThread {
-            updateUIForDisplayState(displayState)
+            updateUIForDisplayState(displayState, message)
         }
     }
 
@@ -286,7 +286,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
 
     // 根据DisplayState更新UI
-    private fun updateUIForDisplayState(displayState: DisplayState) {
+    private fun updateUIForDisplayState(displayState: DisplayState, message: String) {
         Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
 
         // 根据UIType决定UI展示方式
@@ -294,7 +294,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             UIType.LOADING -> {
                 // Type 1: 进度环+文字
                 showLoadingState()
-                loadingText.text = displayState.getFormattedText(this)
+                loadingText.text = displayState.getFormattedText(this, message)
                 loadingText.setTextColor(getColor(R.color.text_primary))
 
                 isProcessing = true
@@ -307,7 +307,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                 try {
                     Log.d("TerminalPayment", "开始更新TAP_TO_PAY页面")
                     showCompletedState()
-                    loadingText.text = displayState.getFormattedText(this)
+                    loadingText.text = displayState.getFormattedText(this, message)
 
                     // 等待刷卡状态显示蓝色文本
                     if (displayState == DisplayState.COLLECTING_PAYMENT_METHOD) {
@@ -328,8 +328,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
             UIType.MESSAGE -> {
                 // Type 3: 只展示白色粗体文字
-                //TODO 需要支持代入动态文本，如具体的报错信息
-                showMessage(displayState.getFormattedText(this))
+                showMessage(displayState.getFormattedText(this, message))
 
                 isProcessing = false
                 backButton.isEnabled = displayState.canGoBack
@@ -495,10 +494,10 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             Log.w("TerminalPayment", "Terminal not ready, updating state through TerminalManager")
             if (::terminalManager.isInitialized) {
                 // 通过统一入口更新状态
-                terminalManager.updateDisplayState(DisplayState.LOADING)
+                terminalManager.updateDisplayState(DisplayState.LOADING, "")
             } else {
                 // 如果TerminalManager还没初始化，直接更新UI（这种情况很少见）
-                updateUIForDisplayState(DisplayState.INIT_FAILED)
+                updateUIForDisplayState(DisplayState.INIT_FAILED, "")
             }
 
             val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)
