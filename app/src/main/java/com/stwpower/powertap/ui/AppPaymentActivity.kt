@@ -1,5 +1,6 @@
 package com.stwpower.powertap.ui
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
@@ -26,6 +27,10 @@ import com.stwpower.powertap.config.ConfigLoader
 import com.stwpower.powertap.utils.OptimizedQRGenerator
 import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.QRCodeUrlProcessor
+import com.stwpower.powertap.utils.ChargeRuleManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 
 class AppPaymentActivity : AppCompatActivity() {
@@ -103,16 +108,19 @@ class AppPaymentActivity : AppCompatActivity() {
         // 设置圆角背景
         setRoundedBackground(backButton, Color.parseColor("#868D91"), 10f)
 
+        // 初始状态：按钮禁用，显示为灰色
         backButton.isEnabled = false
         backButton.alpha = 0.5f
 
         backButton.setOnClickListener {
-            if (!isProcessing) {
-                // 取消倒计时器
-                countDownTimer?.cancel()
-                finish()
-            }
+            // 用户主动离开页面，取消所有协程
+            Log.d("AppPayment", "用户主动离开App支付页面")
+            qrCodeJob?.cancel()
+            finish()
         }
+        
+        // 更新价格信息
+        updatePriceInfo()
     }
 
     private fun setRoundedBackground(button: Button, color: Int, radius: Float) {
@@ -151,13 +159,46 @@ class AppPaymentActivity : AppCompatActivity() {
      * 显示QR码加载状态
      */
     private fun showQRCodeLoading() {
-        Log.d("AppPayment", "显示QR码加载状态")
-        // 二维码区域显示加载环（无文字）
-        qrLoadingLayout.visibility = View.VISIBLE
         qrCodeImage.visibility = View.GONE
+        qrLoadingLayout.visibility = View.VISIBLE
+    }
 
-        // 下方文字显示loading说明
-        qrCodeText.text = "loading"
+    /**
+     * 更新价格信息
+     */
+    private fun updatePriceInfo() {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val chargeRule = ChargeRuleManager.getChargeRule(this@AppPaymentActivity)
+                if (chargeRule != null) {
+                    // 更新单位时间价格
+                    val pricePerHourValue = findViewById<TextView>(R.id.price_per_hour_value)
+                    pricePerHourValue.text = ChargeRuleManager.formatPrice(chargeRule.oneMoneyUnit)
+                    
+                    // 更新单位时间描述
+                    val pricePerHourText = findViewById<TextView>(R.id.price_per_hour_text)
+                    pricePerHourText.text = ChargeRuleManager.getPerHourText(chargeRule.oneMoneyUnit, chargeRule.hourUnit)
+                    
+                    // 更新每天最大金额
+                    val pricePerDayValue = findViewById<TextView>(R.id.price_per_day_value)
+                    pricePerDayValue.text = ChargeRuleManager.formatPrice(chargeRule.maxPerMoney)
+                    
+                    // 更新每天价格描述
+                    val pricePerDayText = findViewById<TextView>(R.id.price_per_day_text)
+                    pricePerDayText.text = ChargeRuleManager.getPerDayText(chargeRule.maxPerMoney)
+                    
+                    // 更新押金金额
+                    val depositValue = findViewById<TextView>(R.id.deposit_value)
+                    depositValue.text = ChargeRuleManager.formatPrice(chargeRule.reportLoss)
+                    
+                    Log.d("AppPayment", "价格信息更新成功")
+                } else {
+                    Log.w("AppPayment", "无法获取充电规则，使用默认价格")
+                }
+            } catch (e: Exception) {
+                Log.e("AppPayment", "更新价格信息时出错", e)
+            }
+        }
     }
 
     /**

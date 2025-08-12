@@ -68,6 +68,6 @@ interface MyApiService {
     fun getOrderInfoByPowerBankId(@Query("powerBankId") powerBankId: String): Call<MyResponse>
 
     /** 查询收费规则 */
-    @GET("/getChargeRuleByQrCode/{qrCode}")
+    @GET("api/branches/getChargeRuleByQrCode/{qrCode}")
     fun getChargeRuleByQrCode(@Path("qrCode") qrCode: String): Call<MyResponse>
 }

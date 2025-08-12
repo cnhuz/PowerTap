@@ -3,6 +3,10 @@ package com.stwpower.powertap
 import android.app.Application
 import android.util.Log
 import com.stwpower.powertap.config.ConfigLoader
+import com.stwpower.powertap.utils.ChargeRuleManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class PowerTapApplication : Application() {
 
@@ -30,11 +34,33 @@ class PowerTapApplication : Application() {
         // 加载配置
         loadConfig()
 
+        // 预加载收费规则
+        preloadChargeRule()
+
         Log.d(TAG, "PowerTap Application initialized successfully")
     }
 
     private fun loadConfig() {
         configLoader = ConfigLoader(this)
         configLoader.loadConfig()
+    }
+
+    /**
+     * 预加载收费规则
+     */
+    private fun preloadChargeRule() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                Log.d(TAG, "开始预加载收费规则...")
+                val chargeRule = ChargeRuleManager.getChargeRule(this@PowerTapApplication)
+                if (chargeRule != null) {
+                    Log.d(TAG, "收费规则预加载成功: $chargeRule")
+                } else {
+                    Log.w(TAG, "收费规则预加载失败或无数据")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "预加载收费规则时出错", e)
+            }
+        }
     }
 }

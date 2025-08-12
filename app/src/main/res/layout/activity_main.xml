@@ -56,6 +56,7 @@
 
             <!-- Price Info - Fixed Height -->
             <TextView
+                android:id="@+id/tv_price_info"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:text="5.00$ / 60minutes"

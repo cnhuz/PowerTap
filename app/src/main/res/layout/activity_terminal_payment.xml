@@ -59,7 +59,7 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="30dp">
 
-                <!-- 左列：60分钟价格 -->
+                <!-- 左列：单位时间价格 -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -68,6 +68,7 @@
                     android:layout_marginEnd="10dp">
 
                     <TextView
+                        android:id="@+id/price_per_hour_value"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="5.00$"
@@ -77,16 +78,17 @@
                         android:gravity="start" />
 
                     <TextView
+                        android:id="@+id/price_per_hour_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="/per_60_minutes"
+                        android:text="60"
                         android:textSize="28sp"
                         android:textColor="@color/text_secondary"
                         android:gravity="start" />
 
                 </LinearLayout>
 
-                <!-- 右列：1天价格 -->
+                <!-- 右列：每天最大金额 -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -95,6 +97,7 @@
                     android:layout_marginStart="10dp">
 
                     <TextView
+                        android:id="@+id/price_per_day_value"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="15.00$"
@@ -104,9 +107,10 @@
                         android:gravity="start" />
 
                     <TextView
+                        android:id="@+id/price_per_day_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="/per_1_day"
+                        android:text="/1 Day"
                         android:textSize="28sp"
                         android:textColor="@color/text_secondary"
                         android:gravity="start" />
@@ -127,6 +131,7 @@
 
             <!-- 第四块：押金价格 -->
             <TextView
+                android:id="@+id/deposit_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="20.00$"

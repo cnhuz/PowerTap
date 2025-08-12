@@ -43,6 +43,10 @@ import com.stwpower.powertap.managers.PermissionManager
 import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.QRCodeUrlProcessor
 import com.stwpower.powertap.managers.SystemPermissionManager
+import com.stwpower.powertap.utils.ChargeRuleManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -138,6 +142,9 @@ class MainActivity : AppCompatActivity() {
 
         // 预生成二维码（提升性能）
         preGenerateQRCodes()
+        
+        // 更新价格信息
+        updatePriceInfo()
     }
     
     private fun setupLanguageButtons() {
@@ -913,30 +920,50 @@ class MainActivity : AppCompatActivity() {
      * 预生成二维码（提升性能）
      */
     private fun preGenerateQRCodes() {
-        Log.d(TAG, "开始预生成二维码...")
-
         Thread {
             try {
-                // 获取qrCodeUrl和qrCode
-                val rawQrCodeUrl = ConfigLoader.qrCodeUrl
+                Log.d(TAG, "开始预生成二维码...")
                 val qrCode = PreferenceManager.getQrCode()
+                if (!qrCode.isNullOrEmpty()) {
+                    // 处理URL
+                    val processedUrl = QRCodeUrlProcessor.generateQRCodeContent(ConfigLoader.qrCodeUrl, qrCode)
+                    Log.d(TAG, "处理后的URL: $processedUrl")
 
-                // 验证和处理URL
-                if (QRCodeUrlProcessor.validateQrCodeUrl(rawQrCodeUrl) && !qrCode.isNullOrEmpty()) {
-                    // 使用工具类生成完整的二维码内容
-                    val fullQRCodeContent = QRCodeUrlProcessor.generateQRCodeContent(rawQrCodeUrl, qrCode)
-
-                    OptimizedQRGenerator.preGenerateQRCode(fullQRCodeContent, 400, "WHITE_BORDERED")
-
-                    Log.d(TAG, "二维码预生成完成")
+                    // 预生成二维码
+                    val qrCodeBitmap = OptimizedQRGenerator.generateQRCode(processedUrl, 800, "WHITE_BORDERED")
+                    if (qrCodeBitmap != null) {
+                        Log.d(TAG, "二维码预生成成功")
+                    } else {
+                        Log.w(TAG, "二维码预生成失败")
+                    }
                 } else {
-                    Log.w(TAG, "qrCodeUrl或qrCode无效，跳过预生成")
-                    Log.w(TAG, "  qrCodeUrl: ${QRCodeUrlProcessor.getProcessedUrlForLogging(rawQrCodeUrl)}")
-                    Log.w(TAG, "  qrCode: $qrCode")
+                    Log.w(TAG, "QR码为空，跳过二维码预生成")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "预生成二维码时发生异常", e)
+                Log.e(TAG, "预生成二维码时出错", e)
             }
         }.start()
+    }
+
+    /**
+     * 更新主页价格信息
+     */
+    private fun updatePriceInfo() {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val chargeRule = ChargeRuleManager.getChargeRule(this@MainActivity)
+                if (chargeRule != null) {
+                    val priceInfoText = findViewById<TextView>(R.id.tv_price_info)
+                    val priceText = ChargeRuleManager.formatPrice(chargeRule.oneMoneyUnit)
+                    val timeText = "${chargeRule.hourUnit} Min"
+                    priceInfoText.text = "$priceText / $timeText"
+                    Log.d(TAG, "主页价格信息更新成功: $priceText / $timeText")
+                } else {
+                    Log.w(TAG, "无法获取充电规则，使用默认价格信息")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "更新主页价格信息时出错", e)
+            }
+        }
     }
 }

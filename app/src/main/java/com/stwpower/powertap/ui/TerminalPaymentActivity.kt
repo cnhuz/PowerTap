@@ -10,6 +10,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
@@ -26,6 +27,10 @@ import com.stwpower.powertap.terminal.DisplayState
 import com.stwpower.powertap.terminal.UIType
 import com.stwpower.powertap.managers.PermissionManager
 import com.stwpower.powertap.managers.PreferenceManager
+import com.stwpower.powertap.utils.ChargeRuleManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.TerminalStateListener {
 
@@ -50,6 +55,13 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     
     // 标志：是否因为配置更改（如语言切换）而暂停
     private var isPausedForConfigurationChange = false
+    
+    // 价格信息相关视图
+    private lateinit var pricePerHourValue: TextView
+    private lateinit var pricePerHourText: TextView
+    private lateinit var pricePerDayValue: TextView
+    private lateinit var pricePerDayText: TextView
+    private lateinit var depositValue: TextView
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,6 +149,47 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                 // 取消倒计时器
                 countDownTimer?.cancel()
                 finish()
+            }
+        }
+        
+        // 更新价格信息
+        updatePriceInfo()
+    }
+
+    /**
+     * 更新价格信息
+     */
+    private fun updatePriceInfo() {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val chargeRule = ChargeRuleManager.getChargeRule(this@TerminalPaymentActivity)
+                if (chargeRule != null) {
+                    // 更新单位时间价格
+                    val pricePerHourValue = findViewById<TextView>(R.id.price_per_hour_value)
+                    pricePerHourValue.text = ChargeRuleManager.formatPrice(chargeRule.oneMoneyUnit)
+                    
+                    // 更新单位时间描述
+                    val pricePerHourText = findViewById<TextView>(R.id.price_per_hour_text)
+                    pricePerHourText.text = ChargeRuleManager.getPerHourText(chargeRule.oneMoneyUnit, chargeRule.hourUnit)
+                    
+                    // 更新每天最大金额
+                    val pricePerDayValue = findViewById<TextView>(R.id.price_per_day_value)
+                    pricePerDayValue.text = ChargeRuleManager.formatPrice(chargeRule.maxPerMoney)
+                    
+                    // 更新每天价格描述
+                    val pricePerDayText = findViewById<TextView>(R.id.price_per_day_text)
+                    pricePerDayText.text = ChargeRuleManager.getPerDayText(chargeRule.maxPerMoney)
+                    
+                    // 更新押金金额
+                    val depositValue = findViewById<TextView>(R.id.deposit_value)
+                    depositValue.text = ChargeRuleManager.formatPrice(chargeRule.reportLoss)
+                    
+                    Log.d("TerminalPayment", "价格信息更新成功")
+                } else {
+                    Log.w("TerminalPayment", "无法获取充电规则，使用默认价格")
+                }
+            } catch (e: Exception) {
+                Log.e("TerminalPayment", "更新价格信息时出错", e)
             }
         }
     }
