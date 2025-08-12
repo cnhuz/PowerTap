@@ -218,4 +218,10 @@ object MyApiClient {
         val result = service.getOrderInfoByPowerBankId(powerBankId).execute()
         return result.body()
     }
+
+    @Throws(IOException::class)
+    fun getChargeRuleByQrCode(qrCode: String): MyResponse? {
+        val result = service.getChargeRuleByQrCode(qrCode).execute()
+        return result.body()
+    }
 }

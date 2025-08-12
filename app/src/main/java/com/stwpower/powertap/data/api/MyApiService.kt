@@ -66,4 +66,8 @@ interface MyApiService {
     /** 根据充电宝ID获取订单信息 */
     @GET("api/borrow/getOrderInfoByPowerBankId")
     fun getOrderInfoByPowerBankId(@Query("powerBankId") powerBankId: String): Call<MyResponse>
+
+    /** 查询收费规则 */
+    @GET("/getChargeRuleByQrCode/{qrCode}")
+    fun getChargeRuleByQrCode(@Path("qrCode") qrCode: String): Call<MyResponse>
 }
