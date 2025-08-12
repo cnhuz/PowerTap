@@ -48,6 +48,9 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     private var countDownTimer: CountDownTimer? = null
     private val timeoutDuration = 60000L // 60秒
     
+    // 标志：是否因为配置更改（如语言切换）而暂停
+    private var isPausedForConfigurationChange = false
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -81,11 +84,19 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             Log.d("TerminalPayment", "Activity重建，恢复状态")
             // 如果Terminal已经在运行，不要重新初始化
             val terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
-            if (terminalManager.isPaymentInProgress()) {
-                Log.d("TerminalPayment", "Terminal支付正在进行中，恢复监听")
-                this.terminalManager = terminalManager
-                return
+            this.terminalManager = terminalManager
+            
+            // 确保视图已经完全加载后再更新UI
+            terminalManager.getCurrentDisplayState().let { currentDisplayState ->
+                Log.d("TerminalPayment", "Activity重建，当前显示状态: $currentDisplayState")
+                // 使用post确保UI更新在布局完成之后执行
+                loadingLayout.post {
+                    Log.d("TerminalPayment", "Activity重建，延迟更新UI")
+                    updateUIForDisplayState(currentDisplayState, null)
+                }
             }
+            
+            return
         }
 
         // 检查权限状态并初始化Terminal
@@ -307,23 +318,22 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                 try {
                     Log.d("TerminalPayment", "开始更新TAP_TO_PAY页面")
                     showCompletedState()
-                    loadingText.text = displayState.getFormattedText(this, message)
-
-                    // 等待刷卡状态显示蓝色文本
-                    if (displayState == DisplayState.COLLECTING_PAYMENT_METHOD) {
-                        loadingText.setTextColor(getColor(android.R.color.holo_blue_dark))
-                    } else {
-                        loadingText.setTextColor(getColor(R.color.text_primary))
-                    }
-
+                    
+                    // 记录当前布局状态用于调试
+                    Log.d("TerminalPayment", "loadingLayout.visibility: ${loadingLayout.visibility}, completedLayout.visibility: ${completedLayout.visibility}")
+                    
+                    // 在TAP_TO_PAY状态下，completed_layout应该显示固定文本和图片
+                    // 我们不需要更新任何动态文本，因为completed_layout中的文本是固定的
+                    
+                    // 设置处理状态和返回按钮
                     isProcessing = false
                     backButton.isEnabled = displayState.canGoBack
                     backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
+                    
                     Log.d("TerminalPayment", "成功更新TAP_TO_PAY页面")
-                }catch (e:Exception){
-                    Log.d("PowerTap","进入TapToPay UI异常",e)
+                } catch (e: Exception) {
+                    Log.e("TerminalPayment", "进入TapToPay UI异常", e)
                 }
-
             }
 
             UIType.MESSAGE -> {
@@ -345,9 +355,11 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     private fun showCompletedState() {
+        Log.d("TerminalPayment", "显示完成状态: 隐藏loadingLayout，显示completedLayout")
         loadingLayout.visibility = View.GONE
         completedLayout.visibility = View.VISIBLE
         messageLayout.visibility = View.GONE
+        Log.d("TerminalPayment", "完成状态显示完成: loadingLayout.visibility=${loadingLayout.visibility}, completedLayout.visibility=${completedLayout.visibility}")
     }
 
     /**
@@ -436,6 +448,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     override fun onDestroy() {
         Log.d("TerminalPayment", "=== onDestroy 被调用 ===")
         Log.d("TerminalPayment", "isFinishing: $isFinishing")
+        Log.d("TerminalPayment", "isChangingConfigurations: $isChangingConfigurations")
         Log.d("TerminalPayment", "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
 
         super.onDestroy()
@@ -445,15 +458,24 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         // 清理消息延迟任务（如果有的话）
         messageDelayRunnable?.let { messageDelayHandler?.removeCallbacks(it) }
 
-        // 如果不是正常finish，说明Activity被系统意外销毁
-        if (!isFinishing) {
-            Log.w("TerminalPayment", "Activity被系统意外销毁，但用户可能还在Terminal页面")
+        // 检查是否是因为配置更改（如语言切换）导致的Activity重建
+        val isConfigurationChange = isChangingConfigurations
+        
+        // 如果不是正常finish，或者是因为配置更改导致的销毁，说明Activity被系统意外销毁或正在重建
+        if (!isFinishing || isConfigurationChange) {
+            if (isConfigurationChange) {
+                Log.d("TerminalPayment", "Activity因配置更改（如语言切换）而重建，保持支付收集")
+            } else {
+                Log.w("TerminalPayment", "Activity被系统意外销毁，但用户可能还在Terminal页面")
+            }
             // 不要暂停支付收集，让Terminal继续运行
             // 用户可能还期望Terminal功能继续工作
         } else {
             Log.d("TerminalPayment", "Activity正常结束，暂停支付收集")
             // 暂停支付收集但保持阅读器连接
             TerminalConnectionManager.pausePaymentCollection()
+            // 重置配置更改标志
+            TerminalConnectionManager.setPausedForConfigurationChange(false)
         }
 
         Log.d("TerminalPayment", "TerminalPaymentActivity destroyed, connection maintained")

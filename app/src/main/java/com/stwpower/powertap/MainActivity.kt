@@ -537,10 +537,15 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        Log.d(TAG, "MainActivity onDestroy - 应用退出，完全断开Terminal连接")
-
-        // 完全断开Terminal连接
-        TerminalConnectionManager.disconnect()
+        // 检查是否是因为配置更改（如语言切换）导致的Activity重建
+        if (isChangingConfigurations) {
+            Log.d(TAG, "MainActivity onDestroy - 因配置更改重建，保持Terminal连接")
+            TerminalConnectionManager.setPausedForConfigurationChange(true)
+        } else {
+            Log.d(TAG, "MainActivity onDestroy - 应用退出，完全断开Terminal连接")
+            // 完全断开Terminal连接
+            TerminalConnectionManager.disconnect()
+        }
 
         // 只有在管理员退出时才真正禁用
         if (::fullscreenManager.isInitialized) {

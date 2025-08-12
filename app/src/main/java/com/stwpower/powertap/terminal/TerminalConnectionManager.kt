@@ -16,6 +16,7 @@ object TerminalConnectionManager {
     
     private var terminalManager: StripeTerminalManager? = null
     private var isInitialized = false
+    private var isPausedForConfigurationChange = false
     
     /**
      * 获取或创建TerminalManager实例
@@ -56,7 +57,11 @@ object TerminalConnectionManager {
      */
     fun pausePaymentCollection() {
         Log.d(TAG, "暂停支付收集")
-        terminalManager?.pausePaymentCollection()
+        if (!isPausedForConfigurationChange) {
+            terminalManager?.pausePaymentCollection()
+        } else {
+            Log.d(TAG, "因配置更改暂停，保持支付收集")
+        }
     }
     
     /**
@@ -75,6 +80,14 @@ object TerminalConnectionManager {
         terminalManager?.disconnect()
         terminalManager = null
         isInitialized = false
+        isPausedForConfigurationChange = false
+    }
+    
+    /**
+     * 设置配置更改标志
+     */
+    fun setPausedForConfigurationChange(paused: Boolean) {
+        isPausedForConfigurationChange = paused
     }
     
     /**
