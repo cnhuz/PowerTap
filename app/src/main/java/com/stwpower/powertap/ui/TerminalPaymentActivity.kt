@@ -260,7 +260,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      *    ↓
      * updateUIForDisplayState（最终UI更新执行）
      */
-    override fun onDisplayStateChanged(displayState: DisplayState, message: String) {
+    override fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?) {
         runOnUiThread {
             updateUIForDisplayState(displayState, message)
         }
@@ -286,7 +286,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
 
     // 根据DisplayState更新UI
-    private fun updateUIForDisplayState(displayState: DisplayState, message: String) {
+    private fun updateUIForDisplayState(displayState: DisplayState, vararg message: Any?) {
         Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
 
         // 根据UIType决定UI展示方式
@@ -494,10 +494,10 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             Log.w("TerminalPayment", "Terminal not ready, updating state through TerminalManager")
             if (::terminalManager.isInitialized) {
                 // 通过统一入口更新状态
-                terminalManager.updateDisplayState(DisplayState.LOADING, "")
+                terminalManager.updateDisplayState(DisplayState.LOADING, null)
             } else {
                 // 如果TerminalManager还没初始化，直接更新UI（这种情况很少见）
-                updateUIForDisplayState(DisplayState.INIT_FAILED, "")
+                updateUIForDisplayState(DisplayState.INIT_FAILED, null)
             }
 
             val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)

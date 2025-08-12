@@ -75,8 +75,8 @@ enum class DisplayState(
     /**
      * 获取格式化的显示文本
      */
-    fun getFormattedText(context: Context,message: String): String {
-        return context.getString(stringResId, message)
+    fun getFormattedText(context: Context,vararg formatArgs: Any?): String {
+        return context.getString(stringResId, formatArgs)
     }
 }
 
@@ -93,7 +93,7 @@ class StripeStateManager {
     private var stateListener: StripeStateListener? = null
     
     interface StripeStateListener {
-        fun onDisplayStateChanged(displayState: DisplayState, message: String) // 统一状态管理监听器
+        fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?) // 统一状态管理监听器
     }
 
     fun setStateListener(listener: StripeStateListener) {
@@ -104,7 +104,7 @@ class StripeStateManager {
      * 统一的状态更新入口
      * 所有状态变化都通过这个方法更新DisplayState
      */
-    fun updateDisplayState(newState: DisplayState, message: String) {
+    fun updateDisplayState(newState: DisplayState, vararg message: Any?) {
         if (currentDisplayState != newState) {
             currentDisplayState = newState
             Log.d("StripeStateManager", "DisplayState更新: $currentDisplayState")
