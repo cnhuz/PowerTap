@@ -2,12 +2,16 @@ package com.stwpower.powertap.config
 
 import android.content.Context
 import android.util.Log
+import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class ConfigLoader(private val context: Context) {
 
     companion object {
         private const val TAG = "powertap"
         private const val CONFIG_FILE = "/sdcard/Player/config.txt"
+        private const val DEVINFO_FILE = "/sdcard/devinfo.txt"
 
         // 静态配置变量 - 可以直接引用
         @JvmStatic
@@ -24,22 +28,40 @@ class ConfigLoader(private val context: Context) {
 
         @JvmStatic
         var enableDebug: Boolean = false
+        
+        @JvmStatic
+        var currency: String = "$" // 默认货币符号
+        
+        // 配置加载状态
+        @JvmStatic
+        var isConfigLoaded = false
+        
+        @JvmStatic
+        var configLoadError: String? = null
     }
     
     /**
-     * 从/sdcard/Player/config.txt读取配置文件
+     * 从/sdcard/Player/config.txt读取配置文件（同步方式）
      */
     fun loadConfig() {
+        Log.d(TAG, "开始加载配置文件...")
         try {
-            val configFile = java.io.File(CONFIG_FILE)
+            val configFile = File(CONFIG_FILE)
+            Log.d(TAG, "检查配置文件是否存在: ${configFile.exists()}, 可读: ${configFile.canRead()}")
             if (configFile.exists() && configFile.canRead()) {
-                configFile.readLines().forEach { line ->
+                val lines = configFile.readLines()
+                Log.d(TAG, "读取到配置文件内容，共 ${lines.size} 行")
+                lines.forEach { line ->
                     parseLine(line.trim())
                 }
                 Log.d(TAG, "Config loaded successfully from $CONFIG_FILE")
+                isConfigLoaded = true
+                configLoadError = null
             } else {
                 Log.w(TAG, "Config file not found or not readable: $CONFIG_FILE")
                 setDefaultValues()
+                isConfigLoaded = true
+                configLoadError = "Config file not found"
             }
 
             // 读取IMEI信息
@@ -53,6 +75,8 @@ class ConfigLoader(private val context: Context) {
             // 即使配置文件读取失败，仍然尝试读取IMEI
             loadImeiFromFile()
             logConfig()
+            isConfigLoaded = true
+            configLoadError = e.message
         }
     }
     
@@ -76,6 +100,8 @@ class ConfigLoader(private val context: Context) {
             "baseUrl" -> apiUrl = value
             "secretKey" -> secretKey = value
             "qrCodeUrl" -> qrCodeUrl = value
+            "currency" -> currency = value // 添加currency字段支持
+            "enableDebug" -> enableDebug = value.equals("true", ignoreCase = true)
             else -> Log.w(TAG, "Unknown config key: $key")
         }
     }
@@ -84,24 +110,23 @@ class ConfigLoader(private val context: Context) {
      * 从/sdcard/devinfo.txt读取IMEI信息
      */
     private fun loadImeiFromFile() {
-        val devinfoFile = "/sdcard/devinfo.txt"
         try {
-            val file = java.io.File(devinfoFile)
+            val file = File(DEVINFO_FILE)
             if (file.exists() && file.canRead()) {
                 val imeiValue = file.readText().trim()
                 if (imeiValue.isNotEmpty()) {
                     imei = imeiValue
-                    Log.d(TAG, "IMEI loaded from $devinfoFile: $imeiValue")
+                    Log.d(TAG, "IMEI loaded from $DEVINFO_FILE: $imeiValue")
                 } else {
-                    Log.w(TAG, "IMEI file is empty: $devinfoFile")
+                    Log.w(TAG, "IMEI file is empty: $DEVINFO_FILE")
                     imei = "123456"
                 }
             } else {
-                Log.w(TAG, "IMEI file not found or not readable: $devinfoFile")
+                Log.w(TAG, "IMEI file not found or not readable: $DEVINFO_FILE")
                 imei = "123456"
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to read IMEI from $devinfoFile", e)
+            Log.e(TAG, "Failed to read IMEI from $DEVINFO_FILE", e)
             imei = "123456"
         }
     }
@@ -110,11 +135,13 @@ class ConfigLoader(private val context: Context) {
      * 设置默认值
      */
     private fun setDefaultValues() {
+        Log.d(TAG, "Setting default config values...")
         apiUrl = "https://powerweb-stw.stwpower.com/power_bank"
         qrCodeUrl = "https://powerweb-stw.stwpower.com/appWeb/store?id="
         secretKey = "q6b56jCopc7UW91eMON0wbAEeZdsd96x"
         imei = "123456"
         enableDebug = false
+        currency = "$" // 默认货币符号
         Log.d(TAG, "Using default config values")
     }
     
@@ -128,5 +155,6 @@ class ConfigLoader(private val context: Context) {
         Log.d(TAG, "  secret_key = $secretKey")
         Log.d(TAG, "  imei = $imei")
         Log.d(TAG, "  enable_debug = $enableDebug")
+        Log.d(TAG, "  currency = $currency") // 添加currency日志
     }
 }

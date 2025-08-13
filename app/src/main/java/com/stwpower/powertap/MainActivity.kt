@@ -87,6 +87,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "qrCodeUrl: ${ConfigLoader.qrCodeUrl}")
             Log.d(TAG, "IMEI: ${ConfigLoader.imei}")
             Log.d(TAG, "Debug Mode: ${ConfigLoader.enableDebug}")
+            Log.d(TAG, "currency: ${ConfigLoader.currency}")
             Log.d(TAG, "===============")
 
             // 根据配置调整应用行为
@@ -143,8 +144,23 @@ class MainActivity : AppCompatActivity() {
         // 预生成二维码（提升性能）
         preGenerateQRCodes()
         
-        // 更新价格信息
-        updatePriceInfo()
+        // 确保配置加载完成后再更新价格信息
+        updatePriceInfoAfterConfigLoaded()
+    }
+
+    /**
+     * 在配置加载完成后再更新价格信息
+     */
+    private fun updatePriceInfoAfterConfigLoaded() {
+        if (com.stwpower.powertap.config.ConfigLoader.isConfigLoaded) {
+            // 配置已加载，直接更新价格信息
+            updatePriceInfo()
+        } else {
+            // 配置还未加载完成，等待一段时间后重试
+            Handler(Looper.getMainLooper()).postDelayed({
+                updatePriceInfo()
+            }, 100)
+        }
     }
     
     private fun setupLanguageButtons() {

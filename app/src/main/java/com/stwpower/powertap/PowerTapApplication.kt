@@ -34,15 +34,36 @@ class PowerTapApplication : Application() {
         // 加载配置
         loadConfig()
 
-        // 预加载收费规则
-        preloadChargeRule()
+        // 配置加载完成后再预加载收费规则
+        preloadChargeRuleAfterConfig()
 
         Log.d(TAG, "PowerTap Application initialized successfully")
     }
 
     private fun loadConfig() {
+        Log.d(TAG, "Creating new ConfigLoader instance...")
         configLoader = ConfigLoader(this)
+        Log.d(TAG, "Loading config...")
         configLoader.loadConfig()
+        Log.d(TAG, "Config loading completed")
+    }
+
+    /**
+     * 配置加载完成后再预加载收费规则
+     */
+    private fun preloadChargeRuleAfterConfig() {
+        // 确保配置已加载
+        if (ConfigLoader.isConfigLoaded) {
+            preloadChargeRule()
+        } else {
+            // 如果配置还未加载完成，等待一小段时间后重试
+            try {
+                Thread.sleep(100)
+                preloadChargeRule()
+            } catch (e: InterruptedException) {
+                preloadChargeRule()
+            }
+        }
     }
 
     /**

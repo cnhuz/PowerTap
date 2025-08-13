@@ -81,7 +81,7 @@
                         android:id="@+id/price_per_hour_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="60"
+                        android:text="/60 Min"
                         android:textSize="28sp"
                         android:textColor="@color/text_secondary"
                         android:gravity="start" />

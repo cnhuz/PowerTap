@@ -1,6 +1,7 @@
 package com.stwpower.powertap.utils
 
 import android.util.Log
+import com.stwpower.powertap.config.ConfigLoader
 import com.stwpower.powertap.data.api.MyApiClient
 import com.stwpower.powertap.domain.ChargeRule
 import com.stwpower.powertap.managers.PreferenceManager
@@ -83,14 +84,15 @@ object ChargeRuleManager {
      * @return 格式化后的字符串，例如 "5.00$"
      */
     fun formatPrice(amount: Double): String {
-        return String.format("%.2f", amount)
+        val currencySymbol = ConfigLoader.currency
+        return String.format("%.2f%s", amount, currencySymbol)
     }
     
     /**
      * 获取每小时价格文本
      * @param oneMoneyUnit 单位时间收费金额
      * @param hourUnit 单位时间（分钟）
-     * @return 例如 "/per_60_minutes" 或 "/per_1_hour"
+     * @return 例如 "/30 Min" 或 "/1 Hour"
      */
     fun getPerHourText(oneMoneyUnit: Double, hourUnit: Int): String {
         return if (hourUnit == 60) {

@@ -1,0 +1,5 @@
+baseUrl:https://powerweb-stw.stwpower.com/power_bank
+qrCodeUrl:https://powerweb-stw.stwpower.com/appWeb/store?id=%s
+device_type:b6_2
+secretKey:q6b56jCopc7UW91eMON0wbAEeZdsd96x
+currency:$
