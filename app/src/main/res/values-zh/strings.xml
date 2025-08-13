@@ -21,7 +21,7 @@
 
     <string name="renting">正在创建订单，请稍候。</string>
     <string name="rent_success">订单创建成功，请稍后检查充电宝是否弹出，如未弹出，请重试。</string>
-    <string name="rent_failed">订单创建失败，请重试。\n %1$s%</string>
+    <string name="rent_failed">订单创建失败，请重试。\n %1$s</string>
     <string name="return_success">总租用时长：%1$s 分钟\n总费用：%2$s%3$s</string>
 
     <string name="tap_card_instruction">将您的银行卡或手机轻触终端。</string>
@@ -30,9 +30,9 @@
     <!-- 主页 -->
     <string name="brand_name">STW</string>
     <string name="main_title">租一个\n充电宝</string>
-    <string name="pay_with_terminal">终端支付</string>
+    <string name="pay_with_terminal">刷卡支付</string>
     <string name="or_text">或</string>
-    <string name="pay_with_app">应用支付</string>
+    <string name="pay_with_app">扫码支付</string>
 
     <!-- 管理员弹框 -->
     <string name="admin_password_title">管理员验证</string>
@@ -47,18 +47,18 @@
     <string name="back">返回</string>
 
     <!-- 刷卡租借页 -->
-    <string name="terminal_payment_title">终端支付</string>
+    <string name="terminal_payment_title">刷卡支付</string>
     <string name="terminal_instructions">请按以下步骤完成支付：\n\n1. 在终端选择支付方式\n2. 插入银行卡或使用NFC支付\n3. 输入密码或验证指纹\n4. 等待支付完成\n5. 取出充电宝</string>
     <string name="processing_payment">正在处理支付...</string>
-    <string name="payment_completed">支付完成！请取出充电宝</string>
+    <string name="payment_completed">正在处理支付...</string>
     <string name="terminal_status_info">支付状态将在此显示</string>
 
     <!-- 扫码租借页 -->
-    <string name="scan_qr_code_payment">使用相机扫码下载应用</string>
+    <string name="scan_qr_code_payment">使用APP扫码租借</string>
 
     <!-- 租借页价格信息 -->
     <string name="pricing">价格</string>
-    <string name="temporary_deposit">临时押金</string>
+    <string name="temporary_deposit">逾期费</string>
     <string name="deposit_refund_info">归还充电宝后押金将退还</string>
     <string name="additional_charges_info">逾期归还或损坏可能产生额外费用</string>
 

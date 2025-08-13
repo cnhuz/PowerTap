@@ -21,7 +21,7 @@
 
     <string name="renting">注文を作成しています。しばらくお待ちください。</string>
     <string name="rent_success">注文が正常に作成されました。後でモバイルバッテリーが取り出されたかご確認ください。取り出されていない場合は、もう一度お試しください。</string>
-    <string name="rent_failed">注文の作成に失敗しました。もう一度お試しください。\n %1$s%</string>
+    <string name="rent_failed">注文の作成に失敗しました。もう一度お試しください。\n %1$s</string>
     <string name="return_success">合計レンタル時間：%1$s 分\n合計料金：%2$s%3$s</string>
 
     <string name="tap_card_instruction">カードまたはスマートフォンを端末にかざしてください。</string>
@@ -50,15 +50,15 @@
     <string name="terminal_payment_title">端末での支払い</string>
     <string name="terminal_instructions">次の手順に従って支払いを完了してください：\n\n1. 端末で支払い方法を選択\n2. 銀行カードを挿入するかNFC決済を使用\n3. パスワード入力または指紋認証\n4. 支払い完了までお待ちください\n5. モバイルバッテリーを取り出す</string>
     <string name="processing_payment">支払い処理中...</string>
-    <string name="payment_completed">支払いが完了しました！ モバイルバッテリーを取り出してください。</string>
+    <string name="payment_completed">支払い処理中...</string>
     <string name="terminal_status_info">支払い状況はここに表示されます</string>
 
     <!-- 扫码租借页 -->
-    <string name="scan_qr_code_payment">カメラでQRコードをスキャンしてアプリをダウンロード</string>
+    <string name="scan_qr_code_payment">アプリでQRコードをスキャンしてレンタル</string>
 
     <!-- 租借页价格信息 -->
     <string name="pricing">料金</string>
-    <string name="temporary_deposit">一時預かり金</string>
+    <string name="temporary_deposit">延滞料</string>
     <string name="deposit_refund_info">モバイルバッテリー返却後に預かり金は返金されます</string>
     <string name="additional_charges_info">返却遅延や破損の場合、追加料金が発生する場合があります</string>
 

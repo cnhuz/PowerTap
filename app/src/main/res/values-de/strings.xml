@@ -21,7 +21,7 @@
 
     <string name="renting">Bestellung wird erstellt, bitte warten.</string>
     <string name="rent_success">Bestellung erfolgreich erstellt. Bitte prüfen Sie später, ob die Powerbank ausgegeben wurde. Falls nicht, bitte erneut versuchen.</string>
-    <string name="rent_failed">Bestellung konnte nicht erstellt werden, bitte erneut versuchen.</string>
+    <string name="rent_failed">Bestellung konnte nicht erstellt werden, bitte erneut versuchen.\n %1$s</string>
     <string name="return_success">Gesamte Mietdauer: %1$s Minuten\nGesamtgebühr: %2$s%3$s</string>
 
     <string name="tap_card_instruction">Halten Sie Ihre Karte oder Ihr Telefon an das Terminal.</string>
@@ -50,15 +50,15 @@
     <string name="terminal_payment_title">Zahlung am Terminal</string>
     <string name="terminal_instructions">Bitte folgen Sie diesen Schritten, um die Zahlung abzuschließen:\n\n1. Zahlungsmethode am Terminal auswählen\n2. Bankkarte einführen oder NFC-Zahlung verwenden\n3. Passwort eingeben oder Fingerabdruck bestätigen\n4. Auf Abschluss der Zahlung warten\n5. Powerbank entnehmen</string>
     <string name="processing_payment">Zahlung wird verarbeitet...</string>
-    <string name="payment_completed">Zahlung abgeschlossen! Bitte entnehmen Sie die Powerbank.</string>
+    <string name="payment_completed">Zahlung wird verarbeitet...</string>
     <string name="terminal_status_info">Der Zahlungsstatus wird hier angezeigt</string>
 
     <!-- 扫码租借页 -->
-    <string name="scan_qr_code_payment">Mit der Kamera QR-Code scannen, um die App herunterzuladen</string>
+    <string name="scan_qr_code_payment">Mit der App den QR-Code scannen, um zu mieten</string>
 
     <!-- 租借页价格信息 -->
     <string name="pricing">PREISE</string>
-    <string name="temporary_deposit">KAUTION</string>
+    <string name="temporary_deposit">MAHN GEBÜHR</string>
     <string name="deposit_refund_info">Die Kaution wird bei Rückgabe der Powerbank zurückerstattet</string>
     <string name="additional_charges_info">Zusätzliche Gebühren können bei verspäteter Rückgabe oder Beschädigung anfallen</string>
 

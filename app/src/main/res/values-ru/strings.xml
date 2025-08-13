@@ -21,7 +21,7 @@
 
     <string name="renting">Создание заказа, пожалуйста, подождите.</string>
     <string name="rent_success">Заказ успешно создан. Позже проверьте, выдана ли пауэрбанк. Если нет, повторите попытку.</string>
-    <string name="rent_failed">Не удалось создать заказ, повторите попытку.\n %1$s%</string>
+    <string name="rent_failed">Не удалось создать заказ, повторите попытку.\n %1$s</string>
     <string name="return_success">Общее время аренды: %1$s минут\nОбщая стоимость: %2$s%3$s</string>
 
     <string name="tap_card_instruction">Приложите карту или телефон к терминалу.</string>
@@ -50,15 +50,15 @@
     <string name="terminal_payment_title">Оплата через терминал</string>
     <string name="terminal_instructions">Пожалуйста, выполните следующие шаги для завершения оплаты:\n\n1. Выберите способ оплаты на терминале\n2. Вставьте банковскую карту или используйте NFC-оплату\n3. Введите пароль или подтвердите отпечатком пальца\n4. Дождитесь завершения оплаты\n5. Заберите пауэрбанк</string>
     <string name="processing_payment">Обработка платежа...</string>
-    <string name="payment_completed">Оплата завершена! Заберите пауэрбанк.</string>
+    <string name="payment_completed">Обработка платежа...</string>
     <string name="terminal_status_info">Статус платежа будет отображаться здесь</string>
 
     <!-- 扫码租借页 -->
-    <string name="scan_qr_code_payment">Отсканируйте QR-код камерой, чтобы скачать приложение</string>
+    <string name="scan_qr_code_payment">Аренда по QR-коду в приложении</string>
 
     <!-- 租借页价格信息 -->
     <string name="pricing">ЦЕНЫ</string>
-    <string name="temporary_deposit">ЗАЛОГ</string>
+    <string name="temporary_deposit">ПЕНЯ</string>
     <string name="deposit_refund_info">Залог будет возвращен после возврата пауэрбанка</string>
     <string name="additional_charges_info">Могут взиматься дополнительные сборы за поздний возврат или повреждения</string>
 

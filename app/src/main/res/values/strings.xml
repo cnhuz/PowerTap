@@ -50,15 +50,15 @@
     <string name="terminal_payment_title">Terminal Payment</string>
     <string name="terminal_instructions">Please follow these steps to complete payment:\n\n1. Select payment method on the terminal\n2. Insert bank card or use NFC payment\n3. Enter password or verify fingerprint\n4. Wait for payment completion\n5. Take out the power bank</string>
     <string name="processing_payment">Processing payment...</string>
-    <string name="payment_completed">Payment completed! Please take out the power bank</string>
+    <string name="payment_completed">Processing payment...</string>
     <string name="terminal_status_info">Payment status will be displayed here</string>
 
     <!-- 扫码租借页 -->
-    <string name="scan_qr_code_payment">Scan QR Code to download the app</string>
+    <string name="scan_qr_code_payment">Rent by scanning the QR code with the app</string>
 
     <!-- 租借页价格信息 -->
     <string name="pricing">PRICING</string>
-    <string name="temporary_deposit">TEMPORARY DEPOSIT</string>
+    <string name="temporary_deposit">LATE FEE</string>
     <string name="deposit_refund_info">Deposit will be refunded when powerbank is returned</string>
     <string name="additional_charges_info">Additional charges may apply for late returns or damage</string>
 
