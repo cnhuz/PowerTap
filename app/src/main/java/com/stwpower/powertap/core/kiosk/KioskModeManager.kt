@@ -28,7 +28,8 @@ class KioskModeManager(private val activity: Activity) {
         "com.stwpower.powertap.MainActivity",
         "com.stwpower.powertap.ui.TerminalPaymentActivity",
         "com.stwpower.powertap.ui.AppPaymentActivity",
-        "com.stwpower.powertap.ui.AdminSettingsActivity"
+        "com.stwpower.powertap.ui.AdminSettingsActivity",
+        "com.stwpower.powertap.ui.DataPopupActivity"
     )
     
     fun enableKioskMode() {

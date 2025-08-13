@@ -96,6 +96,17 @@
             android:excludeFromRecents="true"
             android:stateNotNeeded="true" />
 
+        <!-- Data Popup Activity -->
+        <activity
+            android:name=".ui.DataPopupActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:taskAffinity=""
+            android:hardwareAccelerated="true" />
+
         <!-- Kiosk Watchdog Service -->
         <service
             android:name=".core.kiosk.KioskWatchdogService"
