@@ -22,6 +22,7 @@
     <string name="renting">Bestellung wird erstellt, bitte warten.</string>
     <string name="rent_success">Bestellung erfolgreich erstellt. Bitte prüfen Sie später, ob die Powerbank ausgegeben wurde. Falls nicht, bitte erneut versuchen.</string>
     <string name="rent_failed">Bestellung konnte nicht erstellt werden, bitte erneut versuchen.</string>
+    <string name="return_success">Gesamte Mietdauer: %1$s Minuten\nGesamtgebühr: %2$s%3$s</string>
 
     <string name="tap_card_instruction">Halten Sie Ihre Karte oder Ihr Telefon an das Terminal.</string>
     <string name="card_reader_instruction">Keine kontaktlose Karte? Kartenleser unter der Tastatur</string>

@@ -22,6 +22,7 @@
     <string name="renting">Creating order, please wait.</string>
     <string name="rent_success">Order created successfully, please check later if the power bank has popped out. If it hasn\'t, please try again.</string>
     <string name="rent_failed">Failed to create order, please try again.\n %1$s%</string>
+    <string name="return_success">Total rent time: %1$s minutes\nTotal charger: %2$s%3$s</string>
 
     <string name="tap_card_instruction">Tap your card or phone on the terminal.</string>
     <string name="card_reader_instruction">Not contactless card? Card reader below keypad</string>

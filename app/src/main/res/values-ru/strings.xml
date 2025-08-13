@@ -22,6 +22,7 @@
     <string name="renting">Создание заказа, пожалуйста, подождите.</string>
     <string name="rent_success">Заказ успешно создан. Позже проверьте, выдана ли пауэрбанк. Если нет, повторите попытку.</string>
     <string name="rent_failed">Не удалось создать заказ, повторите попытку.\n %1$s%</string>
+    <string name="return_success">Общее время аренды: %1$s минут\nОбщая стоимость: %2$s%3$s</string>
 
     <string name="tap_card_instruction">Приложите карту или телефон к терминалу.</string>
     <string name="card_reader_instruction">Не бесконтактная карта? Картридер под клавиатурой</string>

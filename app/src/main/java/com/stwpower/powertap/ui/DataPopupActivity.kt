@@ -126,7 +126,7 @@ class DataPopupActivity : Activity() {
         // 构建内容文本
         val contentBuilder = StringBuilder()
         for (i in dataList.indices) {
-            contentBuilder.append("${i + 1}. ${dataList[i]}\n")
+            contentBuilder.append("${dataList[i]}\n")
         }
         
         // 设置内容

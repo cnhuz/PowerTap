@@ -87,7 +87,7 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
      */
     private fun showDataPopup(context: Context, data: Array<CharSequence>) {
         try {
-            Log.d(TAG, "显示数据弹窗，共${data.size}条记录")
+            Log.d(TAG, "显示数据弹窗")
             
             // 创建启动弹窗Activity的意图
             val intent = Intent(context, com.stwpower.powertap.ui.DataPopupActivity::class.java).apply {
@@ -146,15 +146,9 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
                             val amountStr = amount?.let { String.format("%.2f", it.toDouble()) } ?: "N/A"
                             
                             // 添加原始数据和归还成功信息到列表
-                            processedDataList.add(item)
                             processedDataList.add(context.getString(R.string.return_success, usedTimeStr, amountStr, ConfigLoader.currency))
+                            showDataPopup(context, processedDataList.toTypedArray())
                         }
-                    }
-                    
-                    // 只有在有处理后的数据时才显示弹窗
-                    if (processedDataList.isNotEmpty()) {
-                        // 在主线程中显示弹窗
-                        showDataPopup(context, processedDataList.toTypedArray())
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "处理电源银行数据时出错", e)

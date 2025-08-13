@@ -22,6 +22,7 @@
     <string name="renting">注文を作成しています。しばらくお待ちください。</string>
     <string name="rent_success">注文が正常に作成されました。後でモバイルバッテリーが取り出されたかご確認ください。取り出されていない場合は、もう一度お試しください。</string>
     <string name="rent_failed">注文の作成に失敗しました。もう一度お試しください。\n %1$s%</string>
+    <string name="return_success">合計レンタル時間：%1$s 分\n合計料金：%2$s%3$s</string>
 
     <string name="tap_card_instruction">カードまたはスマートフォンを端末にかざしてください。</string>
     <string name="card_reader_instruction">非接触型カードではありませんか？キーパッド下のカードリーダーをご利用ください</string>

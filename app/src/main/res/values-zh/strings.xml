@@ -22,6 +22,7 @@
     <string name="renting">正在创建订单，请稍候。</string>
     <string name="rent_success">订单创建成功，请稍后检查充电宝是否弹出，如未弹出，请重试。</string>
     <string name="rent_failed">订单创建失败，请重试。\n %1$s%</string>
+    <string name="return_success">总租用时长：%1$s 分钟\n总费用：%2$s%3$s</string>
 
     <string name="tap_card_instruction">将您的银行卡或手机轻触终端。</string>
     <string name="card_reader_instruction">不是非接触式卡？请使用键盘下方的刷卡口</string>
