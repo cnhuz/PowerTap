@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     android:background="#00000000">
 
+    <!-- 模糊背景层 -->
+    <ImageView
+        android:id="@+id/iv_blur_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <!-- 半透明遮罩层 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000" />
+
     <LinearLayout
-        android:layout_width="768dp"
-        android:layout_height="320dp"
+        android:layout_width="1024dp"
+        android:layout_height="480dp"
         android:orientation="vertical"
         android:background="#D9282E33"
         android:padding="24dp"
-        android:layout_margin="20dp"
+        android:layout_gravity="center"
         android:elevation="8dp"
         android:radius="8dp"
         android:gravity="center">
@@ -27,7 +38,7 @@
                 android:id="@+id/tv_popup_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
+                android:textSize="50sp"
                 android:textColor="@android:color/white"
                 android:lineSpacingMultiplier="1.2"
                 android:gravity="center"
@@ -46,16 +57,19 @@
                 android:id="@+id/btn_popup_confirm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="确定"
-                android:textSize="16sp"
-                android:minWidth="88dp"
-                android:minHeight="48dp"
+                android:text="@string/confirm"
+                android:textSize="20sp"
+                android:minWidth="120dp"
+                android:minHeight="55dp"
                 android:layout_marginStart="8dp"
-                android:backgroundTint="#29A472"
-                android:textColor="@android:color/white" />
+                android:backgroundTint="@color/button_primary"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:layout_gravity="center"
+                />
 
         </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

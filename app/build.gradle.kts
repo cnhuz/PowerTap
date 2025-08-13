@@ -15,6 +15,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // RenderScript配置
+        renderscriptTargetApi = 21
+        renderscriptSupportModeEnabled = true
     }
 
     signingConfigs {

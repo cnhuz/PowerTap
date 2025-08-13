@@ -1,6 +1,7 @@
 package com.stwpower.powertap.ui
 
 import android.app.Activity
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +13,7 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.WindowCompat
 import com.stwpower.powertap.R
@@ -21,12 +23,12 @@ class DataPopupActivity : Activity() {
     companion object {
         private const val TAG = "DataPopupActivity"
         const val EXTRA_DATA_LIST = "extra_data_list"
-        private const val AUTO_CLOSE_DELAY: Long = 10000 // 10秒后自动关闭
+        private const val AUTO_CLOSE_DELAY: Long = 20000 // 10秒后自动关闭
     }
     
     private val autoCloseHandler = Handler(Looper.getMainLooper())
     private val autoCloseRunnable = Runnable {
-        Log.d(TAG, "弹窗显示10秒后自动关闭")
+        Log.d(TAG, "弹窗显示20秒后自动关闭")
         finish()
     }
     
@@ -37,6 +39,9 @@ class DataPopupActivity : Activity() {
         setupWindowAttributes()
         
         setContentView(R.layout.activity_data_popup)
+        
+        // 设置模糊背景
+        setupBlurBackground()
         
         // 获取传递的数据
         val dataList = intent.getCharSequenceArrayExtra(EXTRA_DATA_LIST)
@@ -115,6 +120,9 @@ class DataPopupActivity : Activity() {
         val contentTextView = findViewById<TextView>(R.id.tv_popup_content)
         val confirmButton = findViewById<Button>(R.id.btn_popup_confirm)
         
+        // 设置确认按钮圆角背景
+        setRoundedBackground(confirmButton, 0xFF29A472.toInt(), 8f)
+        
         // 构建内容文本
         val contentBuilder = StringBuilder()
         for (i in dataList.indices) {
@@ -130,6 +138,27 @@ class DataPopupActivity : Activity() {
             cancelAutoCloseTimer()
             finish()
         }
+    }
+    
+    /**
+     * 设置圆角背景
+     */
+    private fun setRoundedBackground(button: Button, color: Int, radius: Float) {
+        val drawable = GradientDrawable()
+        drawable.setColor(color)
+        drawable.cornerRadius = radius * resources.displayMetrics.density
+        button.background = drawable
+    }
+    
+    /**
+     * 设置模糊背景
+     */
+    private fun setupBlurBackground() {
+        val blurBackground = findViewById<ImageView>(R.id.iv_blur_background)
+        // 在实际应用中，这里可以设置一个模糊的背景图像
+        // 由于这是一个弹窗，获取屏幕截图并模糊化会比较复杂
+        // 这里我们使用一个半透明的深色背景作为替代
+        blurBackground.setBackgroundColor(0x40000000) // 半透明黑色
     }
     
     /**
