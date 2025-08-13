@@ -6,6 +6,13 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.stwpower.powertap.R
+import com.stwpower.powertap.config.ConfigLoader
+import com.stwpower.powertap.data.api.MyApiClient
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * 通用广播接收器
@@ -64,9 +71,6 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
                     Log.d(TAG, "  listData[$i]: ${listData[i]}")
                 }
                 
-                // 启动弹窗Activity显示数据
-                showDataPopup(context, listData)
-                
                 // 处理电源银行数据
                 processPowerBankData(context, listData)
             } else {
@@ -108,16 +112,55 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
         try {
             Log.d(TAG, "处理电源银行数据，共${data.size}条记录")
             
-            // 在这里处理电源银行数据
-            // 例如：更新UI、保存数据到数据库、发送通知等
-            for (item in data) {
-                Log.d(TAG, "处理电源银行项: $item")
-                // 根据实际需求处理每个电源银行项
-                // 例如解析JSON数据、更新状态等
+            // 启动协程进行网络请求
+            GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    // 创建一个新的列表来存储处理后的数据
+                    val processedDataList = mutableListOf<CharSequence>()
+                    
+                    // 为每个电源银行数据项执行网络请求
+                    for (item in data) {
+                        Log.d(TAG, "处理电源银行项: $item")
+                        
+                        // 假设item是充电宝ID，需要根据实际数据格式进行调整
+                        val powerBankId = item.toString()
+                        
+                        // 在IO线程中执行网络请求
+                        val response = withContext(Dispatchers.IO) {
+                            MyApiClient.getOrderInfoByPowerBankId(powerBankId)
+                        }
+                        
+                        // 处理响应结果
+                        if (response != null && response.code == 200) {
+                            // 解析数据
+                            val dataMap = response.data as? Map<*, *>
+                            val usedTime = dataMap?.get("usedTime")
+                            val amount = dataMap?.get("amount") as? Number
+                            
+                            // 格式化数据
+                            val usedTimeStr = if (usedTime is Number) {
+                                usedTime.toInt().toString()
+                            } else {
+                                "N/A"
+                            }
+                            val amountStr = amount?.let { String.format("%.2f", it.toDouble()) } ?: "N/A"
+                            
+                            // 添加原始数据和归还成功信息到列表
+                            processedDataList.add(item)
+                            processedDataList.add(context.getString(R.string.return_success, usedTimeStr, amountStr, ConfigLoader.currency))
+                        }
+                    }
+                    
+                    // 只有在有处理后的数据时才显示弹窗
+                    if (processedDataList.isNotEmpty()) {
+                        // 在主线程中显示弹窗
+                        showDataPopup(context, processedDataList.toTypedArray())
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "处理电源银行数据时出错", e)
+                    // 出现异常时不显示弹窗
+                }
             }
-            
-            // 如果需要通知Activity更新UI，可以发送本地广播
-            // 或者启动Service来处理数据
             
         } catch (e: Exception) {
             Log.e(TAG, "处理电源银行数据时出错", e)
