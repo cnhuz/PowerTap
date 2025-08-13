@@ -102,15 +102,16 @@
             android:enabled="true"
             android:exported="false" />
 
-        <!-- 开机自启广播接收器 -->
+        <!-- 开机自启和自定义广播接收器 -->
         <receiver
-            android:name=".receivers.BootCompletedReceiver"
+            android:name=".receivers.GeneralBroadcastReceiver"
             android:exported="true"
             android:enabled="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.stwpower.player.ACTION_RECEIVE_DATA" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
