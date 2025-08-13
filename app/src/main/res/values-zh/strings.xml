@@ -30,9 +30,9 @@
     <!-- 主页 -->
     <string name="brand_name">STW</string>
     <string name="main_title">租一个\n充电宝</string>
-    <string name="pay_with_terminal">刷卡支付</string>
+    <string name="pay_with_terminal">刷卡租借</string>
     <string name="or_text">或</string>
-    <string name="pay_with_app">扫码支付</string>
+    <string name="pay_with_app">扫码租借</string>
 
     <!-- 管理员弹框 -->
     <string name="admin_password_title">管理员验证</string>

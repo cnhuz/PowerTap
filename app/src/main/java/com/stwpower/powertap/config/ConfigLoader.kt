@@ -32,6 +32,9 @@ class ConfigLoader(private val context: Context) {
         @JvmStatic
         var currency: String = "$" // 默认货币符号
         
+        @JvmStatic
+        var brandName: String = "STW" // 默认品牌名称
+        
         // 配置加载状态
         @JvmStatic
         var isConfigLoaded = false
@@ -101,6 +104,7 @@ class ConfigLoader(private val context: Context) {
             "secretKey" -> secretKey = value
             "qrCodeUrl" -> qrCodeUrl = value
             "currency" -> currency = value // 添加currency字段支持
+            "brandName" -> brandName = value // 添加brandName字段支持
             "enableDebug" -> enableDebug = value.equals("true", ignoreCase = true)
             else -> Log.w(TAG, "Unknown config key: $key")
         }
@@ -142,6 +146,7 @@ class ConfigLoader(private val context: Context) {
         imei = "123456"
         enableDebug = false
         currency = "$" // 默认货币符号
+        brandName = "STW" // 默认品牌名称
         Log.d(TAG, "Using default config values")
     }
     
@@ -156,5 +161,6 @@ class ConfigLoader(private val context: Context) {
         Log.d(TAG, "  imei = $imei")
         Log.d(TAG, "  enable_debug = $enableDebug")
         Log.d(TAG, "  currency = $currency") // 添加currency日志
+        Log.d(TAG, "  brand_name = $brandName") // 添加brandName日志
     }
 }

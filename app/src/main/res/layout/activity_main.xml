@@ -24,6 +24,7 @@
 
             <!-- 品牌名 - Fixed Height -->
             <TextView
+                android:id="@+id/tv_brand_name"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:text="@string/brand_name"

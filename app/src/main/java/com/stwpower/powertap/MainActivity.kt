@@ -134,6 +134,7 @@ class MainActivity : AppCompatActivity() {
         setupAdminExit()
         setupAdminClickArea()
         setupDebugFeatures()
+        setupBrandName()
 
         // 检查和请求权限
         checkAndRequestPermissions()
@@ -758,75 +759,33 @@ class MainActivity : AppCompatActivity() {
      * 设置调试功能
      */
     private fun setupDebugFeatures() {
-        // 长按英文按钮触发权限测试
-        findViewById<ImageButton>(R.id.btn_english)?.setOnLongClickListener {
-            Log.d(TAG, "Debug: Force permission request")
-            Toast.makeText(this, "强制权限请求", Toast.LENGTH_SHORT).show()
-
-            // 强制请求所有Terminal权限
-            val allTerminalPermissions = PermissionManager.TERMINAL_PERMISSIONS
-            requestPermissionLauncher.launch(allTerminalPermissions)
-            true
+        // 只在调试模式下启用长按日志功能
+        if (ConfigLoader.enableDebug) {
+            val priceInfoText = findViewById<TextView>(R.id.tv_price_info)
+            priceInfoText.setOnLongClickListener {
+                Log.d(TAG, "=== 应用配置信息 ===")
+                Log.d(TAG, "API URL: ${ConfigLoader.apiUrl}")
+                Log.d(TAG, "QR Code URL: ${ConfigLoader.qrCodeUrl}")
+                Log.d(TAG, "Secret Key: ${ConfigLoader.secretKey}")
+                Log.d(TAG, "IMEI: ${ConfigLoader.imei}")
+                Log.d(TAG, "Currency: ${ConfigLoader.currency}")
+                Log.d(TAG, "Brand Name: ${ConfigLoader.brandName}")
+                Log.d(TAG, "Debug Mode: ${ConfigLoader.enableDebug}")
+                Log.d(TAG, "==================")
+                true
+            }
         }
-
-        // 长按中文按钮显示权限状态
-        findViewById<ImageButton>(R.id.btn_chinese)?.setOnLongClickListener {
-            Log.d(TAG, "Debug: Show permission status")
-            val report = PermissionManager.getPermissionReport(this)
-            Log.d(TAG, report)
-
-            // 显示简化的权限状态
-            val terminalReady = PermissionManager.isTerminalReady(this)
-            val message = if (terminalReady) "Terminal准备就绪" else "Terminal未准备好"
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-            true
-        }
-
-        // 长按俄文按钮直接授予权限
-        findViewById<ImageButton>(R.id.btn_russian)?.setOnLongClickListener {
-            Log.d(TAG, "Debug: Direct permission grant")
-            Toast.makeText(this, "尝试直接授予权限...", Toast.LENGTH_SHORT).show()
-
-            // 异步执行权限授予
-            Thread {
-                val success = DirectPermissionManager.grantAllPermissions(this)
-                runOnUiThread {
-                    val message = if (success) "权限授予成功" else "权限授予失败"
-                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-
-                    if (success) {
-                        // 重新检查权限状态
-                        checkAndRequestPermissions()
-                    }
-                }
-            }.start()
-            true
-        }
-
-        // 长按法文按钮测试API调用
-        findViewById<ImageButton>(R.id.btn_chinese)?.setOnLongClickListener {
-            Log.d(TAG, "Debug: Test API call")
-            Toast.makeText(this, "测试API调用...", Toast.LENGTH_SHORT).show()
-
-            Thread {
-                try {
-                    val testImei = "test123456789"
-                    Log.d(TAG, "测试API调用，使用测试IMEI: $testImei")
-                    val result = MyApiClient.getQrCode(testImei)
-
-                    runOnUiThread {
-                        val message = "API测试结果: ${result ?: "null"}"
-                        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                        Log.d(TAG, message)
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "API测试失败", e)
-                    runOnUiThread {
-                        Toast.makeText(this, "API测试失败: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }.start()
-            true
+    }
+    
+    /**
+     * 设置品牌名称
+     */
+    private fun setupBrandName() {
+        try {
+            val brandNameTextView = findViewById<TextView>(R.id.tv_brand_name)
+            brandNameTextView.text = ConfigLoader.brandName
+        } catch (e: Exception) {
+            Log.e(TAG, "设置品牌名称时出错", e)
         }
     }
 
