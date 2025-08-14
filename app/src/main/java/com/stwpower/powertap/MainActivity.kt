@@ -44,6 +44,7 @@ import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.QRCodeUrlProcessor
 import com.stwpower.powertap.managers.SystemPermissionManager
 import com.stwpower.powertap.utils.ChargeRuleManager
+import com.stwpower.powertap.utils.QRCodeCacheManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -901,13 +902,16 @@ class MainActivity : AppCompatActivity() {
                 val qrCode = PreferenceManager.getQrCode()
                 if (!qrCode.isNullOrEmpty()) {
                     // 处理URL
-                    val processedUrl = QRCodeUrlProcessor.generateQRCodeContent(ConfigLoader.qrCodeUrl, qrCode)
-                    Log.d(TAG, "处理后的URL: $processedUrl")
+                    val processedUrl = QRCodeUrlProcessor.processQrCodeUrl(ConfigLoader.qrCodeUrl)
+                    val fullQRCodeContent = QRCodeUrlProcessor.generateQRCodeContent(ConfigLoader.qrCodeUrl, qrCode)
+                    Log.d(TAG, "处理后的URL: $fullQRCodeContent")
 
                     // 预生成二维码
-                    val qrCodeBitmap = OptimizedQRGenerator.generateQRCode(processedUrl, 800, "WHITE_BORDERED")
+                    val qrCodeBitmap = OptimizedQRGenerator.generateQRCode(fullQRCodeContent, 800, "WHITE_BORDERED")
                     if (qrCodeBitmap != null) {
                         Log.d(TAG, "二维码预生成成功")
+                        // 将生成的二维码存储到缓存管理器中
+                        QRCodeCacheManager.setCachedQRCode(qrCodeBitmap, processedUrl, qrCode, fullQRCodeContent)
                     } else {
                         Log.w(TAG, "二维码预生成失败")
                     }

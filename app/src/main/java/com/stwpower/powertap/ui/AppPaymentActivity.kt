@@ -28,6 +28,7 @@ import com.stwpower.powertap.utils.OptimizedQRGenerator
 import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.QRCodeUrlProcessor
 import com.stwpower.powertap.utils.ChargeRuleManager
+import com.stwpower.powertap.utils.QRCodeCacheManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -229,21 +230,59 @@ class AppPaymentActivity : AppCompatActivity() {
         val qrCodeUrl = QRCodeUrlProcessor.processQrCodeUrl(rawQrCodeUrl)
         val fullQRCodeContent = QRCodeUrlProcessor.generateQRCodeContent(rawQrCodeUrl, qrCode)
 
-        // 检查是否需要更新二维码（任一组成部分发生变化）
-        if (qrCodeUrl == currentQRCodeUrl &&
-            qrCode == currentQRCode &&
-            fullQRCodeContent == currentQRCodeContent) {
-            Log.d("AppPayment", "二维码内容未变化，跳过生成")
-            // 如果内容未变化，直接隐藏加载状态
-            hideQRCodeLoading()
-            return
+        // 获取共享缓存中的当前状态用于比较
+        val cacheState = QRCodeCacheManager.getCurrentCacheState()
+        
+        // 检查是否有有效的缓存并且内容匹配
+        if (QRCodeCacheManager.hasValidCache() && 
+            QRCodeCacheManager.isCacheMatch(qrCodeUrl, qrCode, fullQRCodeContent)) {
+            Log.d("AppPayment", "使用缓存的二维码")
+            // 使用缓存的二维码
+            val cachedBitmap = QRCodeCacheManager.getCachedQRCodeBitmap()
+            if (cachedBitmap != null && !cachedBitmap.isRecycled) {
+                hideQRCodeLoading()
+                qrCodeImage.setImageBitmap(cachedBitmap)
+                qrCodeText.text = qrCode ?: ""
+                
+                // 更新当前状态为缓存中的状态，确保比较一致性
+                currentQRCodeUrl = cacheState.qrCodeUrl
+                currentQRCode = cacheState.qrCode
+                currentQRCodeContent = cacheState.fullQRCodeContent
+                
+                Log.d("AppPayment", "缓存二维码显示完成")
+                return
+            } else {
+                Log.w("AppPayment", "缓存的二维码bitmap无效，重新生成")
+            }
         }
 
-        Log.d("AppPayment", "二维码内容发生变化，开始生成新的二维码")
-        Log.d("AppPayment", "变化详情:")
-        Log.d("AppPayment", "  qrCodeUrl: $currentQRCodeUrl -> $qrCodeUrl")
-        Log.d("AppPayment", "  qrCode: $currentQRCode -> $qrCode")
-        Log.d("AppPayment", "  完整内容: $currentQRCodeContent -> $fullQRCodeContent")
+        // 检查是否需要更新二维码（任一组成部分发生变化）
+        // 使用共享缓存中的状态进行比较，确保与MainActivity预生成的一致性
+        if (cacheState.qrCodeUrl.isNotEmpty() && 
+            cacheState.qrCode.isNotEmpty() && 
+            cacheState.fullQRCodeContent.isNotEmpty() &&
+            qrCodeUrl == cacheState.qrCodeUrl &&
+            qrCode == cacheState.qrCode &&
+            fullQRCodeContent == cacheState.fullQRCodeContent) {
+            Log.d("AppPayment", "二维码内容与缓存一致，跳过生成")
+            // 如果内容与缓存一致，尝试使用缓存的bitmap
+            val cachedBitmap = QRCodeCacheManager.getCachedQRCodeBitmap()
+            if (cachedBitmap != null && !cachedBitmap.isRecycled) {
+                hideQRCodeLoading()
+                qrCodeImage.setImageBitmap(cachedBitmap)
+                qrCodeText.text = qrCode ?: ""
+                
+                // 更新当前状态
+                currentQRCodeUrl = cacheState.qrCodeUrl
+                currentQRCode = cacheState.qrCode
+                currentQRCodeContent = cacheState.fullQRCodeContent
+                
+                Log.d("AppPayment", "缓存二维码显示完成")
+                return
+            } else {
+                Log.w("AppPayment", "缓存的二维码bitmap无效，重新生成")
+            }
+        }
 
         // 取消之前的二维码生成任务
         qrCodeJob?.cancel()
@@ -273,6 +312,9 @@ class AppPaymentActivity : AppCompatActivity() {
                     currentQRCodeUrl = qrCodeUrl
                     currentQRCode = qrCode ?: ""
                     currentQRCodeContent = fullQRCodeContent
+
+                    // 更新共享缓存
+                    QRCodeCacheManager.setCachedQRCode(bitmap, qrCodeUrl, qrCode ?: "", fullQRCodeContent)
 
                     Log.d("AppPayment", "二维码生成并显示完成")
                 } else {
