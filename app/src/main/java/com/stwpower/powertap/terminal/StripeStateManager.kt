@@ -111,7 +111,8 @@ class StripeStateManager {
      * 所有状态变化都通过这个方法更新DisplayState
      */
     fun updateDisplayState(newState: DisplayState, vararg message: Any?) {
-        if (currentDisplayState != newState) {
+        // 对于UPGRADING状态，即使状态相同也要更新，因为参数（进度）可能变化
+        if (currentDisplayState != newState || newState == DisplayState.UPGRADING) {
             currentDisplayState = newState
             Log.d("StripeStateManager", "DisplayState更新: $currentDisplayState")
             // 通知状态变化

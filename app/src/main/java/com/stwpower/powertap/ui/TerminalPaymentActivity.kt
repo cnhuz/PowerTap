@@ -53,9 +53,6 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     private var countDownTimer: CountDownTimer? = null
     private val timeoutDuration = 60000L // 60秒
     
-    // 标志：是否因为配置更改（如语言切换）而暂停
-    private var isPausedForConfigurationChange = false
-    
     // 价格信息相关视图
     private lateinit var pricePerHourValue: TextView
     private lateinit var pricePerHourText: TextView
@@ -309,6 +306,30 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     /**
+     * 重置进度条为10分钟
+     * 用于升级过程
+     */
+    private fun resetProgressTimerTo10Minutes() {
+        Log.d("TerminalPayment", "重置进度条为10分钟")
+        countDownTimer?.cancel()
+
+        // 重新开始10分钟倒计时 (600000ms)
+        val tenMinutesInMillis = 10 * 60 * 1000L
+        countDownTimer = object : CountDownTimer(tenMinutesInMillis, 33) {
+            override fun onTick(millisUntilFinished: Long) {
+                val progress = (millisUntilFinished.toFloat() / tenMinutesInMillis) * 100f
+                progressTimer.setProgress(progress)
+            }
+
+            override fun onFinish() {
+                progressTimer.setProgress(0f)
+                returnToMainActivity()
+            }
+        }
+        countDownTimer?.start()
+    }
+
+    /**
      * 统一UI更新监听器实现
      *
      * 完整调用链：
@@ -333,9 +354,18 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     // 进度条重置监听器实现
     override fun onProgressTimerReset() {
         runOnUiThread {
-            // 统一重置进度条为20秒
+            // 统一重置进度条为20秒（用于错误显示）
             Log.d("TerminalPayment", "收到进度条重置信号，重置为20秒")
             resetProgressTimerTo20Seconds()
+        }
+    }
+
+    // 升级期间的10分钟进度条重置监听器实现
+    override fun onProgressTimerResetTo10Minutes() {
+        runOnUiThread {
+            // 重置进度条为10分钟（用于升级过程）
+            Log.d("TerminalPayment", "收到升级期间进度条重置信号，重置为10分钟")
+            resetProgressTimerTo10Minutes()
         }
     }
 
@@ -536,10 +566,10 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             // 用户可能还期望Terminal功能继续工作
         } else {
             Log.d("TerminalPayment", "Activity正常结束，暂停支付收集")
-            // 暂停支付收集但保持阅读器连接
-            TerminalConnectionManager.pausePaymentCollection()
             // 重置配置更改标志
             TerminalConnectionManager.setPausedForConfigurationChange(false)
+            // 暂停支付收集但保持阅读器连接
+            TerminalConnectionManager.pausePaymentCollection()
         }
 
         Log.d("TerminalPayment", "TerminalPaymentActivity destroyed, connection maintained")

@@ -56,8 +56,8 @@ object TerminalConnectionManager {
      * 暂停支付收集（保持连接）
      */
     fun pausePaymentCollection() {
-        Log.d(TAG, "暂停支付收集")
         if (!isPausedForConfigurationChange) {
+            Log.d(TAG, "暂停支付收集")
             terminalManager?.pausePaymentCollection()
         } else {
             Log.d(TAG, "因配置更改暂停，保持支付收集")

@@ -42,6 +42,7 @@ class StripeTerminalManager(
     interface TerminalStateListener {
         fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?)
         fun onProgressTimerReset() // 统一的进度条重置监听器
+        fun onProgressTimerResetTo10Minutes() // 升级期间的10分钟进度条重置监听器
         fun onRestartPayment() // 统一的重试进入收集付款方式监听器
     }
 
@@ -583,6 +584,8 @@ class StripeTerminalManager(
         Log.d(TAG, "Starting reader update")
         // 更新过程可以考虑添加到BusinessPhase，暂时保持现状
         updateDisplayState(DisplayState.START_UPGRADING_READER, null)
+        // 通知Activity重置倒计时器为10分钟
+        stateListener.onProgressTimerResetTo10Minutes()
     }
 
     override fun onReportReaderSoftwareUpdateProgress(progress: Float) {
@@ -591,7 +594,6 @@ class StripeTerminalManager(
             Log.d(TAG, "Update progress: ${percentage}%")
             // 直接传递整数值而不是数组
             updateDisplayState(DisplayState.UPGRADING, percentage)
-            stateListener.onRestartPayment()
         }catch (e:Exception){
             Log.d(TAG,"升级异常",e)
         }
@@ -603,9 +605,12 @@ class StripeTerminalManager(
         if (e != null) {
             Log.e(TAG, "Update failed", e)
             updateDisplayState(DisplayState.UPGRADE_FAILED, e.message)
+            // 升级失败，重置倒计时器为60秒
+            stateListener.onProgressTimerReset()
         } else {
-            // 更新成功，连接状态会通过ConnectionStatus自动更新
-            // 连接成功后等待支付状态变化，不需要手动调用
+            Log.d(TAG, "Update succeeded, waiting for connection status change")
+            // 更新成功，重置倒计时器为60秒
+            stateListener.onProgressTimerReset()
         }
     }
 
