@@ -8,9 +8,9 @@
     <string name="connecting_reader">Подключение к считывателю, пожалуйста, подождите.</string>
     <string name="connect_reader_failed">Не удалось подключиться к считывателю, повторите попытку.</string>
 
-    <string name="start_upgrading_reader">Обновление, не выключайте питание. Прогресс 0%.</string>
-    <string name="upgrading">Обновление, не выключайте питание. Прогресс %d%%.</string>
-    <string name="upgrade_failed">Сбой обновления, повторите попытку.</string>
+    <string name="start_upgrading_reader">Обновление, не выключайте питание. Прогресс 0%%.</string>
+    <string name="upgrading">Обновление, не выключайте питание. Прогресс %s%%.</string>
+    <string name="upgrade_failed">Сбой обновления, повторите попытку.\n%1$s</string>
 
     <string name="enter_collection_method">Переход в режим приема платежей, пожалуйста, подождите.</string>
     <string name="enter_collection_method_failed">Не удалось войти в режим приема платежей, повторите попытку.</string>

@@ -8,9 +8,9 @@
     <string name="connecting_reader">リーダーに接続しています。しばらくお待ちください。</string>
     <string name="connect_reader_failed">リーダーへの接続に失敗しました。もう一度お試しください。</string>
 
-    <string name="start_upgrading_reader">アップグレード中です。電源を切らないでください。進捗 0%。</string>
-    <string name="upgrading">アップグレード中です。電源を切らないでください。進捗 %d%%。</string>
-    <string name="upgrade_failed">アップグレードに失敗しました。もう一度お試しください。</string>
+    <string name="start_upgrading_reader">アップグレード中です。電源を切らないでください。進捗 0%%。</string>
+    <string name="upgrading">アップグレード中です。電源を切らないでください。進捗 %s%%。</string>
+    <string name="upgrade_failed">アップグレードに失敗しました。もう一度お試しください。\n%1$s</string>
 
     <string name="enter_collection_method">支払い収集モードに入ります。しばらくお待ちください。</string>
     <string name="enter_collection_method_failed">支払い収集モードへの切り替えに失敗しました。もう一度お試しください。</string>

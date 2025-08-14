@@ -19,6 +19,7 @@ import com.stwpower.powertap.data.api.MyApiClient
 import com.stwpower.powertap.data.provider.TokenProvider
 import com.stwpower.powertap.managers.PreferenceManager
 import kotlinx.coroutines.*
+import kotlin.math.roundToInt
 
 /**
  * Stripe Terminal 管理器
@@ -75,7 +76,12 @@ class StripeTerminalManager(
         // 设置状态管理器监听器
         stripeStateManager.setStateListener(object : StripeStateManager.StripeStateListener {
             override fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?) {
-                stateListener.onDisplayStateChanged(displayState, message)
+                // 如果message只有一个元素且是数组，则展开该数组
+                if (message.size == 1 && message[0] is Array<*>) {
+                    stateListener.onDisplayStateChanged(displayState, *(message[0] as Array<*>))
+                } else {
+                    stateListener.onDisplayStateChanged(displayState, *message)
+                }
             }
         })
 
@@ -576,18 +582,27 @@ class StripeTerminalManager(
     override fun onStartInstallingUpdate(update: ReaderSoftwareUpdate, cancelable: Cancelable?) {
         Log.d(TAG, "Starting reader update")
         // 更新过程可以考虑添加到BusinessPhase，暂时保持现状
+        updateDisplayState(DisplayState.START_UPGRADING_READER, null)
     }
 
     override fun onReportReaderSoftwareUpdateProgress(progress: Float) {
-        Log.d(TAG, "Update progress: ${(progress * 100).toInt()}%")
-        // 更新进度可以考虑添加到BusinessPhase，暂时保持现状
+        try{
+            val percentage = (progress * 100).roundToInt() // 四舍五入而不是直接截断
+            Log.d(TAG, "Update progress: ${percentage}%")
+            // 直接传递整数值而不是数组
+            updateDisplayState(DisplayState.UPGRADING, percentage)
+            stateListener.onRestartPayment()
+        }catch (e:Exception){
+            Log.d(TAG,"升级异常",e)
+        }
+
     }
 
     override fun onFinishInstallingUpdate(update: ReaderSoftwareUpdate?, e: TerminalException?) {
         Log.d(TAG, "Update finished")
         if (e != null) {
             Log.e(TAG, "Update failed", e)
-            updateDisplayState(DisplayState.UPGRADE_FAILED, null)
+            updateDisplayState(DisplayState.UPGRADE_FAILED, e.message)
         } else {
             // 更新成功，连接状态会通过ConnectionStatus自动更新
             // 连接成功后等待支付状态变化，不需要手动调用

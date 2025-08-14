@@ -8,9 +8,9 @@
     <string name="connecting_reader">Verbindung zum Lesegerät wird hergestellt, bitte warten.</string>
     <string name="connect_reader_failed">Verbindung zum Lesegerät fehlgeschlagen, bitte erneut versuchen.</string>
 
-    <string name="start_upgrading_reader">Wird aktualisiert, bitte schalten Sie das Gerät nicht aus. Fortschritt 0%.</string>
-    <string name="upgrading">Wird aktualisiert, bitte schalten Sie das Gerät nicht aus. Fortschritt %d%%.</string>
-    <string name="upgrade_failed">Aktualisierung fehlgeschlagen, bitte erneut versuchen.</string>
+    <string name="start_upgrading_reader">Wird aktualisiert, bitte schalten Sie das Gerät nicht aus. Fortschritt 0%%.</string>
+    <string name="upgrading">Wird aktualisiert, bitte schalten Sie das Gerät nicht aus. Fortschritt %s%%.</string>
+    <string name="upgrade_failed">Aktualisierung fehlgeschlagen, bitte erneut versuchen.\n%1$s</string>
 
     <string name="enter_collection_method">Wechsel in den Zahlungsmodus, bitte warten.</string>
     <string name="enter_collection_method_failed">Wechsel in den Zahlungsmodus fehlgeschlagen, bitte erneut versuchen.</string>

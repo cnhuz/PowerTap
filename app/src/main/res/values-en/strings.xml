@@ -8,9 +8,9 @@
     <string name="connecting_reader">Connecting to reader, please wait.</string>
     <string name="connect_reader_failed">Failed to connect to reader, please try again.</string>
 
-    <string name="start_upgrading_reader">Upgrading, please do not turn off the power, progress 0%.</string>
-    <string name="upgrading">Upgrading, please do not turn off the power, progress %d%%.</string>
-    <string name="upgrade_failed">Upgrade failed, please try again.</string>
+    <string name="start_upgrading_reader">Upgrading, please do not turn off the power, progress 0%%.</string>
+    <string name="upgrading">Upgrading, please do not turn off the power, progress %s%%.</string>
+    <string name="upgrade_failed">Upgrade failed, please try again.\n%1$s</string>
 
     <string name="enter_collection_method">Entering payment collection mode, please wait.</string>
     <string name="enter_collection_method_failed">Failed to enter payment collection mode, please try again.</string>

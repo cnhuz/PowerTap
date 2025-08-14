@@ -76,7 +76,13 @@ enum class DisplayState(
      * 获取格式化的显示文本
      */
     fun getFormattedText(context: Context,vararg formatArgs: Any?): String {
-        return context.getString(stringResId, formatArgs)
+        // 如果有参数且第一个参数是数组，则展开该数组作为参数
+        return if (formatArgs.isNotEmpty() && formatArgs[0] is Array<*>) {
+            context.getString(stringResId, *(formatArgs[0] as Array<*>))
+        } else {
+            // 否则使用原始参数
+            context.getString(stringResId, *formatArgs)
+        }
     }
 }
 

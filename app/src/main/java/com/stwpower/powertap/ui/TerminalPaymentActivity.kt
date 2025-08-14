@@ -358,7 +358,12 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             UIType.LOADING -> {
                 // Type 1: 进度环+文字
                 showLoadingState()
-                loadingText.text = displayState.getFormattedText(this, message)
+                // 如果message只有一个元素且是数组，则展开该数组作为参数
+                loadingText.text = if (message.size == 1 && message[0] is Array<*>) {
+                    displayState.getFormattedText(this, *(message[0] as Array<*>))
+                } else {
+                    displayState.getFormattedText(this, *message)
+                }
                 loadingText.setTextColor(getColor(R.color.text_primary))
 
                 isProcessing = true
@@ -391,7 +396,13 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
             UIType.MESSAGE -> {
                 // Type 3: 只展示白色粗体文字
-                showMessage(displayState.getFormattedText(this, message))
+                // 如果message只有一个元素且是数组，则展开该数组作为参数
+                val formattedText = if (message.size == 1 && message[0] is Array<*>) {
+                    displayState.getFormattedText(this, *(message[0] as Array<*>))
+                } else {
+                    displayState.getFormattedText(this, *message)
+                }
+                showMessage(formattedText)
 
                 isProcessing = false
                 backButton.isEnabled = displayState.canGoBack
