@@ -128,7 +128,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             
             return
         }
-
+        updateUIForDisplayState(DisplayState.LOADING)
         // 初始化Terminal
         initializeTerminal()
     }
