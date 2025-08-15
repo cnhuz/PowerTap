@@ -104,6 +104,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         // 使用TerminalConnectionManager获取Terminal管理器
         Log.d("TerminalPayment", "获取Terminal管理器")
         terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
+//        terminalManager.setUserLeftTerminalPage(false)
 
         // 注册USB设备连接状态监听器
         registerUsbDeviceListener()
@@ -128,9 +129,8 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             return
         }
 
-        // 检查权限状态并初始化Terminal
-        Log.d("TerminalPayment", "检查权限并初始化Terminal")
-        checkPermissionsAndInitialize()
+        // 初始化Terminal
+        initializeTerminal()
     }
     
     private fun setupViews() {
@@ -853,53 +853,16 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     /**
-     * 检查权限状态并初始化Terminal
+     * 初始化Terminal
      */
-    private fun checkPermissionsAndInitialize() {
-        Log.d("TerminalPayment", "Checking permissions and initializing...")
-
-        // 打印权限状态报告
-        Log.d("TerminalPayment", PermissionManager.getPermissionReport(this))
+    private fun initializeTerminal() {
+        Log.d("TerminalPayment", "Initializing Terminal...")
 
         // 打印Terminal连接状态报告
         Log.d("TerminalPayment", TerminalConnectionManager.getStatusReport())
 
-        if (PermissionManager.isTerminalReady(this)) {
-            // 权限和GPS都准备好了，使用TerminalConnectionManager初始化
-            Log.d("TerminalPayment", "Terminal ready, initializing via TerminalConnectionManager...")
-            TerminalConnectionManager.initializeIfNeeded(this, this)
-        } else {
-            // 权限或GPS未准备好，通过TerminalManager更新状态
-            Log.w("TerminalPayment", "Terminal not ready, updating state through TerminalManager")
-            if (::terminalManager.isInitialized) {
-                // 通过统一入口更新状态
-                terminalManager.updateDisplayState(DisplayState.LOADING, null)
-            } else {
-                // 如果TerminalManager还没初始化，直接更新UI（这种情况很少见）
-                updateUIForDisplayState(DisplayState.INIT_FAILED, null)
-            }
-
-            val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)
-            val gpsEnabled = PermissionManager.isGpsEnabled(this)
-
-            Log.d("TerminalPayment", "Missing permissions: ${missingPermissions.joinToString()}")
-            Log.d("TerminalPayment", "GPS enabled: $gpsEnabled")
-
-            val errorMessage = buildString {
-                if (missingPermissions.isNotEmpty()) {
-                    append("缺少权限: ${missingPermissions.joinToString()}")
-                }
-                if (!gpsEnabled) {
-                    if (isNotEmpty()) append("\n")
-                    append("GPS未启用")
-                }
-                if (isEmpty()) {
-                    append("Terminal初始化失败")
-                }
-            }
-
-            loadingText.text = errorMessage
-            Log.d("TerminalPayment", "Error message: $errorMessage")
-        }
+        // 使用TerminalConnectionManager初始化
+        Log.d("TerminalPayment", "Initializing via TerminalConnectionManager...")
+        TerminalConnectionManager.initializeIfNeeded(this, this)
     }
 }

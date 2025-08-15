@@ -53,7 +53,7 @@ class StripeTerminalManager(
     private var discoveryJob: Job? = null
 
     // 标志：用户是否已经离开了Terminal页面
-    private var userLeftTerminalPage = false
+    private var userLeftTerminalPage = true
     private var paymentJob: Job? = null
     private var discoveryCancelable: Cancelable? = null
     private var collectCancelable: Cancelable? = null
@@ -556,20 +556,9 @@ class StripeTerminalManager(
         Log.d(TAG, "阅读器断开连接，开始重新扫描连接")
         // 断开连接会通过ConnectionStatus自动更新UI
 
-        // 检查用户是否已离开页面
-        if (userLeftTerminalPage) {
-            Log.d(TAG, "用户已离开页面，不重新扫描连接")
-            return
-        }
-
         // 重新开始扫描和连接流程，但添加延迟避免频繁重连
         handler.postDelayed({
-            // 再次检查用户是否已离开页面
-            if (!userLeftTerminalPage) {
-                startDiscovery()
-            } else {
-                Log.d(TAG, "延迟后用户已离开页面，不重新扫描连接")
-            }
+            startDiscovery()
         }, 2000) // 延迟2秒再开始扫描
     }
 
@@ -601,19 +590,11 @@ class StripeTerminalManager(
             ConnectionStatus.NOT_CONNECTED -> {
                 Log.w(TAG, "阅读器断开连接")
                 updateDisplayState(DisplayState.LOADING, null)
-                
-                // 检查用户是否已离开页面
-                if (!userLeftTerminalPage) {
-                    Log.d(TAG, "用户未离开页面，重新开始发现流程")
-                    // 用户仍在页面上，重新开始发现流程
-                    handler.postDelayed({
-                        if (!userLeftTerminalPage) {
-                            startDiscovery()
-                        }
-                    }, 1000) // 延迟1秒再开始扫描
-                } else {
-                    Log.d(TAG, "用户已离开页面，不重新开始发现流程")
-                }
+
+                Log.d(TAG, "重新开始发现流程")
+                handler.postDelayed({
+                    startDiscovery()
+                }, 1000) // 延迟1秒再开始扫描
             }
         }
     }
@@ -1007,12 +988,6 @@ class StripeTerminalManager(
             // 重试过程保持当前状态
 
             handler.postDelayed({
-                // 在重试之前检查用户是否已离开页面
-                if (userLeftTerminalPage) {
-                    Log.d(TAG, "用户已离开页面，取消发现阅读器重试")
-                    return@postDelayed
-                }
-                
                 // 检查当前连接状态
                 val connectionStatus = Terminal.getInstance().connectionStatus
                 if (connectionStatus == ConnectionStatus.CONNECTED) {

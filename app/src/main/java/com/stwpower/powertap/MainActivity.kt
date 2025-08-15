@@ -45,6 +45,9 @@ import com.stwpower.powertap.utils.QRCodeUrlProcessor
 import com.stwpower.powertap.managers.SystemPermissionManager
 import com.stwpower.powertap.utils.ChargeRuleManager
 import com.stwpower.powertap.utils.QRCodeCacheManager
+import com.stwpower.powertap.terminal.StripeTerminalManager
+import com.stwpower.powertap.terminal.DisplayState
+import com.stwpower.powertap.terminal.UIType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -228,24 +231,51 @@ class MainActivity : AppCompatActivity() {
                 terminalButton.alpha = 0.7f
                 terminalButton.isEnabled = false
 
-                // 使用Handler延迟启动Activity
-                Handler(Looper.getMainLooper()).post {
-                    try {
-                        Log.d(TAG, "Starting TerminalPaymentActivity...")
-                        val intent = Intent(this, TerminalPaymentActivity::class.java)
-                        startActivity(intent)
-                        // 添加过渡动画
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                        Log.d(TAG, "Terminal activity started successfully")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to start Terminal activity", e)
-                    } finally {
+                // 检查Terminal权限和GPS状态
+                if (PermissionManager.isTerminalReady(this)) {
+                    // 检查Terminal是否已经连接
+                    if (TerminalConnectionManager.hasActiveConnection()) {
+                        // Terminal已经连接，直接启动TerminalPaymentActivity
+                        // 使用Handler延迟启动Activity
+                        Handler(Looper.getMainLooper()).post {
+                            try {
+                                Log.d(TAG, "Starting TerminalPaymentActivity...")
+                                val intent = Intent(this, TerminalPaymentActivity::class.java)
+                                startActivity(intent)
+                                // 添加过渡动画
+                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                                Log.d(TAG, "Terminal activity started successfully")
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failed to start Terminal activity", e)
+                            } finally {
+                                // 恢复按钮状态
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    terminalButton.alpha = 1.0f
+                                    terminalButton.isEnabled = true
+                                }, 1000)
+                            }
+                        }
+                    } else {
+                        // Terminal未连接，显示提示信息
+                        Log.w(TAG, "Terminal not connected, showing connection dialog")
+                        showTerminalNotConnectedDialog()
+                        
                         // 恢复按钮状态
                         Handler(Looper.getMainLooper()).postDelayed({
                             terminalButton.alpha = 1.0f
                             terminalButton.isEnabled = true
                         }, 1000)
                     }
+                } else {
+                    // 权限或GPS未准备好，显示提示对话框
+                    Log.w(TAG, "Terminal not ready, showing permission dialog")
+                    showTerminalNotReadyDialog()
+                    
+                    // 恢复按钮状态
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        terminalButton.alpha = 1.0f
+                        terminalButton.isEnabled = true
+                    }, 1000)
                 }
             } else {
                 Log.d(TAG, "Terminal button click ignored (debounce)")
@@ -672,6 +702,45 @@ class MainActivity : AppCompatActivity() {
 
         // 打印权限状态报告
         Log.d(TAG, PermissionManager.getPermissionReport(this))
+
+        // 预初始化Terminal
+        preInitializeTerminal()
+    }
+    
+    /**
+     * 预初始化Terminal
+     */
+    private fun preInitializeTerminal() {
+        if (PermissionManager.isTerminalReady(this)) {
+            Log.d(TAG, "开始预初始化Terminal")
+            // 使用TerminalConnectionManager初始化Terminal
+            TerminalConnectionManager.initializeIfNeeded(this, object : StripeTerminalManager.TerminalStateListener {
+                override fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?) {
+                    // 在MainActivity中我们只关心初始化是否成功，不更新UI
+                    Log.d(TAG, "Terminal状态更新: $displayState")
+                    
+                    // 只要连接成功就停止监听
+                    if (TerminalConnectionManager.hasActiveConnection()) {
+                        Log.d(TAG, "Terminal预初始化完成，已连接")
+                        // 可以在这里添加一些预初始化完成的处理逻辑
+                    }
+                }
+                
+                override fun onProgressTimerReset() {
+                    // 不需要处理
+                }
+                
+                override fun onProgressTimerResetTo10Minutes() {
+                    // 不需要处理
+                }
+                
+                override fun onRestartPayment() {
+                    // 不需要处理
+                }
+            })
+        } else {
+            Log.d(TAG, "Terminal未准备好，跳过预初始化")
+        }
     }
 
     /**
@@ -944,5 +1013,43 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "更新主页价格信息时出错", e)
             }
         }
+    }
+    
+    /**
+     * 显示Terminal未准备好的对话框
+     */
+    private fun showTerminalNotReadyDialog() {
+        val missingPermissions = PermissionManager.getMissingPermissions(this, PermissionManager.TERMINAL_PERMISSIONS)
+        val gpsEnabled = PermissionManager.isGpsEnabled(this)
+        
+        val errorMessage = buildString {
+            if (missingPermissions.isNotEmpty()) {
+                append("缺少权限: ${missingPermissions.joinToString()}")
+            }
+            if (!gpsEnabled) {
+                if (isNotEmpty()) append("\n")
+                append("GPS未启用")
+            }
+            if (isEmpty()) {
+                append("Terminal初始化失败")
+            }
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("Terminal未准备好")
+            .setMessage(errorMessage)
+            .setPositiveButton("确定", null)
+            .show()
+    }
+    
+    /**
+     * 显示Terminal未连接的对话框
+     */
+    private fun showTerminalNotConnectedDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Terminal未连接")
+            .setMessage("阅读器未连接，请检查设备连接并稍后重试。")
+            .setPositiveButton("确定", null)
+            .show()
     }
 }
