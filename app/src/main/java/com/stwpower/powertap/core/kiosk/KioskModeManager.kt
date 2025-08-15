@@ -209,14 +209,15 @@ class KioskModeManager(private val activity: Activity) {
 
     private fun setupWindowInsetsListener() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 允许某些系统UI显示，如USB权限对话框
             activity.window.decorView.setOnApplyWindowInsetsListener { view, insets ->
-                // 简化处理，不强制隐藏系统栏
+                // 不强制隐藏系统栏，允许系统对话框显示
                 insets
             }
         } else {
             // 对于旧版本，使用系统UI可见性监听器
             activity.window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-                // 简化处理，不强制重新隐藏
+                // 不强制重新隐藏系统栏
             }
         }
     }

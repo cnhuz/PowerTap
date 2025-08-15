@@ -37,6 +37,8 @@ class StripeTerminalManager(
         private const val PAYMENT_TIMEOUT = 60000L // 60秒
         private const val MAX_RETRY_ATTEMPTS = 3 // 最大重试次数
         private const val RETRY_DELAY = 5000L // 重试延迟5秒
+        private const val MAX_DISCOVERY_RETRY_ATTEMPTS = 3 // 最大发现重试次数
+        private const val DISCOVERY_RETRY_DELAY = 5000L // 发现重试延迟5秒
     }
 
     interface TerminalStateListener {
@@ -65,6 +67,11 @@ class StripeTerminalManager(
     private var discoveryRetryCount = 0
     private var connectionRetryCount = 0
     private var paymentRetryCount = 0
+    
+    // 时间戳跟踪
+    private var lastDiscoveryStartTime: Long = 0L
+    private var lastConnectionStartTime: Long = 0L
+    private var lastPaymentStartTime: Long = 0L
 
     // 状态保持相关
     private var isReaderConnected = false
@@ -141,6 +148,10 @@ class StripeTerminalManager(
     private fun startDiscovery() {
         // 发现读卡器是Stripe的技术状态，会通过ConnectionStatus自动更新
         updateDisplayState(DisplayState.SCANNING_READER, null)
+        
+        // 记录发现开始时间
+        lastDiscoveryStartTime = System.currentTimeMillis()
+        Log.d(TAG, "开始扫描阅读器，位置id：${getLocationId()}")
 
         // 检查SNO
         val sno = getDeviceQrCode()
@@ -189,13 +200,19 @@ class StripeTerminalManager(
 
         // 设置发现超时
         handler.postDelayed({
-            // 检查是否还在发现阶段（连接状态为NOT_CONNECTED）
-            if (Terminal.getInstance().connectionStatus == ConnectionStatus.NOT_CONNECTED) {
+            if (discoveryCancelable?.isCompleted == false) {
+                Log.w(TAG, "Discovery timeout, retrying...")
                 discoveryCancelable?.cancel(object : Callback {
                     override fun onSuccess() {
-                        handleDiscoveryTimeout()
+                        Log.d(TAG, "Previous discovery cancelled successfully")
+                        // 创建一个新的TerminalException实例用于重试
+                        val errorCode = TerminalException.TerminalErrorCode.REQUEST_TIMED_OUT
+                        val errorMessage = "Discovery timeout after cancellation"
+                        val exception = TerminalException(errorCode, errorMessage)
+                        retryDiscovery(exception)
                     }
                     override fun onFailure(e: TerminalException) {
+                        Log.e(TAG, "Failed to cancel previous discovery", e)
                         retryDiscovery(e)
                     }
                 })
@@ -217,6 +234,20 @@ class StripeTerminalManager(
         }
 
         Log.d(TAG, "连接到阅读器: ${reader.serialNumber}")
+        
+        // 检查当前连接状态，避免在连接过程中重复连接
+        val currentConnectionStatus = Terminal.getInstance().connectionStatus
+        if (currentConnectionStatus == ConnectionStatus.CONNECTING) {
+            Log.d(TAG, "阅读器正在连接中，跳过重复连接请求")
+            return
+        }
+        
+        // 检查是否已经连接到同一个阅读器
+        if (currentConnectionStatus == ConnectionStatus.CONNECTED && 
+            connectedReader?.serialNumber == reader.serialNumber) {
+            Log.d(TAG, "已经连接到同一个阅读器，跳过重复连接请求")
+            return
+        }
 
         // 参考Example.kt，使用USB连接
         val config = ConnectionConfiguration.UsbConnectionConfiguration(
@@ -516,18 +547,38 @@ class StripeTerminalManager(
     // TerminalListener 实现
     override fun onUnexpectedReaderDisconnect(reader: Reader) {
         Log.w(TAG, "阅读器意外断开连接: ${reader.deviceType}")
+        Log.w(TAG, "阅读器序列号: ${reader.serialNumber}")
+        Log.w(TAG, "阅读器类型: ${reader.deviceType}")
+        
         currentReader = null
 
         // 根据状态管理逻辑：阅读器断开连接需要重新扫描连接
         Log.d(TAG, "阅读器断开连接，开始重新扫描连接")
         // 断开连接会通过ConnectionStatus自动更新UI
 
-        // 重新开始扫描和连接流程
-        startDiscovery()
+        // 检查用户是否已离开页面
+        if (userLeftTerminalPage) {
+            Log.d(TAG, "用户已离开页面，不重新扫描连接")
+            return
+        }
+
+        // 重新开始扫描和连接流程，但添加延迟避免频繁重连
+        handler.postDelayed({
+            // 再次检查用户是否已离开页面
+            if (!userLeftTerminalPage) {
+                startDiscovery()
+            } else {
+                Log.d(TAG, "延迟后用户已离开页面，不重新扫描连接")
+            }
+        }, 2000) // 延迟2秒再开始扫描
     }
 
     override fun onConnectionStatusChange(status: ConnectionStatus) {
         Log.d(TAG, "Connection status changed: $status")
+        
+        // 记录当前时间，便于调试
+        val currentTime = System.currentTimeMillis()
+        Log.d(TAG, "Connection status change time: $currentTime")
 
         when (status) {
             ConnectionStatus.CONNECTING -> {
@@ -537,10 +588,32 @@ class StripeTerminalManager(
             ConnectionStatus.CONNECTED -> {
                 Log.d(TAG, "阅读器连接成功")
                 updateDisplayState(DisplayState.ENTER_COLLECTION_METHOD, null)
+                
+                // 重置发现重试计数器
+                discoveryRetryCount = 0
+                
+                // 检查用户是否已离开页面
+                if (userLeftTerminalPage) {
+                    Log.d(TAG, "用户已离开页面，但阅读器连接成功")
+                    // 在这种情况下，我们可能需要暂停连接以节省资源
+                }
             }
             ConnectionStatus.NOT_CONNECTED -> {
                 Log.w(TAG, "阅读器断开连接")
                 updateDisplayState(DisplayState.LOADING, null)
+                
+                // 检查用户是否已离开页面
+                if (!userLeftTerminalPage) {
+                    Log.d(TAG, "用户未离开页面，重新开始发现流程")
+                    // 用户仍在页面上，重新开始发现流程
+                    handler.postDelayed({
+                        if (!userLeftTerminalPage) {
+                            startDiscovery()
+                        }
+                    }, 1000) // 延迟1秒再开始扫描
+                } else {
+                    Log.d(TAG, "用户已离开页面，不重新开始发现流程")
+                }
             }
         }
     }
@@ -585,6 +658,7 @@ class StripeTerminalManager(
         // 更新过程可以考虑添加到BusinessPhase，暂时保持现状
         updateDisplayState(DisplayState.START_UPGRADING_READER, null)
         // 通知Activity重置倒计时器为10分钟
+        Log.d(TAG, "通知Activity重置倒计时器为10分钟（升级开始）")
         stateListener.onProgressTimerResetTo10Minutes()
     }
 
@@ -606,10 +680,12 @@ class StripeTerminalManager(
             Log.e(TAG, "Update failed", e)
             updateDisplayState(DisplayState.UPGRADE_FAILED, e.message)
             // 升级失败，重置倒计时器为60秒
+            Log.d(TAG, "通知Activity重置倒计时器为60秒（升级失败）")
             stateListener.onProgressTimerReset()
         } else {
             Log.d(TAG, "Update succeeded, waiting for connection status change")
             // 更新成功，重置倒计时器为60秒
+            Log.d(TAG, "通知Activity重置倒计时器为60秒（升级成功）")
             stateListener.onProgressTimerReset()
         }
     }
@@ -924,16 +1000,31 @@ class StripeTerminalManager(
      * 重试发现阅读器
      */
     private fun retryDiscovery(error: TerminalException) {
-        if (discoveryRetryCount < MAX_RETRY_ATTEMPTS) {
+        if (discoveryRetryCount < MAX_DISCOVERY_RETRY_ATTEMPTS) {
             discoveryRetryCount++
-            Log.d(TAG, "Retrying discovery, attempt $discoveryRetryCount/$MAX_RETRY_ATTEMPTS")
+            Log.d(TAG, "重试发现阅读器，第${discoveryRetryCount}次尝试/$MAX_DISCOVERY_RETRY_ATTEMPTS")
+            Log.d(TAG, "发现错误: ${error.errorMessage}", error)
             // 重试过程保持当前状态
 
             handler.postDelayed({
+                // 在重试之前检查用户是否已离开页面
+                if (userLeftTerminalPage) {
+                    Log.d(TAG, "用户已离开页面，取消发现阅读器重试")
+                    return@postDelayed
+                }
+                
+                // 检查当前连接状态
+                val connectionStatus = Terminal.getInstance().connectionStatus
+                if (connectionStatus == ConnectionStatus.CONNECTED) {
+                    Log.d(TAG, "阅读器已连接，取消发现阅读器重试")
+                    return@postDelayed
+                }
+                
                 startDiscovery()
-            }, RETRY_DELAY)
+            }, DISCOVERY_RETRY_DELAY)
         } else {
-            Log.e(TAG, "Discovery failed after $MAX_RETRY_ATTEMPTS attempts")
+            Log.e(TAG, "发现阅读器失败，已达到最大重试次数: $MAX_DISCOVERY_RETRY_ATTEMPTS")
+            Log.e(TAG, "最终错误: ${error.errorMessage}", error)
             updateDisplayState(DisplayState.LOADING, null)
         }
     }
@@ -1042,6 +1133,58 @@ class StripeTerminalManager(
     fun onUserEnteredTerminalPage() {
         userLeftTerminalPage = false
         Log.d(TAG, "用户重新进入Terminal页面，重置离开标志")
+        
+        // 检查当前连接状态并决定是否需要重新开始发现流程
+        val connectionStatus = Terminal.getInstance().connectionStatus
+        val paymentStatus = Terminal.getInstance().paymentStatus
+        
+        Log.d(TAG, "用户重新进入页面时的当前状态 - 连接: $connectionStatus, 支付: $paymentStatus")
+        
+        when (connectionStatus) {
+            ConnectionStatus.CONNECTED -> {
+                Log.d(TAG, "阅读器已连接，检查支付状态")
+                // 阅读器已连接，检查支付状态
+                when (paymentStatus) {
+                    PaymentStatus.READY -> {
+                        Log.d(TAG, "支付状态为READY，等待用户操作")
+                        // 支付状态会通过PaymentStatus自动更新UI
+                    }
+                    PaymentStatus.NOT_READY -> {
+                        Log.d(TAG, "支付状态为NOT_READY，等待状态变化")
+                        // 支付状态会通过PaymentStatus自动更新UI
+                    }
+                    PaymentStatus.WAITING_FOR_INPUT -> {
+                        Log.d(TAG, "支付状态为WAITING_FOR_INPUT，直接进入等待刷卡状态")
+                        // 支付状态会通过PaymentStatus自动更新UI
+                    }
+                    else -> {
+                        Log.d(TAG, "未知支付状态: $paymentStatus，显示连接状态")
+                        // 支付状态会通过PaymentStatus自动更新UI
+                    }
+                }
+            }
+            ConnectionStatus.CONNECTING -> {
+                Log.d(TAG, "正在连接阅读器")
+                updateDisplayState(DisplayState.CONNECTING_READER, null)
+            }
+            ConnectionStatus.NOT_CONNECTED -> {
+                Log.d(TAG, "阅读器未连接，检查是否需要重新开始发现流程")
+                // 检查是否真的需要重新开始发现流程
+                val currentTime = System.currentTimeMillis()
+                val timeSinceLastDiscovery = currentTime - lastDiscoveryStartTime
+                
+                // 如果距离上次发现已经超过30秒，或者从未开始过发现，则重新开始
+                if (timeSinceLastDiscovery > 30000 || lastDiscoveryStartTime == 0L) {
+                    Log.d(TAG, "距离上次发现已经超过30秒或从未开始过发现，重新开始发现流程")
+                    // 阅读器未连接，重新开始发现流程
+                    startDiscovery()
+                } else {
+                    Log.d(TAG, "距离上次发现时间较短($timeSinceLastDiscovery ms)，不重新开始发现流程")
+                    // 显示当前状态
+                    updateDisplayState(DisplayState.LOADING, null)
+                }
+            }
+        }
     }
 
     /**
@@ -1058,11 +1201,23 @@ class StripeTerminalManager(
         }
     }
 
+    /**
+     * 检查用户是否已离开Terminal页面
+     */
+    fun isUserLeftTerminalPage(): Boolean {
+        return userLeftTerminalPage
+    }
+
     private fun shouldAutoStart(): Boolean {
         val currentState = stripeStateManager.getCurrentDisplayState()
 
-        if(userLeftTerminalPage)
+        // 如果用户已离开页面，不自动开始
+        if (userLeftTerminalPage) {
+            Log.d(TAG, "用户已离开Terminal页面标志设置为true，不自动开始收集付款方式")
             return false
+        }
+        
+        Log.d(TAG, "用户未离开Terminal页面，检查是否应该自动开始，当前状态: $currentState")
         return when (currentState) {
             DisplayState.ENTER_COLLECTION_METHOD_FAILED,
             DisplayState.COLLECTING_PAYMENT_METHOD,
@@ -1070,7 +1225,10 @@ class StripeTerminalManager(
             DisplayState.RENTING,
             DisplayState.RENT_SUCCESS,
             DisplayState.RENT_FAILED -> false
-            else -> true
+            else -> {
+                Log.d(TAG, "自动进入收集付款方式")
+                true
+            }
         }
     }
 }
