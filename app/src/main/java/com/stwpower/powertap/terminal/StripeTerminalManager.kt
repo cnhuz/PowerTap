@@ -4,6 +4,7 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbDevice
 import android.location.LocationManager
 import android.os.Build
 import android.os.Handler
@@ -21,14 +22,14 @@ import com.stwpower.powertap.managers.PreferenceManager
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
-/**
+/** 
  * Stripe Terminal 管理器
  * 负责管理 Terminal 的完整生命周期和支付流程
  */
 class StripeTerminalManager(
     private val context: Context,
     private var stateListener: TerminalStateListener
-) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener {
+) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener, UsbDeviceManager.UsbDeviceListener {
 
     companion object {
         private const val TAG = "powertap"
@@ -50,6 +51,7 @@ class StripeTerminalManager(
 
     // 使用新的状态管理器
     private val stripeStateManager = StripeStateManager()
+    private val usbDeviceManager = UsbDeviceManager(context)
     private var discoveryJob: Job? = null
 
     // 标志：用户是否已经离开了Terminal页面
@@ -81,6 +83,10 @@ class StripeTerminalManager(
      * 初始化 Terminal
      */
     fun initialize() {
+        // 初始化USB设备管理器
+        usbDeviceManager.setDeviceListener(this)
+        usbDeviceManager.initialize()
+        
         // 设置状态管理器监听器
         stripeStateManager.setStateListener(object : StripeStateManager.StripeStateListener {
             override fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?) {
@@ -1205,5 +1211,35 @@ class StripeTerminalManager(
                 true
             }
         }
+    }
+    
+    // UsbDeviceListener 实现
+    override fun onDeviceAttached(device: UsbDevice) {
+        Log.d(TAG, "USB设备已连接: ${device.deviceName}")
+        // 检查是否是Stripe阅读器设备
+        if (usbDeviceManager.isStripeReaderDevice(device)) {
+            Log.d(TAG, "检测到Stripe阅读器设备连接: ${device.deviceName}")
+            // 请求USB权限
+            usbDeviceManager.checkAndRequestUsbPermission(device)
+        }
+    }
+    
+    override fun onDeviceDetached(device: UsbDevice) {
+        Log.d(TAG, "USB设备已断开: ${device.deviceName}")
+        // 检查是否是Stripe阅读器设备断开
+        if (usbDeviceManager.isStripeReaderDevice(device)) {
+            Log.d(TAG, "Stripe阅读器设备断开连接: ${device.deviceName}")
+            // 可以在这里添加设备断开的处理逻辑
+        }
+    }
+    
+    override fun onPermissionGranted(device: UsbDevice) {
+        Log.d(TAG, "USB设备权限已授予: ${device.deviceName}")
+        // 权限授予后，Stripe SDK会自动处理设备连接
+    }
+    
+    override fun onPermissionDenied(device: UsbDevice) {
+        Log.w(TAG, "USB设备权限被拒绝: ${device.deviceName}")
+        // 可以在这里添加权限被拒绝的处理逻辑
     }
 }

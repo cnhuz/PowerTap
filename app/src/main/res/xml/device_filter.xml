@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stripe Reader BBPOS Chipper 2X BT (Vendor ID: 0x15A2) -->
+    <usb-device vendor-id="5538" product-id="258" />
+    
+    <!-- Stripe Reader BBPOS WisePad 3 (Vendor ID: 0x15A2) -->
+    <usb-device vendor-id="5538" product-id="259" />
+    
+    <!-- Stripe Reader BBPOS WisePOS E (Vendor ID: 0x15A2) -->
+    <usb-device vendor-id="5538" product-id="260" />
+    
+    <!-- Stripe Reader Verifone P400 (Vendor ID: 0x15A2) -->
+    <usb-device vendor-id="5538" product-id="261" />
+
+    <usb-device product-id="22352" vendor-id="11369" />
+
+    <usb-device product-id="257" vendor-id="5538" />
+    
+    <!-- 通用Stripe阅读器设备 -->
+    <usb-device vendor-id="5538" />
+</resources>

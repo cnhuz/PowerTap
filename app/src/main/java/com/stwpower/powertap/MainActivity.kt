@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.hardware.usb.UsbDevice
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -48,12 +49,19 @@ import com.stwpower.powertap.utils.QRCodeCacheManager
 import com.stwpower.powertap.terminal.StripeTerminalManager
 import com.stwpower.powertap.terminal.DisplayState
 import com.stwpower.powertap.terminal.UIType
+import com.stwpower.powertap.terminal.UsbDeviceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        @JvmStatic
+        var isAdminExiting = false
+        private const val TAG = "powertap"
+    }
 
     private var clickCount = 0
     private val clickHandler = Handler(Looper.getMainLooper())
@@ -64,11 +72,8 @@ class MainActivity : AppCompatActivity() {
     private var adminClickArea: View? = null
     private var permissionsReady = false // 权限是否准备完成
 
-    // 防抖动相关
-    private var lastClickTime = 0L
-    private val clickDebounceTime = 1000L // 1秒防抖动
-
-    // 不再需要单独的Terminal管理器，使用TerminalConnectionManager
+    // USB设备管理器
+    private lateinit var usbDeviceManager: UsbDeviceManager
 
     // 权限请求
     private val requestPermissionLauncher = registerForActivityResult(
@@ -77,11 +82,9 @@ class MainActivity : AppCompatActivity() {
         handlePermissionResult(permissions)
     }
 
-    companion object {
-        @JvmStatic
-        var isAdminExiting = false
-        private const val TAG = "powertap"
-    }
+    // 防抖动相关
+    private var lastClickTime = 0L
+    private val clickDebounceTime = 1000L // 1秒防抖动
 
     private fun loadAndUseConfig() {
         try {
@@ -121,6 +124,42 @@ class MainActivity : AppCompatActivity() {
         kioskModeManager = KioskModeManager(this)
         homeKeyInterceptor = HomeKeyInterceptor(this)
         fullscreenManager = ImmersiveFullscreenManager(this)
+        usbDeviceManager = UsbDeviceManager(this)
+        usbDeviceManager.setDeviceListener(object : UsbDeviceManager.UsbDeviceListener {
+            override fun onDeviceAttached(device: UsbDevice) {
+                Log.d(TAG, "MainActivity: USB设备已连接: ${device.deviceName}")
+                // 检查是否是Stripe阅读器设备
+                if (usbDeviceManager.isStripeReaderDevice(device)) {
+                    Log.d(TAG, "MainActivity: 检测到Stripe阅读器设备连接: ${device.deviceName}")
+                    // 请求USB权限
+                    usbDeviceManager.checkAndRequestUsbPermission(device)
+                }
+            }
+            
+            override fun onDeviceDetached(device: UsbDevice) {
+                Log.d(TAG, "MainActivity: USB设备已断开: ${device.deviceName}")
+                // 检查是否是Stripe阅读器设备断开
+                if (usbDeviceManager.isStripeReaderDevice(device)) {
+                    Log.d(TAG, "MainActivity: Stripe阅读器设备断开连接: ${device.deviceName}")
+                }
+            }
+            
+            override fun onPermissionGranted(device: UsbDevice) {
+                Log.d(TAG, "MainActivity: USB设备权限已授予: ${device.deviceName}")
+                // 权限授予后，可以显示提示信息
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Stripe读卡器已连接并获得权限", Toast.LENGTH_SHORT).show()
+                }
+            }
+            
+            override fun onPermissionDenied(device: UsbDevice) {
+                Log.w(TAG, "MainActivity: USB设备权限被拒绝: ${device.deviceName}")
+                // 权限被拒绝，显示提示信息
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "请授予Stripe读卡器权限", Toast.LENGTH_LONG).show()
+                }
+            }
+        })
 
         // 应用默认语言设置
         applyDefaultLanguage()
@@ -500,6 +539,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        // 初始化USB设备管理器
+        usbDeviceManager.initialize()
+
         // 只有在权限准备完成后才启用kiosk模式
         if (permissionsReady) {
             enableKioskMode()
@@ -555,6 +597,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        // 停止USB设备监听
+        usbDeviceManager.destroy()
         // 不要在onPause中禁用kiosk模式，保持监控
         // kioskModeManager.disableKioskMode()
     }
@@ -591,6 +635,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        // 销毁USB设备管理器
+        usbDeviceManager.destroy()
 
         // 检查是否是因为配置更改（如语言切换）导致的Activity重建
         if (isChangingConfigurations) {

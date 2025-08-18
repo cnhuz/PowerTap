@@ -1,14 +1,7 @@
 package com.stwpower.powertap.ui
 
-import android.app.PendingIntent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -71,10 +64,6 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     private lateinit var pricePerDayText: TextView
     private lateinit var depositValue: TextView
     
-    // USB设备监听相关
-    private var usbManager: UsbManager? = null
-    private var usbReceiver: BroadcastReceiver? = null
-    private var isUsbReceiverRegistered = false
     private val handler = Handler(Looper.getMainLooper())
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,10 +93,6 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         // 使用TerminalConnectionManager获取Terminal管理器
         Log.d("TerminalPayment", "获取Terminal管理器")
         terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
-//        terminalManager.setUserLeftTerminalPage(false)
-
-        // 注册USB设备连接状态监听器
-        registerUsbDeviceListener()
 
         // 检查是否是Activity重建
         if (savedInstanceState != null) {
@@ -174,9 +159,6 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         
         // 更新价格信息
         updatePriceInfo()
-        
-        // 注册USB设备监听器
-        registerUsbDeviceListener()
     }
 
     /**
@@ -214,218 +196,6 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             } catch (e: Exception) {
                 Log.e("TerminalPayment", "更新价格信息时出错", e)
             }
-        }
-    }
-
-    /**
-     * 注册USB设备监听器
-     */
-    private fun registerUsbDeviceListener() {
-        try {
-            // 检查是否已经注册过
-            if (isUsbReceiverRegistered) {
-                Log.d("TerminalPayment", "USB设备监听器已注册，跳过重复注册")
-                return
-            }
-            
-            usbManager = getSystemService(USB_SERVICE) as UsbManager
-            Log.d("TerminalPayment", "USB管理器初始化成功")
-            
-            // 创建USB设备连接状态变化的广播接收器
-            usbReceiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    when (intent?.action) {
-                        UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                            val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
-                            } else {
-                                @Suppress("DEPRECATION")
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                            }
-                            Log.d("TerminalPayment", "USB设备已连接: ${device?.deviceName}, VendorId: ${device?.vendorId}, ProductId: ${device?.productId}")
-                            
-                            // 检查是否是Stripe阅读器设备
-                            if (device != null) {
-                                checkAndRequestUsbPermission(device)
-                                
-                                // 如果是Stripe阅读器设备连接，延迟处理以确保设备稳定
-                                if (isStripeReaderDevice(device)) {
-                                    handler.postDelayed({
-                                        Log.d("TerminalPayment", "Stripe阅读器设备连接稳定，开始处理")
-                                        // Stripe SDK会自动处理设备连接事件
-                                    }, 2000) // 延迟2秒确保设备连接稳定
-                                }
-                            }
-                        }
-                        UsbManager.ACTION_USB_DEVICE_DETACHED -> {
-                            val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
-                            } else {
-                                @Suppress("DEPRECATION")
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                            }
-                            Log.d("TerminalPayment", "USB设备已断开: ${device?.deviceName}, VendorId: ${device?.vendorId}, ProductId: ${device?.productId}")
-                            
-                            // 如果是Stripe阅读器设备断开，处理断开连接
-                            if (device != null) {
-                                handleUsbDeviceDetached(device)
-                            }
-                        }
-                        ACTION_USB_PERMISSION -> {
-                            val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
-                            } else {
-                                @Suppress("DEPRECATION")
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                            }
-                            val permissionGranted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
-                            
-                            if (permissionGranted) {
-                                Log.d("TerminalPayment", "USB设备权限已授予: ${device?.deviceName}")
-                                // Stripe SDK会自动处理权限授予事件
-                            } else {
-                                Log.w("TerminalPayment", "USB设备权限被拒绝: ${device?.deviceName}")
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // 注册广播接收器
-            val filter = IntentFilter().apply {
-                addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-                addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
-                addAction(ACTION_USB_PERMISSION)
-            }
-            
-            registerReceiver(usbReceiver, filter)
-            isUsbReceiverRegistered = true
-            Log.d("TerminalPayment", "USB设备监听器注册成功")
-            
-            // 检查当前连接的USB设备
-            val deviceList = usbManager?.deviceList
-            if (deviceList != null && deviceList.isNotEmpty()) {
-                Log.d("TerminalPayment", "当前连接的USB设备数量: ${deviceList.size}")
-                for ((name, device) in deviceList) {
-                    Log.d("TerminalPayment", "USB设备: $name, VendorId: ${device.vendorId}, ProductId: ${device.productId}")
-                    // 检查并请求USB权限
-                    checkAndRequestUsbPermission(device)
-                }
-            } else {
-                Log.d("TerminalPayment", "当前没有连接USB设备")
-            }
-        } catch (e: Exception) {
-            Log.e("TerminalPayment", "USB管理器初始化失败", e)
-        }
-    }
-    
-    /**
-     * 检查并请求USB设备权限
-     */
-    private fun checkAndRequestUsbPermission(device: UsbDevice) {
-        try {
-            usbManager?.let { manager ->
-                if (manager.hasPermission(device)) {
-                    Log.d("TerminalPayment", "已拥有USB设备权限: ${device.deviceName}")
-                } else {
-                    Log.d("TerminalPayment", "请求USB设备权限: ${device.deviceName}")
-                    // 注意：在实际应用中，可能需要用户交互来授予权限
-                    // 这里我们只是记录日志，Stripe SDK会处理权限请求
-                    
-                    // 创建权限请求Intent
-                    val permissionIntent = PendingIntent.getBroadcast(
-                        this, 
-                        0, 
-                        Intent(ACTION_USB_PERMISSION), 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            PendingIntent.FLAG_MUTABLE
-                        } else {
-                            0
-                        }
-                    )
-                    
-                    // 请求权限
-                    manager.requestPermission(device, permissionIntent)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("TerminalPayment", "检查USB设备权限时出错", e)
-        }
-    }
-    
-    /**
-     * 处理USB设备断开连接
-     */
-    private fun handleUsbDeviceDetached(device: UsbDevice) {
-        try {
-            Log.d("TerminalPayment", "处理USB设备断开连接: ${device.deviceName}")
-            
-            // 检查是否是Stripe阅读器设备断开
-            if (isStripeReaderDevice(device)) {
-                Log.d("TerminalPayment", "Stripe阅读器设备断开连接: ${device.deviceName}")
-                
-                // 检查是否是正常的Activity暂停/销毁过程
-                if (isFinishing || isChangingConfigurations) {
-                    Log.d("TerminalPayment", "Activity正在finish或配置更改，不处理设备断开")
-                    return
-                }
-                
-                // 延迟处理，避免设备重新连接时的误判
-                handler.postDelayed({
-                    // 检查设备是否真的断开（没有重新连接）
-                    if (!isUsbDeviceConnected(device)) {
-                        Log.d("TerminalPayment", "确认设备已断开，通知TerminalManager")
-                        // 通知TerminalManager设备断开
-                        if (::terminalManager.isInitialized) {
-                            // 注意：Stripe SDK会自动处理设备断开连接的事件
-                            // 我们只需要记录日志即可
-                        }
-                    } else {
-                        Log.d("TerminalPayment", "设备已重新连接，忽略断开事件")
-                    }
-                }, 2000) // 延迟2秒检查
-            }
-        } catch (e: Exception) {
-            Log.e("TerminalPayment", "处理USB设备断开连接时出错", e)
-        }
-    }
-    
-    /**
-     * 检查是否是Stripe阅读器设备
-     */
-    private fun isStripeReaderDevice(device: UsbDevice): Boolean {
-        // Stripe阅读器的VendorId通常是5538 (0x15A2)
-        return device.vendorId == 5538 || device.vendorId == 0x15A2
-    }
-    
-    /**
-     * 检查USB设备是否仍连接
-     */
-    private fun isUsbDeviceConnected(device: UsbDevice): Boolean {
-        try {
-            val deviceList = usbManager?.deviceList
-            return deviceList?.values?.any { it.deviceName == device.deviceName } ?: false
-        } catch (e: Exception) {
-            Log.e("TerminalPayment", "检查USB设备连接状态时出错", e)
-            return false
-        }
-    }
-    
-    /**
-     * 注销USB设备监听器
-     */
-    private fun unregisterUsbDeviceListener() {
-        if (isUsbReceiverRegistered && usbReceiver != null) {
-            try {
-                unregisterReceiver(usbReceiver)
-                isUsbReceiverRegistered = false
-                usbReceiver = null
-                Log.d("TerminalPayment", "USB设备监听器注销成功")
-            } catch (e: Exception) {
-                Log.e("TerminalPayment", "注销USB设备监听器时出错", e)
-            }
-        } else {
-            Log.d("TerminalPayment", "USB设备监听器未注册或已注销")
         }
     }
 
@@ -766,9 +536,6 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         if (::terminalManager.isInitialized) {
             terminalManager.onUserEnteredTerminalPage()
         }
-        
-        // 重新注册USB设备监听器（如果需要）
-        registerUsbDeviceListener()
     }
 
     override fun onPause() {
@@ -802,9 +569,6 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
         // 清理消息延迟任务（如果有的话）
         messageDelayRunnable?.let { messageDelayHandler?.removeCallbacks(it) }
-
-        // 注销USB设备监听器
-        unregisterUsbDeviceListener()
 
         // 检查是否是因为配置更改（如语言切换）导致的Activity重建
         val isConfigurationChange = isChangingConfigurations

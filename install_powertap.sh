@@ -20,7 +20,7 @@ echo "检测到ADB设备连接 ✓"
 echo
 
 # 确定APK文件路径
-APK_PATH=""
+APK_PATH="/Users/huz/code/2025/PowerTap/apk/PowerTap-1.0.0-SC20NEW.apk"
 if [ $# -eq 0 ]; then
     # 如果没有指定APK路径，则查找apk目录下的最新APK文件
     if [ -d "apk" ]; then
