@@ -73,54 +73,50 @@ echo 正在为 !PACKAGE_NAME! 授予权限...
 
 REM 授予位置权限
 echo 授予位置权限...
-adb shell pm grant !PACKAGE_NAME! android.permission.ACCESS_FINE_LOCATION 2>nul
-adb shell pm grant !PACKAGE_NAME! android.permission.ACCESS_COARSE_LOCATION 2>nul
+adb shell pm grant com.stwpower.powertap android.permission.ACCESS_FINE_LOCATION
+adb shell pm grant com.stwpower.powertap android.permission.ACCESS_COARSE_LOCATION
 
 REM 授予蓝牙权限
 echo 授予蓝牙权限...
-adb shell pm grant !PACKAGE_NAME! android.permission.BLUETOOTH 2>nul
-adb shell pm grant !PACKAGE_NAME! android.permission.BLUETOOTH_ADMIN 2>nul
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH_ADMIN
 
 REM Android 12+ 蓝牙权限
 echo 授予Android 12+蓝牙权限...
-adb shell pm grant !PACKAGE_NAME! android.permission.BLUETOOTH_CONNECT 2>nul
-adb shell pm grant !PACKAGE_NAME! android.permission.BLUETOOTH_SCAN 2>nul
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH_CONNECT 2>nul || echo BLUETOOTH_CONNECT权限不适用于此设备
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH_SCAN 2>nul || echo BLUETOOTH_SCAN权限不适用于此设备
 
 REM 授予存储权限
 echo 授予存储权限...
-adb shell pm grant !PACKAGE_NAME! android.permission.READ_EXTERNAL_STORAGE 2>nul
-adb shell pm grant !PACKAGE_NAME! android.permission.WRITE_EXTERNAL_STORAGE 2>nul
+adb shell pm grant com.stwpower.powertap android.permission.READ_EXTERNAL_STORAGE
+adb shell pm grant com.stwpower.powertap android.permission.WRITE_EXTERNAL_STORAGE
 
 REM 授予电话状态权限（获取IMEI）
 echo 授予电话状态权限...
-adb shell pm grant !PACKAGE_NAME! android.permission.READ_PHONE_STATE 2>nul
-
-REM 授予USB权限
-echo 授予USB权限...
-adb shell pm grant !PACKAGE_NAME! android.permission.USB_PERMISSION 2>nul
+adb shell pm grant com.stwpower.powertap android.permission.READ_PHONE_STATE
 
 echo.
 echo 启用GPS和位置服务...
 REM 启用GPS
-adb shell settings put secure location_mode 3 2>nul
-adb shell settings put secure location_providers_allowed +gps,+network 2>nul
+adb shell settings put secure location_mode 3
+adb shell settings put secure location_providers_allowed +gps,+network
 
 echo.
-echo 权限授予完成 ✓
+echo === 权限授予完成 ===
 echo.
 
-REM 设置为默认处理USB设备的应用
-echo === 设置默认USB处理应用 ===
-echo 正在将 !PACKAGE_NAME! 设置为默认处理USB设备的应用...
+REM 验证权限状态
+echo 验证权限状态...
+echo 位置权限:
+adb shell dumpsys package com.stwpower.powertap | findstr "android.permission.ACCESS_FINE_LOCATION"
+echo.
 
-REM 清除默认应用设置（如果有）
-adb shell pm clear !PACKAGE_NAME! 2>nul
+echo 蓝牙权限:
+adb shell dumpsys package com.stwpower.powertap | findstr "android.permission.BLUETOOTH"
+echo.
 
-REM 设置为默认处理USB设备
-REM 注意：这可能需要根据具体设备和Android版本进行调整
-adb shell cmd package set-home-activity !PACKAGE_NAME!/.MainActivity 2>nul
-
-echo 默认USB处理应用设置完成 ✓
+echo GPS状态:
+adb shell settings get secure location_mode
 echo.
 
 REM 启动应用

@@ -20,7 +20,7 @@ echo "检测到ADB设备连接 ✓"
 echo
 
 # 确定APK文件路径
-APK_PATH="/Users/huz/code/2025/PowerTap/apk/PowerTap-1.0.0-SC20NEW.apk"
+APK_PATH="/Users/huz/code/2025/PowerTap/apk/PowerTap-1.0.1-SC20NEW.apk"
 if [ $# -eq 0 ]; then
     # 如果没有指定APK路径，则查找apk目录下的最新APK文件
     if [ -d "apk" ]; then
@@ -69,54 +69,50 @@ echo "正在为 $PACKAGE_NAME 授予权限..."
 
 # 授予位置权限
 echo "授予位置权限..."
-adb shell pm grant $PACKAGE_NAME android.permission.ACCESS_FINE_LOCATION 2>/dev/null
-adb shell pm grant $PACKAGE_NAME android.permission.ACCESS_COARSE_LOCATION 2>/dev/null
+adb shell pm grant com.stwpower.powertap android.permission.ACCESS_FINE_LOCATION
+adb shell pm grant com.stwpower.powertap android.permission.ACCESS_COARSE_LOCATION
 
 # 授予蓝牙权限
 echo "授予蓝牙权限..."
-adb shell pm grant $PACKAGE_NAME android.permission.BLUETOOTH 2>/dev/null
-adb shell pm grant $PACKAGE_NAME android.permission.BLUETOOTH_ADMIN 2>/dev/null
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH_ADMIN
 
 # Android 12+ 蓝牙权限
 echo "授予Android 12+蓝牙权限..."
-adb shell pm grant $PACKAGE_NAME android.permission.BLUETOOTH_CONNECT 2>/dev/null
-adb shell pm grant $PACKAGE_NAME android.permission.BLUETOOTH_SCAN 2>/dev/null
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH_CONNECT 2>/dev/null || echo "BLUETOOTH_CONNECT权限不适用于此设备"
+adb shell pm grant com.stwpower.powertap android.permission.BLUETOOTH_SCAN 2>/dev/null || echo "BLUETOOTH_SCAN权限不适用于此设备"
 
 # 授予存储权限
 echo "授予存储权限..."
-adb shell pm grant $PACKAGE_NAME android.permission.READ_EXTERNAL_STORAGE 2>/dev/null
-adb shell pm grant $PACKAGE_NAME android.permission.WRITE_EXTERNAL_STORAGE 2>/dev/null
+adb shell pm grant com.stwpower.powertap android.permission.READ_EXTERNAL_STORAGE
+adb shell pm grant com.stwpower.powertap android.permission.WRITE_EXTERNAL_STORAGE
 
 # 授予电话状态权限（获取IMEI）
 echo "授予电话状态权限..."
-adb shell pm grant $PACKAGE_NAME android.permission.READ_PHONE_STATE 2>/dev/null
-
-# 授予USB权限
-echo "授予USB权限..."
-adb shell pm grant $PACKAGE_NAME android.permission.USB_PERMISSION 2>/dev/null
+adb shell pm grant com.stwpower.powertap android.permission.READ_PHONE_STATE
 
 echo
 echo "启用GPS和位置服务..."
 # 启用GPS
-adb shell settings put secure location_mode 3 2>/dev/null
-adb shell settings put secure location_providers_allowed +gps,+network 2>/dev/null
+adb shell settings put secure location_mode 3
+adb shell settings put secure location_providers_allowed +gps,+network
 
 echo
-echo "权限授予完成 ✓"
+echo "=== 权限授予完成 ==="
 echo
 
-# 设置为默认处理USB设备的应用
-echo "=== 设置默认USB处理应用 ==="
-echo "正在将 $PACKAGE_NAME 设置为默认处理USB设备的应用..."
+# 验证权限状态
+echo "验证权限状态..."
+echo "位置权限:"
+adb shell dumpsys package com.stwpower.powertap | grep -A 1 "android.permission.ACCESS_FINE_LOCATION"
+echo
 
-# 清除默认应用设置（如果有）
-adb shell pm clear $PACKAGE_NAME 2>/dev/null
+echo "蓝牙权限:"
+adb shell dumpsys package com.stwpower.powertap | grep -A 1 "android.permission.BLUETOOTH"
+echo
 
-# 设置为默认处理USB设备
-# 注意：这可能需要根据具体设备和Android版本进行调整
-adb shell cmd package set-home-activity $PACKAGE_NAME/.MainActivity 2>/dev/null
-
-echo "默认USB处理应用设置完成 ✓"
+echo "GPS状态:"
+adb shell settings get secure location_mode
 echo
 
 # 启动应用
