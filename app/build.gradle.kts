@@ -12,7 +12,7 @@ android {
         minSdk = 25
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
@@ -22,35 +22,92 @@ android {
     }
 
     signingConfigs {
-        create("system") {
-            // 系统证书配置 - 请替换为你的实际证书路径和密码
-             storeFile = file("SC20-NEW.keystore")
-             storePassword = "stw2024"
-             keyAlias = "platform"
-             keyPassword = "stw2024"
-            // 临时使用debug证书，实际部署时请使用系统证书
-//            storeFile = file("debug.keystore")
-//            storePassword = "android"
-//            keyAlias = "androiddebugkey"
-//            keyPassword = "android"
+        create("rk3288") {
+            storeFile = file("RK3288.keystore")
+            storePassword = "stw2024"
+            keyAlias = "platform"
+            keyPassword = "stw2024"
+        }
+        create("rk3288new") {
+            storeFile = file("RK3288-NEW.keystore")
+            storePassword = "stw2024"
+            keyAlias = "platform"
+            keyPassword = "stw2024"
+        }
+        create("sc20") {
+            storeFile = file("SC20.keystore")
+            storePassword = "stw2024"
+            keyAlias = "platform"
+            keyPassword = "stw2024"
+        }
+        create("sc20new") {
+            storeFile = file("SC20-NEW.keystore")
+            storePassword = "stw2024"
+            keyAlias = "platform"
+            keyPassword = "stw2024"
+        }
+    }
+
+    flavorDimensions += "device"
+
+    productFlavors {
+        create("rk3288") {
+            dimension = "device"
+            versionNameSuffix = "-RK3288"
+            signingConfig = signingConfigs.getByName("rk3288")
+        }
+        create("rk3288new") {
+            dimension = "device"
+            versionNameSuffix = "-RK3288NEW"
+            signingConfig = signingConfigs.getByName("rk3288new")
+        }
+        create("sc20") {
+            dimension = "device"
+            versionNameSuffix = "-SC20"
+            signingConfig = signingConfigs.getByName("sc20")
+        }
+        create("sc20new") {
+            dimension = "device"
+            versionNameSuffix = "-SC20NEW"
+            signingConfig = signingConfigs.getByName("sc20new")
         }
     }
 
     buildTypes {
-        debug {
-            // 使用系统签名配置
-            signingConfig = signingConfigs.getByName("system")
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+            isDebuggable = true
         }
-        release {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // 使用系统签名配置
-            signingConfig = signingConfigs.getByName("system")
         }
     }
+
+    // 确保每个variant使用正确的签名配置，并将APK输出到指定目录
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            // 使用variant.versionName，它已经包含了flavor和buildType的后缀
+            val fileName = "PowerTap-${variant.versionName}.apk"
+            output.outputFileName = fileName
+            
+            // 将APK复制到项目根目录的apk文件夹中
+            variant.assembleProvider.get().doLast {
+                copy {
+                    from(output.outputFile)
+                    into("${rootDir}/apk")
+                    rename { fileName }
+                }
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
