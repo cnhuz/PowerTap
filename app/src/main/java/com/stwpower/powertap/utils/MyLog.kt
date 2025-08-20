@@ -12,11 +12,13 @@ import java.util.Locale
 
 class MyLog private constructor() {
 
-
     companion object {
         private val logger: Logger = Logger.getLogger(MyLog::class.java)
         private val instance: MyLog by lazy { MyLog() }
-        private val TAG = "PowerTap"
+        private const val TAG = "PowerTap"
+
+        // 防止重复配置
+        @Volatile private var configured = false
 
         init {
             configLogger()
@@ -24,75 +26,65 @@ class MyLog private constructor() {
 
         fun getInstance(): MyLog = instance
 
-        @JvmStatic
-        fun e(msg: String) {
-            log(Level.ERROR, TAG, msg)
-        }
+        // ===== 简化调用（默认 TAG）=====
+        @JvmStatic fun e(msg: String) = log(Level.ERROR, TAG, msg, null)
+        @JvmStatic fun d(msg: String) = log(Level.DEBUG, TAG, msg, null)
+        @JvmStatic fun w(msg: String) = log(Level.WARN,  TAG, msg, null)
+        @JvmStatic fun v(msg: String) = log(Level.TRACE, TAG, msg, null)
+        @JvmStatic fun i(msg: String) = log(Level.INFO,  TAG, msg, null)
 
-        @JvmStatic
-        fun d(msg: String) {
-            log(Level.DEBUG, TAG, msg)
-        }
+        // ===== 支持 Throwable 的 ERROR 重载（默认 TAG）=====
+        @JvmStatic fun e(msg: String, tr: Throwable) = log(Level.ERROR, TAG, msg, tr)
 
-        @JvmStatic
-        fun w(msg: String) {
-            log(Level.WARN, TAG, msg)
-        }
+        // ===== 指定 TAG 的重载 =====
+        @JvmStatic fun e(tag: String, msg: String) = log(Level.ERROR, tag, msg, null)
+        @JvmStatic fun d(tag: String, msg: String) = log(Level.DEBUG, tag, msg, null)
+        @JvmStatic fun w(tag: String, msg: String) = log(Level.WARN,  tag, msg, null)
+        @JvmStatic fun v(tag: String, msg: String) = log(Level.TRACE, tag, msg, null)
+        @JvmStatic fun i(tag: String, msg: String) = log(Level.INFO,  tag, msg, null)
 
-        @JvmStatic
-        fun v(msg: String) {
-            log(Level.TRACE, TAG, msg)
-        }
+        // ===== 指定 TAG + Throwable 的 ERROR 重载 =====
+        @JvmStatic fun e(tag: String, msg: String, tr: Throwable) = log(Level.ERROR, tag, msg, tr)
 
-        @JvmStatic
-        fun i(msg: String) {
-            log(Level.INFO, TAG, msg)
-        }
-
-        @JvmStatic
-        fun e(tag: String, msg: String) {
-            log(Level.ERROR, tag, msg)
-        }
-
-        @JvmStatic
-        fun d(tag: String, msg: String) {
-            log(Level.DEBUG, tag, msg)
-        }
-
-        @JvmStatic
-        fun w(tag: String, msg: String) {
-            log(Level.WARN, tag, msg)
-        }
-
-        @JvmStatic
-        fun v(tag: String, msg: String) {
-            log(Level.TRACE, tag, msg)
-        }
-
-        @JvmStatic
-        fun i(tag: String, msg: String) {
-            log(Level.INFO, tag, msg)
-        }
-
-        private fun log(level: Level, tag: String, msg: String) {
+        // 统一出口：支持可选 Throwable
+        private fun log(level: Level, tag: String, msg: String, tr: Throwable?) {
             val stackTrace = Thread.currentThread().stackTrace
             val caller = findCaller(stackTrace)
-            if (caller != null) {
-                val cleanMsg = msg.replace("[\\r\\n]".toRegex(), " ")
-                val callerInfo = "${caller.fileName}.${caller.methodName}(Line:${caller.lineNumber})"
-                val logMsg = "$callerInfo - $cleanMsg"
-                Log.println(toAndroidLogLevel(level), tag, "${getCurrentTime()} - $logMsg")
-                logger.log(level, String.format("%-8.8s", tag) + " - $logMsg")
+
+            val cleanMsg = msg.replace("[\\r\\n]".toRegex(), " ")
+            val callerInfo = caller?.let { "${it.fileName}.${it.methodName}(Line:${it.lineNumber})" } ?: "UnknownCaller"
+            val logMsg = "$callerInfo - $cleanMsg"
+            val consoleMsg = "${getCurrentTime()} - $logMsg"
+
+            // ---- Android Log ----
+            when {
+                tr != null && level.isGreaterOrEqual(Level.ERROR) -> Log.e(tag, consoleMsg, tr)
+                tr != null && level.isGreaterOrEqual(Level.WARN)  -> Log.w(tag, consoleMsg, tr)
+                tr != null && level.isGreaterOrEqual(Level.INFO)  -> Log.i(tag, consoleMsg, tr)
+                tr != null && level.isGreaterOrEqual(Level.DEBUG) -> Log.d(tag, consoleMsg, tr)
+                tr != null                                          -> Log.v(tag, consoleMsg, tr)
+                else                                                -> Log.println(toAndroidLogLevel(level), tag, consoleMsg)
+            }
+
+            // ---- log4j 文件 ----
+            val paddedTag = String.format("%-8.8s", tag)
+            if (tr != null) {
+                logger.log(level, "$paddedTag - $logMsg", tr)
+            } else {
+                logger.log(level, "$paddedTag - $logMsg")
             }
         }
 
+        // 尝试跳过 MyLog/Companion 自身
         private fun findCaller(stackTrace: Array<StackTraceElement>): StackTraceElement? {
-            var hitLogHelper = false
-            for (element in stackTrace) {
-                if (element.className == MyLog::class.java.name) {
-                    hitLogHelper = true
-                } else if (hitLogHelper) {
-                    return element
+            var hit = false
+            val self = MyLog::class.java.name
+            val selfCompanion = "$self\$Companion"
+            for (e in stackTrace) {
+                if (e.className == self || e.className == selfCompanion) {
+                    hit = true
+                } else if (hit) {
+                    return e
                 }
             }
             return null
@@ -103,41 +95,40 @@ class MyLog private constructor() {
             return sdf.format(Date())
         }
 
-        private fun toAndroidLogLevel(level: Level): Int {
-            return when {
-                level.isGreaterOrEqual(Level.ERROR) -> Log.ERROR
-                level.isGreaterOrEqual(Level.WARN) -> Log.WARN
-                level.isGreaterOrEqual(Level.INFO) -> Log.INFO
-                level.isGreaterOrEqual(Level.DEBUG) -> Log.DEBUG
-                else -> Log.VERBOSE
-            }
+        private fun toAndroidLogLevel(level: Level): Int = when {
+            level.isGreaterOrEqual(Level.ERROR) -> Log.ERROR
+            level.isGreaterOrEqual(Level.WARN)  -> Log.WARN
+            level.isGreaterOrEqual(Level.INFO)  -> Log.INFO
+            level.isGreaterOrEqual(Level.DEBUG) -> Log.DEBUG
+            else                                -> Log.VERBOSE
         }
 
+        @Synchronized
         private fun configLogger() {
+            if (configured) return
+            configured = true
+
             val logDirectory = getLogDirectory()
             val dir = File(logDirectory)
-            if (!dir.exists()) {
-                dir.mkdirs()
+            if (!dir.exists()) dir.mkdirs()
+
+            val logFile = File(logDirectory, "log.txt")
+            if (!logFile.exists()) runCatching { logFile.createNewFile() }.onFailure { it.printStackTrace() }
+
+            // 防止重复添加 appender（例如多次初始化）
+            val appenders = logger.allAppenders
+            if (appenders != null && appenders.hasMoreElements()) return
+
+            val fileAppender = RollingFileAppender().apply {
+                file = logFile.absolutePath
+                setMaxFileSize("2MB")
+                maxBackupIndex = 2
+                layout = PatternLayout("%d %-5p - %m%n")
+                activateOptions()
             }
-            val file = File(logDirectory, "log.txt")
-            if (!file.exists()) {
-                try {
-                    file.createNewFile()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            val fileAppender = RollingFileAppender()
-            fileAppender.file = logDirectory + "log.txt"
-            fileAppender.setMaxFileSize("2MB")
-            fileAppender.maxBackupIndex = 2
-            fileAppender.layout = PatternLayout("%d %-5p - %m%n")
-            fileAppender.activateOptions()
             logger.addAppender(fileAppender)
         }
 
-        private fun getLogDirectory(): String {
-            return "/sdcard/Player/logs/"
-        }
+        private fun getLogDirectory(): String = "/sdcard/Player/logs/"
     }
 }
