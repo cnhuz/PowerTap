@@ -13,9 +13,7 @@ import com.stwpower.powertap.utils.MyLog
  * 用于系统应用的权限管理，跳过运行时权限请求
  */
 object SystemPermissionManager {
-    
-    private const val TAG = "powertap"
-    
+
     /**
      * 检查是否为系统应用
      */

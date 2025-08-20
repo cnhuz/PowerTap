@@ -33,7 +33,6 @@ class StripeTerminalManager(
 ) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener, UsbDeviceManager.UsbDeviceListener {
 
     companion object {
-        private const val TAG = "powertap"
         private const val DISCOVERY_TIMEOUT = 30000L // 30秒
         private const val RETRY_DELAY = 10 * 1000L // 重试延迟10秒
         private const val DISCOVERY_RETRY_DELAY = 30 * 1000L // 发现重试延迟30秒
@@ -49,7 +48,6 @@ class StripeTerminalManager(
     // 使用新的状态管理器
     private val stripeStateManager = StripeStateManager()
     private val usbDeviceManager = UsbDeviceManager(context)
-    private var discoveryJob: Job? = null
 
     // 标志：用户是否已经离开了Terminal页面
     private var userLeftTerminalPage = true
@@ -69,8 +67,6 @@ class StripeTerminalManager(
     
     // 时间戳跟踪
     private var lastDiscoveryStartTime: Long = 0L
-    private var lastConnectionStartTime: Long = 0L
-    private var lastPaymentStartTime: Long = 0L
 
     // 状态保持相关
     private var isReaderConnected = false
@@ -653,7 +649,7 @@ class StripeTerminalManager(
             // 直接传递整数值而不是数组
             updateDisplayState(DisplayState.UPGRADING, percentage)
         }catch (e:Exception){
-            Log.d(TAG,"升级异常",e)
+            MyLog.e("升级异常",e)
         }
 
     }

@@ -22,7 +22,6 @@ import kotlinx.coroutines.withContext
 class GeneralBroadcastReceiver : BroadcastReceiver() {
     
     companion object {
-        private const val TAG = "powertap"
         private const val ACTION_QUICKBOOT_POWERON = "android.intent.action.QUICKBOOT_POWERON"
         private const val HTC_QUICKBOOT_POWERON = "com.htc.intent.action.QUICKBOOT_POWERON"
         private const val ACTION_RECEIVE_DATA = "com.stwpower.player.ACTION_RECEIVE_DATA"

@@ -18,7 +18,6 @@ import com.stwpower.powertap.utils.MyLog
 class UsbDeviceManager(private val context: Context) {
     
     companion object {
-        private const val TAG = "UsbDeviceManager"
         private const val ACTION_USB_PERMISSION = "com.stwpower.powertap.USB_PERMISSION"
     }
     

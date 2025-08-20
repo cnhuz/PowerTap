@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 class PowerTapApplication : Application() {
 
     companion object {
-        private const val TAG = "powertap"
 
         @Volatile
         private var INSTANCE: PowerTapApplication? = null

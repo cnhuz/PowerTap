@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit
 class ConfigLoader(private val context: Context) {
 
     companion object {
-        private const val TAG = "powertap"
         private const val CONFIG_FILE = "/sdcard/Player/config.txt"
         private const val DEVINFO_FILE = "/sdcard/devinfo.txt"
 

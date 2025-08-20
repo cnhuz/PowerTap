@@ -12,9 +12,7 @@ import com.stwpower.powertap.utils.MyLog
  * 用于在不同Activity间共享Terminal连接状态
  */
 object TerminalConnectionManager {
-    
-    private const val TAG = "powertap"
-    
+
     private var terminalManager: StripeTerminalManager? = null
     private var isInitialized = false
     private var isPausedForConfigurationChange = false

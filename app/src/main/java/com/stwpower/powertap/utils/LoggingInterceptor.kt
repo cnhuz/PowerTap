@@ -9,9 +9,6 @@ import okhttp3.Response
 import okio.Buffer
 
 class LoggingInterceptor : Interceptor {
-    companion object {
-        private const val TAG = "powertap"
-    }
 
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {

@@ -10,9 +10,7 @@ import kotlinx.coroutines.*
  * 使用ADB命令直接授予权限，跳过运行时请求
  */
 object DirectPermissionManager {
-    
-    private const val TAG = "powertap"
-    
+
     /**
      * 直接授予所有必要权限
      */

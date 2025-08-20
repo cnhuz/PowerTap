@@ -30,8 +30,9 @@ class MyLog private constructor() {
         @JvmStatic fun v(msg: String) = log(Level.TRACE, TAG, msg, null)
         @JvmStatic fun i(msg: String) = log(Level.INFO,  TAG, msg, null)
 
-        // ===== 支持 Throwable 的 ERROR 重载（默认 TAG）=====
+        // ===== 支持 Throwable 的重载（默认 TAG）=====
         @JvmStatic fun e(msg: String, tr: Throwable) = log(Level.ERROR, TAG, msg, tr)
+        @JvmStatic fun d(msg: String, tr: Throwable) = log(Level.DEBUG, TAG, msg, tr)
 
         // ===== 指定 TAG 的重载 =====
         @JvmStatic fun e(tag: String, msg: String) = log(Level.ERROR, tag, msg, null)
@@ -40,8 +41,9 @@ class MyLog private constructor() {
         @JvmStatic fun v(tag: String, msg: String) = log(Level.TRACE, tag, msg, null)
         @JvmStatic fun i(tag: String, msg: String) = log(Level.INFO,  tag, msg, null)
 
-        // ===== 指定 TAG + Throwable 的 ERROR 重载 =====
+        // ===== 指定 TAG + Throwable 的重载 =====
         @JvmStatic fun e(tag: String, msg: String, tr: Throwable) = log(Level.ERROR, tag, msg, tr)
+        @JvmStatic fun d(tag: String, msg: String, tr: Throwable) = log(Level.DEBUG, tag, msg, tr)
 
         // 统一出口：支持可选 Throwable
         private fun log(level: Level, tag: String, msg: String, tr: Throwable?) {

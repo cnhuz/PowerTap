@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         var isAdminExiting = false
-        private const val TAG = "powertap"
     }
 
     private var clickCount = 0

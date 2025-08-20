@@ -13,8 +13,7 @@ import kotlinx.coroutines.withContext
  * 收费规则工具类
  */
 object ChargeRuleManager {
-    private const val TAG = "ChargeRuleManager"
-    
+
     /**
      * 获取充电规则（优先从网络获取，失败时使用缓存）
      * @param context 上下文

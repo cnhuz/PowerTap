@@ -22,7 +22,6 @@ import com.stwpower.powertap.utils.MyLog
 class DataPopupActivity : Activity() {
     
     companion object {
-        private const val TAG = "DataPopupActivity"
         const val EXTRA_DATA_LIST = "extra_data_list"
         private const val AUTO_CLOSE_DELAY: Long = 20000 // 10秒后自动关闭
     }

@@ -8,8 +8,7 @@ import android.util.Log
  * 用于在不同Activity间共享预生成的二维码和相关参数
  */
 object QRCodeCacheManager {
-    private const val TAG = "powertap"
-    
+
     // 缓存的二维码bitmap
     private var cachedQRCodeBitmap: Bitmap? = null
     

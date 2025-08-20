@@ -14,9 +14,7 @@ import com.stwpower.powertap.utils.MyLog
  * 负责管理应用所需的所有权限
  */
 object PermissionManager {
-    
-    private const val TAG = "powertap"
-    
+
     /**
      * Terminal支付所需的权限
      */

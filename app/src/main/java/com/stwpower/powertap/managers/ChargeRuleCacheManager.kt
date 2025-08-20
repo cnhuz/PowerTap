@@ -14,7 +14,6 @@ class ChargeRuleCacheManager private constructor(context: Context) {
     private val editor: SharedPreferences.Editor = sharedPreferences.edit()
     
     companion object {
-        private const val TAG = "ChargeRuleCacheManager"
         private const val KEY_MAX_PER_MONEY = "max_per_money"
         private const val KEY_ONE_MONEY_UNIT = "one_money_unit"
         private const val KEY_HOUR_UNIT = "hour_unit"
