@@ -149,6 +149,7 @@ class MainActivity : AppCompatActivity() {
                 MyLog.d("MainActivity: USB设备权限已授予: ${device.deviceName}")
                 // 权限授予后，可以显示提示信息
                 runOnUiThread {
+                    //TODO 国际化
                     Toast.makeText(this@MainActivity, "Stripe读卡器已连接并获得权限", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -265,7 +266,7 @@ class MainActivity : AppCompatActivity() {
 
         terminalButton.setOnClickListener {
             if (isClickAllowed()) {
-                MyLog.d("Terminal button clicked")
+                MyLog.d("Terminal payment button clicked")
 
                 // 立即提供视觉反馈
                 terminalButton.alpha = 0.7f
@@ -273,38 +274,24 @@ class MainActivity : AppCompatActivity() {
 
                 // 检查Terminal权限和GPS状态
                 if (PermissionManager.isTerminalReady(this)) {
-                    // 检查Terminal是否已经连接
-                    if (TerminalConnectionManager.hasActiveConnection()) {
-                        // Terminal已经连接，直接启动TerminalPaymentActivity
-                        // 使用Handler延迟启动Activity
-                        Handler(Looper.getMainLooper()).post {
-                            try {
-                                MyLog.d("Starting TerminalPaymentActivity...")
-                                val intent = Intent(this, TerminalPaymentActivity::class.java)
-                                startActivity(intent)
-                                // 添加过渡动画
-                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                                MyLog.d("Terminal activity started successfully")
-                            } catch (e: Exception) {
-                                MyLog.e("Failed to start Terminal activity", e)
-                            } finally {
-                                // 恢复按钮状态
-                                Handler(Looper.getMainLooper()).postDelayed({
-                                    terminalButton.alpha = 1.0f
-                                    terminalButton.isEnabled = true
-                                }, 1000)
-                            }
+                    // 使用Handler延迟启动Activity
+                    Handler(Looper.getMainLooper()).post {
+                        try {
+                            MyLog.d("Starting TerminalPaymentActivity...")
+                            val intent = Intent(this, TerminalPaymentActivity::class.java)
+                            startActivity(intent)
+                            // 添加过渡动画
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                            MyLog.d("Terminal activity started successfully")
+                        } catch (e: Exception) {
+                            MyLog.e("Failed to start Terminal activity", e)
+                        } finally {
+                            // 恢复按钮状态
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                terminalButton.alpha = 1.0f
+                                terminalButton.isEnabled = true
+                            }, 1000)
                         }
-                    } else {
-                        // Terminal未连接，显示提示信息
-                        MyLog.w("Terminal not connected, showing connection dialog")
-                        showTerminalNotConnectedDialog()
-                        
-                        // 恢复按钮状态
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            terminalButton.alpha = 1.0f
-                            terminalButton.isEnabled = true
-                        }, 1000)
                     }
                 } else {
                     // 权限或GPS未准备好，显示提示对话框

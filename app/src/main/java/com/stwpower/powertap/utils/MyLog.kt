@@ -14,7 +14,6 @@ class MyLog private constructor() {
 
     companion object {
         private val logger: Logger = Logger.getLogger(MyLog::class.java)
-        private val instance: MyLog by lazy { MyLog() }
         private const val TAG = "PowerTap"
 
         // 防止重复配置
@@ -23,8 +22,6 @@ class MyLog private constructor() {
         init {
             configLogger()
         }
-
-        fun getInstance(): MyLog = instance
 
         // ===== 简化调用（默认 TAG）=====
         @JvmStatic fun e(msg: String) = log(Level.ERROR, TAG, msg, null)

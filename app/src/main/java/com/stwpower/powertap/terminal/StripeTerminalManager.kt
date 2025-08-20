@@ -35,12 +35,8 @@ class StripeTerminalManager(
     companion object {
         private const val TAG = "powertap"
         private const val DISCOVERY_TIMEOUT = 30000L // 30秒
-        private const val CONNECTION_TIMEOUT = 20000L // 20秒
-        private const val PAYMENT_TIMEOUT = 60000L // 60秒
-        private const val MAX_RETRY_ATTEMPTS = 3 // 最大重试次数
-        private const val RETRY_DELAY = 5000L // 重试延迟5秒
-        private const val MAX_DISCOVERY_RETRY_ATTEMPTS = 3 // 最大发现重试次数
-        private const val DISCOVERY_RETRY_DELAY = 5000L // 发现重试延迟5秒
+        private const val RETRY_DELAY = 10 * 1000L // 重试延迟10秒
+        private const val DISCOVERY_RETRY_DELAY = 30 * 1000L // 发现重试延迟30秒
     }
 
     interface TerminalStateListener {
@@ -988,63 +984,28 @@ class StripeTerminalManager(
      * 重试发现阅读器
      */
     private fun retryDiscovery(error: TerminalException) {
-        if (discoveryRetryCount < MAX_DISCOVERY_RETRY_ATTEMPTS) {
-            discoveryRetryCount++
-            MyLog.d("重试发现阅读器，第${discoveryRetryCount}次尝试/$MAX_DISCOVERY_RETRY_ATTEMPTS")
-            MyLog.d("发现错误: ${error.errorMessage}", error)
-            // 重试过程保持当前状态
+        MyLog.e("发现错误: ${error.errorMessage}", error)
+        // 重试过程保持当前状态
+        handler.postDelayed({
+            // 检查当前连接状态
+            val connectionStatus = Terminal.getInstance().connectionStatus
+            if (connectionStatus == ConnectionStatus.CONNECTED) {
+                MyLog.d("阅读器已连接，取消发现阅读器重试")
+                return@postDelayed
+            }
 
-            handler.postDelayed({
-                // 检查当前连接状态
-                val connectionStatus = Terminal.getInstance().connectionStatus
-                if (connectionStatus == ConnectionStatus.CONNECTED) {
-                    MyLog.d("阅读器已连接，取消发现阅读器重试")
-                    return@postDelayed
-                }
-                
-                startDiscovery()
-            }, DISCOVERY_RETRY_DELAY)
-        } else {
-            MyLog.e("发现阅读器失败，已达到最大重试次数: $MAX_DISCOVERY_RETRY_ATTEMPTS")
-            MyLog.e("最终错误: ${error.errorMessage}", error)
-            updateDisplayState(DisplayState.LOADING, null)
-        }
+            startDiscovery()
+        }, DISCOVERY_RETRY_DELAY)
     }
 
     /**
      * 重试连接阅读器
      */
     private fun retryConnection(reader: Reader, error: TerminalException) {
-        if (connectionRetryCount < MAX_RETRY_ATTEMPTS) {
-            connectionRetryCount++
-            MyLog.d("Retrying connection, attempt $connectionRetryCount/$MAX_RETRY_ATTEMPTS")
-            // 重试过程保持当前状态
-
-            handler.postDelayed({
-                connectToReader(reader)
-            }, RETRY_DELAY)
-        } else {
-            MyLog.e("Connection failed after $MAX_RETRY_ATTEMPTS attempts")
-            updateDisplayState(DisplayState.CONNECT_READER_FAILED, null)
-        }
-    }
-
-    /**
-     * 重试支付
-     */
-    private fun retryPayment(error: TerminalException) {
-        if (paymentRetryCount < MAX_RETRY_ATTEMPTS) {
-            paymentRetryCount++
-            MyLog.d("Retrying payment, attempt $paymentRetryCount/$MAX_RETRY_ATTEMPTS")
-            // 重试过程保持当前状态
-
-            handler.postDelayed({
-                startPaymentCollection()
-            }, RETRY_DELAY)
-        } else {
-            MyLog.e("Payment failed after $MAX_RETRY_ATTEMPTS attempts")
-            updateDisplayState(DisplayState.ENTER_COLLECTION_METHOD_FAILED, null)
-        }
+        // 重试过程保持当前状态
+        handler.postDelayed({
+            connectToReader(reader)
+        }, RETRY_DELAY)
     }
 
     /**
@@ -1057,39 +1018,14 @@ class StripeTerminalManager(
     }
 
     /**
-     * 处理发现超时
-     */
-    private fun handleDiscoveryTimeout() {
-        if (discoveryRetryCount < MAX_RETRY_ATTEMPTS) {
-            discoveryRetryCount++
-            MyLog.d("Discovery timeout, retrying attempt $discoveryRetryCount/$MAX_RETRY_ATTEMPTS")
-            // 重试过程保持当前状态
-
-            handler.postDelayed({
-                startDiscovery()
-            }, RETRY_DELAY)
-        } else {
-            MyLog.e("Discovery failed after $MAX_RETRY_ATTEMPTS attempts due to timeout")
-            updateDisplayState(DisplayState.LOADING, null)
-        }
-    }
-
-    /**
      * 处理未找到阅读器
      */
     private fun handleNoReadersFound() {
-        if (discoveryRetryCount < MAX_RETRY_ATTEMPTS) {
-            discoveryRetryCount++
-            MyLog.d("No readers found, retrying attempt $discoveryRetryCount/$MAX_RETRY_ATTEMPTS")
-            // 重试过程保持当前状态
-
-            handler.postDelayed({
-                startDiscovery()
-            }, RETRY_DELAY)
-        } else {
-            MyLog.e("Discovery failed after $MAX_RETRY_ATTEMPTS attempts: no readers found")
-            updateDisplayState(DisplayState.LOADING, null)
-        }
+        MyLog.d("未找到阅读器，重试")
+        // 重试过程保持当前状态
+        handler.postDelayed({
+            startDiscovery()
+        }, RETRY_DELAY)
     }
 
     /**
