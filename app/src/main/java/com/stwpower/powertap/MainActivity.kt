@@ -50,6 +50,7 @@ import com.stwpower.powertap.terminal.StripeTerminalManager
 import com.stwpower.powertap.terminal.DisplayState
 import com.stwpower.powertap.terminal.UIType
 import com.stwpower.powertap.terminal.UsbDeviceManager
+import com.stwpower.powertap.utils.MyLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,22 +90,22 @@ class MainActivity : AppCompatActivity() {
     private fun loadAndUseConfig() {
         try {
             // 直接使用静态变量 - 更简洁！
-            Log.d(TAG, "=== 配置信息 ===")
-            Log.d(TAG, "API URL: ${ConfigLoader.apiUrl}")
-            Log.d(TAG, "qrCodeUrl: ${ConfigLoader.qrCodeUrl}")
-            Log.d(TAG, "IMEI: ${ConfigLoader.imei}")
-            Log.d(TAG, "Debug Mode: ${ConfigLoader.enableDebug}")
-            Log.d(TAG, "currency: ${ConfigLoader.currency}")
-            Log.d(TAG, "===============")
+            MyLog.d("=== 配置信息 ===")
+            MyLog.d("API URL: ${ConfigLoader.apiUrl}")
+            MyLog.d("qrCodeUrl: ${ConfigLoader.qrCodeUrl}")
+            MyLog.d("IMEI: ${ConfigLoader.imei}")
+            MyLog.d("Debug Mode: ${ConfigLoader.enableDebug}")
+            MyLog.d("currency: ${ConfigLoader.currency}")
+            MyLog.d("===============")
 
             // 根据配置调整应用行为
             if (ConfigLoader.enableDebug) {
                 // 调试模式下的特殊处理
-                Log.d(TAG, "Debug mode enabled - showing detailed logs")
+                MyLog.d("Debug mode enabled - showing detailed logs")
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to load config in MainActivity", e)
+            MyLog.e("Failed to load config in MainActivity", e)
         }
     }
 
@@ -127,25 +128,25 @@ class MainActivity : AppCompatActivity() {
         usbDeviceManager = UsbDeviceManager(this)
         usbDeviceManager.setDeviceListener(object : UsbDeviceManager.UsbDeviceListener {
             override fun onDeviceAttached(device: UsbDevice) {
-                Log.d(TAG, "MainActivity: USB设备已连接: ${device.deviceName}")
+                MyLog.d("MainActivity: USB设备已连接: ${device.deviceName}")
                 // 检查是否是Stripe阅读器设备
                 if (usbDeviceManager.isStripeReaderDevice(device)) {
-                    Log.d(TAG, "MainActivity: 检测到Stripe阅读器设备连接: ${device.deviceName}")
+                    MyLog.d("MainActivity: 检测到Stripe阅读器设备连接: ${device.deviceName}")
                     // 请求USB权限
                     usbDeviceManager.checkAndRequestUsbPermission(device)
                 }
             }
             
             override fun onDeviceDetached(device: UsbDevice) {
-                Log.d(TAG, "MainActivity: USB设备已断开: ${device.deviceName}")
+                MyLog.d("MainActivity: USB设备已断开: ${device.deviceName}")
                 // 检查是否是Stripe阅读器设备断开
                 if (usbDeviceManager.isStripeReaderDevice(device)) {
-                    Log.d(TAG, "MainActivity: Stripe阅读器设备断开连接: ${device.deviceName}")
+                    MyLog.d("MainActivity: Stripe阅读器设备断开连接: ${device.deviceName}")
                 }
             }
             
             override fun onPermissionGranted(device: UsbDevice) {
-                Log.d(TAG, "MainActivity: USB设备权限已授予: ${device.deviceName}")
+                MyLog.d("MainActivity: USB设备权限已授予: ${device.deviceName}")
                 // 权限授予后，可以显示提示信息
                 runOnUiThread {
                     Toast.makeText(this@MainActivity, "Stripe读卡器已连接并获得权限", Toast.LENGTH_SHORT).show()
@@ -153,7 +154,7 @@ class MainActivity : AppCompatActivity() {
             }
             
             override fun onPermissionDenied(device: UsbDevice) {
-                Log.w(TAG, "MainActivity: USB设备权限被拒绝: ${device.deviceName}")
+                MyLog.w("MainActivity: USB设备权限被拒绝: ${device.deviceName}")
                 // 权限被拒绝，显示提示信息
                 runOnUiThread {
                     Toast.makeText(this@MainActivity, "请授予Stripe读卡器权限", Toast.LENGTH_LONG).show()
@@ -264,7 +265,7 @@ class MainActivity : AppCompatActivity() {
 
         terminalButton.setOnClickListener {
             if (isClickAllowed()) {
-                Log.d(TAG, "Terminal button clicked")
+                MyLog.d("Terminal button clicked")
 
                 // 立即提供视觉反馈
                 terminalButton.alpha = 0.7f
@@ -278,14 +279,14 @@ class MainActivity : AppCompatActivity() {
                         // 使用Handler延迟启动Activity
                         Handler(Looper.getMainLooper()).post {
                             try {
-                                Log.d(TAG, "Starting TerminalPaymentActivity...")
+                                MyLog.d("Starting TerminalPaymentActivity...")
                                 val intent = Intent(this, TerminalPaymentActivity::class.java)
                                 startActivity(intent)
                                 // 添加过渡动画
                                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                                Log.d(TAG, "Terminal activity started successfully")
+                                MyLog.d("Terminal activity started successfully")
                             } catch (e: Exception) {
-                                Log.e(TAG, "Failed to start Terminal activity", e)
+                                MyLog.e("Failed to start Terminal activity", e)
                             } finally {
                                 // 恢复按钮状态
                                 Handler(Looper.getMainLooper()).postDelayed({
@@ -296,7 +297,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     } else {
                         // Terminal未连接，显示提示信息
-                        Log.w(TAG, "Terminal not connected, showing connection dialog")
+                        MyLog.w("Terminal not connected, showing connection dialog")
                         showTerminalNotConnectedDialog()
                         
                         // 恢复按钮状态
@@ -307,7 +308,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     // 权限或GPS未准备好，显示提示对话框
-                    Log.w(TAG, "Terminal not ready, showing permission dialog")
+                    MyLog.w("Terminal not ready, showing permission dialog")
                     showTerminalNotReadyDialog()
                     
                     // 恢复按钮状态
@@ -317,13 +318,13 @@ class MainActivity : AppCompatActivity() {
                     }, 1000)
                 }
             } else {
-                Log.d(TAG, "Terminal button click ignored (debounce)")
+                MyLog.d("Terminal button click ignored (debounce)")
             }
         }
 
         appButton.setOnClickListener {
             if (isClickAllowed()) {
-                Log.d(TAG, "App payment button clicked")
+                MyLog.d("App payment button clicked")
 
                 // 立即提供视觉反馈
                 appButton.alpha = 0.7f
@@ -332,14 +333,14 @@ class MainActivity : AppCompatActivity() {
                 // 使用Handler延迟启动Activity，避免UI阻塞
                 Handler(Looper.getMainLooper()).post {
                     try {
-                        Log.d(TAG, "Starting AppPaymentActivity...")
+                        MyLog.d("Starting AppPaymentActivity...")
                         val intent = Intent(this, AppPaymentActivity::class.java)
                         startActivity(intent)
                         // 添加过渡动画，减少黑屏
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                        Log.d(TAG, "App payment activity started successfully")
+                        MyLog.d("App payment activity started successfully")
                     } catch (e: Exception) {
-                        Log.e(TAG, "Failed to start App payment activity", e)
+                        MyLog.e("Failed to start App payment activity", e)
                     } finally {
                         // 恢复按钮状态
                         Handler(Looper.getMainLooper()).postDelayed({
@@ -349,7 +350,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } else {
-                Log.d(TAG, "App payment button click ignored (debounce)")
+                MyLog.d("App payment button click ignored (debounce)")
             }
         }
     }
@@ -552,7 +553,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun enableKioskMode() {
-        Log.d(TAG, "Enabling full kiosk mode...")
+        MyLog.d("Enabling full kiosk mode...")
         // 启用所有保护机制
         fullscreenManager.enableFullscreen()
         kioskModeManager.enableKioskMode()
@@ -564,7 +565,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun enableBasicFullscreen() {
-        Log.d(TAG, "Enabling basic fullscreen mode (no kiosk restrictions)...")
+        MyLog.d("Enabling basic fullscreen mode (no kiosk restrictions)...")
         // 只启用全屏模式，不启用Kiosk限制
         fullscreenManager.enableFullscreen()
         fullscreenManager.onResume()
@@ -574,7 +575,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun temporarilyDisableKioskMode() {
-        Log.d(TAG, "Temporarily disabling kiosk mode for permission request...")
+        MyLog.d("Temporarily disabling kiosk mode for permission request...")
 
         // 停止看门狗服务
         stopService(Intent(this, KioskWatchdogService::class.java))
@@ -641,10 +642,10 @@ class MainActivity : AppCompatActivity() {
 
         // 检查是否是因为配置更改（如语言切换）导致的Activity重建
         if (isChangingConfigurations) {
-            Log.d(TAG, "MainActivity onDestroy - 因配置更改重建，保持Terminal连接")
+            MyLog.d("MainActivity onDestroy - 因配置更改重建，保持Terminal连接")
             TerminalConnectionManager.setPausedForConfigurationChange(true)
         } else {
-            Log.d(TAG, "MainActivity onDestroy - 应用退出，完全断开Terminal连接")
+            MyLog.d("MainActivity onDestroy - 应用退出，完全断开Terminal连接")
             // 完全断开Terminal连接
             TerminalConnectionManager.disconnect()
         }
@@ -665,40 +666,40 @@ class MainActivity : AppCompatActivity() {
      * 检查和请求权限
      */
     private fun checkAndRequestPermissions() {
-        Log.d(TAG, "Starting permission check...")
+        MyLog.d("Starting permission check...")
 
         // 首先尝试系统级权限管理
         if (SystemPermissionManager.isSystemApp(this)) {
-            Log.d(TAG, "Detected system app, using system permission management")
+            MyLog.d("Detected system app, using system permission management")
 
             val systemPermissionsReady = SystemPermissionManager.initializeSystemPermissions(this)
 
             if (systemPermissionsReady) {
-                Log.d(TAG, "System permissions initialized successfully")
+                MyLog.d("System permissions initialized successfully")
                 onPermissionsReady()
                 return
             } else {
-                Log.w(TAG, "System permission initialization failed, falling back to regular permissions")
+                MyLog.w("System permission initialization failed, falling back to regular permissions")
             }
         }
 
         // 回退到常规权限管理
-        Log.d(TAG, "Using regular permission management")
+        MyLog.d("Using regular permission management")
 
         // 打印详细的权限状态报告
-        Log.d(TAG, PermissionManager.getPermissionReport(this))
+        MyLog.d(PermissionManager.getPermissionReport(this))
 
         val missingPermissions = PermissionManager.getMissingPermissions(this)
-        Log.d(TAG, "Missing permissions count: ${missingPermissions.size}")
-        Log.d(TAG, "Missing permissions: ${missingPermissions.joinToString()}")
+        MyLog.d("Missing permissions count: ${missingPermissions.size}")
+        MyLog.d("Missing permissions: ${missingPermissions.joinToString()}")
 
         if (missingPermissions.isEmpty()) {
             // 所有权限已授予，检查GPS
-            Log.d(TAG, "All permissions granted, checking GPS...")
+            MyLog.d("All permissions granted, checking GPS...")
             checkGpsStatus()
         } else {
             // 请求缺失的权限前，暂时禁用Kiosk模式
-            Log.d(TAG, "Requesting permissions: ${missingPermissions.joinToString()}")
+            MyLog.d("Requesting permissions: ${missingPermissions.joinToString()}")
             temporarilyDisableKioskMode()
             requestPermissionLauncher.launch(missingPermissions.toTypedArray())
         }
@@ -710,16 +711,16 @@ class MainActivity : AppCompatActivity() {
     private fun handlePermissionResult(permissions: Map<String, Boolean>) {
         val deniedPermissions = permissions.filter { !it.value }.keys.toList()
 
-        Log.d(TAG, "Permission request result:")
+        MyLog.d("Permission request result:")
         permissions.forEach { (permission, granted) ->
-            Log.d(TAG, "  $permission: ${if (granted) "GRANTED" else "DENIED"}")
+            MyLog.d("  $permission: ${if (granted) "GRANTED" else "DENIED"}")
         }
 
         if (deniedPermissions.isEmpty()) {
-            Log.d(TAG, "All requested permissions granted")
+            MyLog.d("All requested permissions granted")
             checkGpsStatus()
         } else {
-            Log.w(TAG, "Some permissions denied: ${deniedPermissions.joinToString()}")
+            MyLog.w("Some permissions denied: ${deniedPermissions.joinToString()}")
             showPermissionDeniedDialog(deniedPermissions)
         }
     }
@@ -731,7 +732,7 @@ class MainActivity : AppCompatActivity() {
         if (!PermissionManager.isGpsEnabled(this)) {
             showGpsRequiredDialog()
         } else {
-            Log.d(TAG, "All permissions and GPS ready")
+            MyLog.d("All permissions and GPS ready")
             // 权限和GPS都准备好了，可以正常使用Terminal功能
             onPermissionsReady()
         }
@@ -741,14 +742,14 @@ class MainActivity : AppCompatActivity() {
      * 权限准备完成
      */
     private fun onPermissionsReady() {
-        Log.d(TAG, "Permissions ready, Terminal functionality available")
+        MyLog.d("Permissions ready, Terminal functionality available")
         permissionsReady = true
 
         // 现在可以安全地启用Kiosk模式
         enableKioskMode()
 
         // 打印权限状态报告
-        Log.d(TAG, PermissionManager.getPermissionReport(this))
+        MyLog.d(PermissionManager.getPermissionReport(this))
 
         // 预初始化Terminal
         preInitializeTerminal()
@@ -759,16 +760,16 @@ class MainActivity : AppCompatActivity() {
      */
     private fun preInitializeTerminal() {
         if (PermissionManager.isTerminalReady(this)) {
-            Log.d(TAG, "开始预初始化Terminal")
+            MyLog.d("开始预初始化Terminal")
             // 使用TerminalConnectionManager初始化Terminal
             TerminalConnectionManager.initializeIfNeeded(this, object : StripeTerminalManager.TerminalStateListener {
                 override fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?) {
                     // 在MainActivity中我们只关心初始化是否成功，不更新UI
-                    Log.d(TAG, "Terminal状态更新: $displayState")
+                    MyLog.d("Terminal状态更新: $displayState")
                     
                     // 只要连接成功就停止监听
                     if (TerminalConnectionManager.hasActiveConnection()) {
-                        Log.d(TAG, "Terminal预初始化完成，已连接")
+                        MyLog.d("Terminal预初始化完成，已连接")
                         // 可以在这里添加一些预初始化完成的处理逻辑
                     }
                 }
@@ -786,7 +787,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         } else {
-            Log.d(TAG, "Terminal未准备好，跳过预初始化")
+            MyLog.d("Terminal未准备好，跳过预初始化")
         }
     }
 
@@ -833,7 +834,7 @@ class MainActivity : AppCompatActivity() {
             intent.data = android.net.Uri.fromParts("package", packageName, null)
             startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to open app settings", e)
+            MyLog.e("Failed to open app settings", e)
             Toast.makeText(this, "无法打开设置", Toast.LENGTH_SHORT).show()
         }
     }
@@ -846,7 +847,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to open location settings", e)
+            MyLog.e("Failed to open location settings", e)
             Toast.makeText(this, "无法打开位置设置", Toast.LENGTH_SHORT).show()
         }
     }
@@ -880,15 +881,15 @@ class MainActivity : AppCompatActivity() {
         if (ConfigLoader.enableDebug) {
             val priceInfoText = findViewById<TextView>(R.id.tv_price_info)
             priceInfoText.setOnLongClickListener {
-                Log.d(TAG, "=== 应用配置信息 ===")
-                Log.d(TAG, "API URL: ${ConfigLoader.apiUrl}")
-                Log.d(TAG, "QR Code URL: ${ConfigLoader.qrCodeUrl}")
-                Log.d(TAG, "Secret Key: ${ConfigLoader.secretKey}")
-                Log.d(TAG, "IMEI: ${ConfigLoader.imei}")
-                Log.d(TAG, "Currency: ${ConfigLoader.currency}")
-                Log.d(TAG, "Brand Name: ${ConfigLoader.brandName}")
-                Log.d(TAG, "Debug Mode: ${ConfigLoader.enableDebug}")
-                Log.d(TAG, "==================")
+                MyLog.d("=== 应用配置信息 ===")
+                MyLog.d("API URL: ${ConfigLoader.apiUrl}")
+                MyLog.d("QR Code URL: ${ConfigLoader.qrCodeUrl}")
+                MyLog.d("Secret Key: ${ConfigLoader.secretKey}")
+                MyLog.d("IMEI: ${ConfigLoader.imei}")
+                MyLog.d("Currency: ${ConfigLoader.currency}")
+                MyLog.d("Brand Name: ${ConfigLoader.brandName}")
+                MyLog.d("Debug Mode: ${ConfigLoader.enableDebug}")
+                MyLog.d("==================")
                 true
             }
         }
@@ -902,7 +903,7 @@ class MainActivity : AppCompatActivity() {
             val brandNameTextView = findViewById<TextView>(R.id.tv_brand_name)
             brandNameTextView.text = ConfigLoader.brandName
         } catch (e: Exception) {
-            Log.e(TAG, "设置品牌名称时出错", e)
+            MyLog.e("设置品牌名称时出错", e)
         }
     }
 
@@ -910,43 +911,43 @@ class MainActivity : AppCompatActivity() {
      * 获取设备信息和QR码
      */
     private fun getDeviceInfoAndQrCode() {
-        Log.d(TAG, "=== 开始获取设备信息和QR码 ===")
+        MyLog.d("=== 开始获取设备信息和QR码 ===")
 
         // 异步获取设备信息
         Thread {
             try {
-                Log.d(TAG, "开始获取设备IMEI...")
+                MyLog.d("开始获取设备IMEI...")
                 val imei = getDeviceImei()
-                Log.d(TAG, "Device IMEI: $imei")
+                MyLog.d("Device IMEI: $imei")
 
                 if (imei.isNotEmpty()) {
-                    Log.d(TAG, "开始调用API获取QR码，IMEI: $imei")
+                    MyLog.d("开始调用API获取QR码，IMEI: $imei")
 
                     // 根据IMEI获取QR码
                     val qrCode = MyApiClient.getQrCode(imei)
-                    Log.d(TAG, "API调用完成，返回的QR码: $qrCode")
+                    MyLog.d("API调用完成，返回的QR码: $qrCode")
 
                     if (qrCode != null && qrCode.isNotEmpty()) {
                         // 存储QR码信息
                         PreferenceManager.setQrCode(qrCode)
                         PreferenceManager.setDeviceSno(qrCode)
 
-                        Log.d(TAG, "QR码保存成功: $qrCode")
+                        MyLog.d("QR码保存成功: $qrCode")
 
                         // 获取位置ID
                         getLocationId(qrCode)
                     } else {
-                        Log.w(TAG, "从服务器获取QR码失败，返回值为空")
+                        MyLog.w("从服务器获取QR码失败，返回值为空")
                     }
                 } else {
-                    Log.w(TAG, "获取设备IMEI失败，IMEI为空")
+                    MyLog.w("获取设备IMEI失败，IMEI为空")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "获取设备信息和QR码时发生异常", e)
+                MyLog.e("获取设备信息和QR码时发生异常", e)
             }
         }.start()
 
-        Log.d(TAG, "已启动异步线程获取设备信息")
+        MyLog.d("已启动异步线程获取设备信息")
     }
 
     /**
@@ -957,32 +958,32 @@ class MainActivity : AppCompatActivity() {
             // 首先使用ConfigLoader中已经加载的IMEI
             val configImei = ConfigLoader.imei
             if (configImei.isNotEmpty() && configImei != "123456") {
-                Log.d(TAG, "使用ConfigLoader中的IMEI: $configImei")
+                MyLog.d("使用ConfigLoader中的IMEI: $configImei")
                 return configImei
             }
 
             // 如果ConfigLoader中的IMEI是默认值，尝试重新从文件读取
-            Log.d(TAG, "ConfigLoader中的IMEI是默认值，尝试重新读取devinfo.txt")
+            MyLog.d("ConfigLoader中的IMEI是默认值，尝试重新读取devinfo.txt")
             val devinfoFile = java.io.File("/sdcard/devinfo.txt")
             if (devinfoFile.exists() && devinfoFile.canRead()) {
                 val content = devinfoFile.readText().trim()
-                Log.d(TAG, "从devinfo.txt读取到内容: $content")
+                MyLog.d("从devinfo.txt读取到内容: $content")
 
                 if (content.isNotEmpty()) {
-                    Log.d(TAG, "使用devinfo.txt中的IMEI: $content")
+                    MyLog.d("使用devinfo.txt中的IMEI: $content")
                     return content
                 }
             } else {
-                Log.w(TAG, "devinfo.txt文件不存在或不可读: /sdcard/devinfo.txt")
+                MyLog.w("devinfo.txt文件不存在或不可读: /sdcard/devinfo.txt")
             }
 
             // 备用方案：使用Android ID
             val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            Log.d(TAG, "使用Android ID作为备用: $androidId")
+            MyLog.d("使用Android ID作为备用: $androidId")
             return androidId ?: ""
 
         } catch (e: Exception) {
-            Log.e(TAG, "获取IMEI时发生异常", e)
+            MyLog.e("获取IMEI时发生异常", e)
             // 最终备用方案：使用Android ID
             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
         }
@@ -998,12 +999,12 @@ class MainActivity : AppCompatActivity() {
                 if (result?.code == 200 && result.data != null) {
                     val locationId = result.data as String
                     PreferenceManager.setLocationId(locationId)
-                    Log.d(TAG, "Location ID saved: $locationId")
+                    MyLog.d("Location ID saved: $locationId")
                 } else {
-                    Log.w(TAG, "Failed to get location ID: ${result?.message}")
+                    MyLog.w("Failed to get location ID: ${result?.message}")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error getting location ID", e)
+                MyLog.e("Error getting location ID", e)
             }
         }.start()
     }
@@ -1014,28 +1015,28 @@ class MainActivity : AppCompatActivity() {
     private fun preGenerateQRCodes() {
         Thread {
             try {
-                Log.d(TAG, "开始预生成二维码...")
+                MyLog.d("开始预生成二维码...")
                 val qrCode = PreferenceManager.getQrCode()
                 if (!qrCode.isNullOrEmpty()) {
                     // 处理URL
                     val processedUrl = QRCodeUrlProcessor.processQrCodeUrl(ConfigLoader.qrCodeUrl)
                     val fullQRCodeContent = QRCodeUrlProcessor.generateQRCodeContent(ConfigLoader.qrCodeUrl, qrCode)
-                    Log.d(TAG, "处理后的URL: $fullQRCodeContent")
+                    MyLog.d("处理后的URL: $fullQRCodeContent")
 
                     // 预生成二维码
                     val qrCodeBitmap = OptimizedQRGenerator.generateQRCode(fullQRCodeContent, 800, "WHITE_BORDERED")
                     if (qrCodeBitmap != null) {
-                        Log.d(TAG, "二维码预生成成功")
+                        MyLog.d("二维码预生成成功")
                         // 将生成的二维码存储到缓存管理器中
                         QRCodeCacheManager.setCachedQRCode(qrCodeBitmap, processedUrl, qrCode, fullQRCodeContent)
                     } else {
-                        Log.w(TAG, "二维码预生成失败")
+                        MyLog.w("二维码预生成失败")
                     }
                 } else {
-                    Log.w(TAG, "QR码为空，跳过二维码预生成")
+                    MyLog.w("QR码为空，跳过二维码预生成")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "预生成二维码时出错", e)
+                MyLog.e("预生成二维码时出错", e)
             }
         }.start()
     }
@@ -1052,12 +1053,12 @@ class MainActivity : AppCompatActivity() {
                     val priceText = ChargeRuleManager.formatPrice(chargeRule.oneMoneyUnit)
                     val timeText = "${chargeRule.hourUnit} Min"
                     priceInfoText.text = "$priceText / $timeText"
-                    Log.d(TAG, "主页价格信息更新成功: $priceText / $timeText")
+                    MyLog.d("主页价格信息更新成功: $priceText / $timeText")
                 } else {
-                    Log.w(TAG, "无法获取充电规则，使用默认价格信息")
+                    MyLog.w("无法获取充电规则，使用默认价格信息")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "更新主页价格信息时出错", e)
+                MyLog.e("更新主页价格信息时出错", e)
             }
         }
     }

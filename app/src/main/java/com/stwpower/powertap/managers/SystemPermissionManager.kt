@@ -6,6 +6,7 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.stwpower.powertap.utils.MyLog
 
 /**
  * 系统级权限管理器
@@ -28,13 +29,13 @@ object SystemPermissionManager {
             val isSystem = (flags?.and(android.content.pm.ApplicationInfo.FLAG_SYSTEM)) != 0
             val isSystemUpdate = (flags?.and(android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0
             
-            Log.d(TAG, "App flags: $flags")
-            Log.d(TAG, "Is system app: $isSystem")
-            Log.d(TAG, "Is system update: $isSystemUpdate")
+            MyLog.d("App flags: $flags")
+            MyLog.d("Is system app: $isSystem")
+            MyLog.d("Is system update: $isSystemUpdate")
             
             isSystem || isSystemUpdate
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to check system app status", e)
+            MyLog.e("Failed to check system app status", e)
             false
         }
     }
@@ -44,7 +45,7 @@ object SystemPermissionManager {
      */
     fun grantSystemPermissions(context: Context): Boolean {
         if (!isSystemApp(context)) {
-            Log.w(TAG, "Not a system app, cannot grant system permissions")
+            MyLog.w("Not a system app, cannot grant system permissions")
             return false
         }
         
@@ -68,10 +69,10 @@ object SystemPermissionManager {
             grantPermission(packageName, "android.permission.READ_EXTERNAL_STORAGE")
             grantPermission(packageName, "android.permission.WRITE_EXTERNAL_STORAGE")
             
-            Log.d(TAG, "System permissions granted successfully")
+            MyLog.d("System permissions granted successfully")
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to grant system permissions", e)
+            MyLog.e("Failed to grant system permissions", e)
             false
         }
     }
@@ -87,7 +88,7 @@ object SystemPermissionManager {
             val exitCode1 = process1.waitFor()
 
             if (exitCode1 == 0) {
-                Log.d(TAG, "Granted permission via pm: $permission")
+                MyLog.d("Granted permission via pm: $permission")
                 return true
             }
 
@@ -97,14 +98,14 @@ object SystemPermissionManager {
             val exitCode2 = process2.waitFor()
 
             if (exitCode2 == 0) {
-                Log.d(TAG, "Granted permission via su: $permission")
+                MyLog.d("Granted permission via su: $permission")
                 true
             } else {
-                Log.w(TAG, "Failed to grant permission: $permission (exit codes: $exitCode1, $exitCode2)")
+                MyLog.w("Failed to grant permission: $permission (exit codes: $exitCode1, $exitCode2)")
                 false
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Exception granting permission: $permission", e)
+            MyLog.e("Exception granting permission: $permission", e)
             false
         }
     }
@@ -114,7 +115,7 @@ object SystemPermissionManager {
      */
     fun enableGPS(context: Context): Boolean {
         if (!isSystemApp(context)) {
-            Log.w(TAG, "Not a system app, cannot enable GPS")
+            MyLog.w("Not a system app, cannot enable GPS")
             return false
         }
         
@@ -126,10 +127,10 @@ object SystemPermissionManager {
                 Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
             )
             
-            Log.d(TAG, "GPS enabled successfully")
+            MyLog.d("GPS enabled successfully")
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to enable GPS", e)
+            MyLog.e("Failed to enable GPS", e)
             
             // 备用方法：使用shell命令
             try {
@@ -138,14 +139,14 @@ object SystemPermissionManager {
                 val exitCode = process.waitFor()
                 
                 if (exitCode == 0) {
-                    Log.d(TAG, "GPS enabled via shell command")
+                    MyLog.d("GPS enabled via shell command")
                     true
                 } else {
-                    Log.w(TAG, "Failed to enable GPS via shell command")
+                    MyLog.w("Failed to enable GPS via shell command")
                     false
                 }
             } catch (shellException: Exception) {
-                Log.e(TAG, "Failed to enable GPS via shell command", shellException)
+                MyLog.e("Failed to enable GPS via shell command", shellException)
                 false
             }
         }
@@ -159,15 +160,15 @@ object SystemPermissionManager {
         
         val allGranted = requiredPermissions.all { permission ->
             val granted = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-            Log.d(TAG, "Permission $permission: ${if (granted) "GRANTED" else "DENIED"}")
+            MyLog.d("Permission $permission: ${if (granted) "GRANTED" else "DENIED"}")
             granted
         }
         
         val gpsEnabled = PermissionManager.isGpsEnabled(context)
-        Log.d(TAG, "GPS enabled: $gpsEnabled")
+        MyLog.d("GPS enabled: $gpsEnabled")
         
         val result = allGranted && gpsEnabled
-        Log.d(TAG, "All permissions and GPS ready: $result")
+        MyLog.d("All permissions and GPS ready: $result")
         
         return result
     }
@@ -176,10 +177,10 @@ object SystemPermissionManager {
      * 系统级权限初始化
      */
     fun initializeSystemPermissions(context: Context): Boolean {
-        Log.d(TAG, "Initializing system permissions...")
+        MyLog.d("Initializing system permissions...")
         
         if (!isSystemApp(context)) {
-            Log.w(TAG, "Not a system app, falling back to regular permission management")
+            MyLog.w("Not a system app, falling back to regular permission management")
             return false
         }
         
@@ -195,10 +196,10 @@ object SystemPermissionManager {
         // 验证权限状态
         val allReady = checkAllPermissionsGranted(context)
         
-        Log.d(TAG, "System permission initialization result:")
-        Log.d(TAG, "  Permissions granted: $permissionsGranted")
-        Log.d(TAG, "  GPS enabled: $gpsEnabled")
-        Log.d(TAG, "  All ready: $allReady")
+        MyLog.d("System permission initialization result:")
+        MyLog.d("  Permissions granted: $permissionsGranted")
+        MyLog.d("  GPS enabled: $gpsEnabled")
+        MyLog.d("  All ready: $allReady")
         
         return allReady
     }

@@ -17,6 +17,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.WindowCompat
 import com.stwpower.powertap.R
+import com.stwpower.powertap.utils.MyLog
 
 class DataPopupActivity : Activity() {
     
@@ -28,7 +29,7 @@ class DataPopupActivity : Activity() {
     
     private val autoCloseHandler = Handler(Looper.getMainLooper())
     private val autoCloseRunnable = Runnable {
-        Log.d(TAG, "弹窗显示20秒后自动关闭")
+        MyLog.d("弹窗显示20秒后自动关闭")
         finish()
     }
     
@@ -47,12 +48,12 @@ class DataPopupActivity : Activity() {
         val dataList = intent.getCharSequenceArrayExtra(EXTRA_DATA_LIST)
         
         if (dataList != null) {
-            Log.d(TAG, "接收到数据，共${dataList.size}条记录")
+            MyLog.d("接收到数据，共${dataList.size}条记录")
             setupViews(dataList)
             // 启动自动关闭定时器
             startAutoCloseTimer()
         } else {
-            Log.w(TAG, "未接收到数据")
+            MyLog.w("未接收到数据")
             finish()
         }
     }

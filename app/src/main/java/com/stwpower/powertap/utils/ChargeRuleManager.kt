@@ -24,7 +24,7 @@ object ChargeRuleManager {
         return@withContext try {
             val qrCode = PreferenceManager.getQrCode()
             if (qrCode.isNullOrEmpty()) {
-                Log.w(TAG, "QR code is empty or null")
+                MyLog.w("QR code is empty or null")
                 return@withContext getChargeRuleFromCache(context)
             }
             
@@ -43,18 +43,18 @@ object ChargeRuleManager {
                     // 保存到缓存
                     ChargeRuleCacheManager.getInstance(context).saveChargeRule(chargeRule)
                     
-                    Log.d(TAG, "从网络获取到收费规则并保存到缓存: $chargeRule")
+                    MyLog.d("从网络获取到收费规则并保存到缓存: $chargeRule")
                     return@withContext chargeRule
                 } else {
-                    Log.w(TAG, "Failed to parse charge rule data")
+                    MyLog.w("Failed to parse charge rule data")
                     return@withContext getChargeRuleFromCache(context)
                 }
             } else {
-                Log.w(TAG, "Failed to get charge rule from network: ${response?.message}")
+                MyLog.w("Failed to get charge rule from network: ${response?.message}")
                 return@withContext getChargeRuleFromCache(context)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error getting charge rule from network", e)
+            MyLog.e("Error getting charge rule from network", e)
             return@withContext getChargeRuleFromCache(context)
         }
     }
@@ -66,14 +66,14 @@ object ChargeRuleManager {
         return try {
             val cachedRule = ChargeRuleCacheManager.getInstance(context).getChargeRuleFromCache()
             if (cachedRule != null) {
-                Log.d(TAG, "使用缓存的收费规则: $cachedRule")
+                MyLog.d("使用缓存的收费规则: $cachedRule")
                 cachedRule
             } else {
-                Log.w(TAG, "没有缓存的收费规则可用")
+                MyLog.w("没有缓存的收费规则可用")
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "从缓存获取收费规则时出错", e)
+            MyLog.e("从缓存获取收费规则时出错", e)
             null
         }
     }

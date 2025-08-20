@@ -9,6 +9,7 @@ import android.util.Log
 import com.stwpower.powertap.R
 import com.stwpower.powertap.config.ConfigLoader
 import com.stwpower.powertap.data.api.MyApiClient
+import com.stwpower.powertap.utils.MyLog
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
@@ -29,14 +30,14 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
     
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
-        Log.d(TAG, "接收到广播: $action")
+        MyLog.d("接收到广播: $action")
         
         when (action) {
             // 开机完成广播处理
             Intent.ACTION_BOOT_COMPLETED,
             ACTION_QUICKBOOT_POWERON,
             HTC_QUICKBOOT_POWERON -> {
-                Log.d(TAG, "设备开机完成，启动应用...")
+                MyLog.d("设备开机完成，启动应用...")
                 
                 // 延迟启动应用，确保系统完全启动
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -46,12 +47,12 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
             
             // 自定义数据接收广播处理
             ACTION_RECEIVE_DATA -> {
-                Log.d(TAG, "接收到自定义数据广播")
+                MyLog.d("接收到自定义数据广播")
                 handleCustomDataBroadcast(context, intent)
             }
             
             else -> {
-                Log.w(TAG, "未知广播动作: $action")
+                MyLog.w("未知广播动作: $action")
             }
         }
     }
@@ -64,21 +65,21 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
             // 获取广播中的数据
             val listData = intent.getCharSequenceArrayExtra("listData")
             
-            Log.d(TAG, "接收到自定义数据:")
+            MyLog.d("接收到自定义数据:")
             if (listData != null) {
-                Log.d(TAG, "  listData长度: ${listData.size}")
+                MyLog.d("  listData长度: ${listData.size}")
                 for (i in listData.indices) {
-                    Log.d(TAG, "  listData[$i]: ${listData[i]}")
+                    MyLog.d("  listData[$i]: ${listData[i]}")
                 }
                 
                 // 处理电源银行数据
                 processPowerBankData(context, listData)
             } else {
-                Log.d(TAG, "  listData为空")
+                MyLog.d("  listData为空")
             }
             
         } catch (e: Exception) {
-            Log.e(TAG, "处理自定义数据广播时出错", e)
+            MyLog.e("处理自定义数据广播时出错", e)
         }
     }
     
@@ -87,7 +88,7 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
      */
     private fun showDataPopup(context: Context, data: Array<CharSequence>) {
         try {
-            Log.d(TAG, "显示数据弹窗")
+            MyLog.d("显示数据弹窗")
             
             // 创建启动弹窗Activity的意图
             val intent = Intent(context, com.stwpower.powertap.ui.DataPopupActivity::class.java).apply {
@@ -98,10 +99,10 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
             
             // 启动弹窗Activity
             context.startActivity(intent)
-            Log.d(TAG, "数据弹窗启动成功")
+            MyLog.d("数据弹窗启动成功")
             
         } catch (e: Exception) {
-            Log.e(TAG, "显示数据弹窗时出错", e)
+            MyLog.e("显示数据弹窗时出错", e)
         }
     }
     
@@ -110,7 +111,7 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
      */
     private fun processPowerBankData(context: Context, data: Array<CharSequence>) {
         try {
-            Log.d(TAG, "处理电源银行数据，共${data.size}条记录")
+            MyLog.d("处理电源银行数据，共${data.size}条记录")
             
             // 启动协程进行网络请求
             GlobalScope.launch(Dispatchers.Main) {
@@ -120,7 +121,7 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
                     
                     // 为每个电源银行数据项执行网络请求
                     for (item in data) {
-                        Log.d(TAG, "处理电源银行项: $item")
+                        MyLog.d("处理电源银行项: $item")
                         
                         // 假设item是充电宝ID，需要根据实际数据格式进行调整
                         val powerBankId = item.toString()
@@ -151,13 +152,13 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "处理电源银行数据时出错", e)
+                    MyLog.e("处理电源银行数据时出错", e)
                     // 出现异常时不显示弹窗
                 }
             }
             
         } catch (e: Exception) {
-            Log.e(TAG, "处理电源银行数据时出错", e)
+            MyLog.e("处理电源银行数据时出错", e)
         }
     }
     
@@ -166,16 +167,16 @@ class GeneralBroadcastReceiver : BroadcastReceiver() {
      */
     private fun startMainActivity(context: Context) {
         try {
-            Log.d(TAG, "启动主Activity...")
+            MyLog.d("启动主Activity...")
             val intent = Intent(context, com.stwpower.powertap.MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
             context.startActivity(intent)
-            Log.d(TAG, "主Activity启动成功")
+            MyLog.d("主Activity启动成功")
         } catch (e: Exception) {
-            Log.e(TAG, "启动主Activity失败", e)
+            MyLog.e("启动主Activity失败", e)
         }
     }
 }

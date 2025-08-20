@@ -9,6 +9,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Build
 import android.util.Log
+import com.stwpower.powertap.utils.MyLog
 
 /**
  * USB设备管理器
@@ -43,12 +44,12 @@ class UsbDeviceManager(private val context: Context) {
     fun initialize() {
         try {
             if (isUsbReceiverRegistered) {
-                Log.d(TAG, "USB设备管理器已初始化，跳过重复初始化")
+                MyLog.d("USB设备管理器已初始化，跳过重复初始化")
                 return
             }
             
             usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-            Log.d(TAG, "USB管理器初始化成功")
+            MyLog.d("USB管理器初始化成功")
             
             // 创建USB设备连接状态变化的广播接收器
             usbReceiver = object : BroadcastReceiver() {
@@ -61,7 +62,7 @@ class UsbDeviceManager(private val context: Context) {
                                 @Suppress("DEPRECATION")
                                 intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
                             }
-                            Log.d(TAG, "USB设备已连接: ${device?.deviceName}, VendorId: ${device?.vendorId}, ProductId: ${device?.productId}")
+                            MyLog.d("USB设备已连接: ${device?.deviceName}, VendorId: ${device?.vendorId}, ProductId: ${device?.productId}")
                             
                             device?.let { deviceListener?.onDeviceAttached(it) }
                         }
@@ -72,7 +73,7 @@ class UsbDeviceManager(private val context: Context) {
                                 @Suppress("DEPRECATION")
                                 intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
                             }
-                            Log.d(TAG, "USB设备已断开: ${device?.deviceName}, VendorId: ${device?.vendorId}, ProductId: ${device?.productId}")
+                            MyLog.d("USB设备已断开: ${device?.deviceName}, VendorId: ${device?.vendorId}, ProductId: ${device?.productId}")
                             
                             device?.let { deviceListener?.onDeviceDetached(it) }
                         }
@@ -86,10 +87,10 @@ class UsbDeviceManager(private val context: Context) {
                             val permissionGranted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
                             
                             if (permissionGranted) {
-                                Log.d(TAG, "USB设备权限已授予: ${device?.deviceName}")
+                                MyLog.d("USB设备权限已授予: ${device?.deviceName}")
                                 device?.let { deviceListener?.onPermissionGranted(it) }
                             } else {
-                                Log.w(TAG, "USB设备权限被拒绝: ${device?.deviceName}")
+                                MyLog.w("USB设备权限被拒绝: ${device?.deviceName}")
                                 device?.let { deviceListener?.onPermissionDenied(it) }
                             }
                         }
@@ -106,20 +107,20 @@ class UsbDeviceManager(private val context: Context) {
             
             context.registerReceiver(usbReceiver, filter)
             isUsbReceiverRegistered = true
-            Log.d(TAG, "USB设备监听器注册成功")
+            MyLog.d("USB设备监听器注册成功")
             
             // 检查当前连接的USB设备
             val deviceList = usbManager?.deviceList
             if (deviceList != null && deviceList.isNotEmpty()) {
-                Log.d(TAG, "当前连接的USB设备数量: ${deviceList.size}")
+                MyLog.d("当前连接的USB设备数量: ${deviceList.size}")
                 for ((name, device) in deviceList) {
-                    Log.d(TAG, "USB设备: $name, VendorId: ${device.vendorId}, ProductId: ${device.productId}")
+                    MyLog.d("USB设备: $name, VendorId: ${device.vendorId}, ProductId: ${device.productId}")
                 }
             } else {
-                Log.d(TAG, "当前没有连接USB设备")
+                MyLog.d("当前没有连接USB设备")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "USB管理器初始化失败", e)
+            MyLog.e("USB管理器初始化失败", e)
         }
     }
     
@@ -130,10 +131,10 @@ class UsbDeviceManager(private val context: Context) {
         try {
             usbManager?.let { manager ->
                 if (manager.hasPermission(device)) {
-                    Log.d(TAG, "已拥有USB设备权限: ${device.deviceName}")
+                    MyLog.d("已拥有USB设备权限: ${device.deviceName}")
                     deviceListener?.onPermissionGranted(device)
                 } else {
-                    Log.d(TAG, "请求USB设备权限: ${device.deviceName}")
+                    MyLog.d("请求USB设备权限: ${device.deviceName}")
                     
                     // 创建权限请求Intent
                     val permissionIntent = PendingIntent.getBroadcast(
@@ -152,7 +153,7 @@ class UsbDeviceManager(private val context: Context) {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "检查USB设备权限时出错", e)
+            MyLog.e("检查USB设备权限时出错", e)
         }
     }
     
@@ -173,12 +174,12 @@ class UsbDeviceManager(private val context: Context) {
                 context.unregisterReceiver(usbReceiver)
                 isUsbReceiverRegistered = false
                 usbReceiver = null
-                Log.d(TAG, "USB设备监听器注销成功")
+                MyLog.d("USB设备监听器注销成功")
             } catch (e: Exception) {
-                Log.e(TAG, "注销USB设备监听器时出错", e)
+                MyLog.e("注销USB设备监听器时出错", e)
             }
         } else {
-            Log.d(TAG, "USB设备监听器未注册或已注销")
+            MyLog.d("USB设备监听器未注册或已注销")
         }
     }
 }

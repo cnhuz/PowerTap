@@ -7,6 +7,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.stwpower.powertap.utils.MyLog
 
 /**
  * 权限管理器
@@ -84,7 +85,7 @@ object PermissionManager {
         return try {
             locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to check GPS status", e)
+            MyLog.e("Failed to check GPS status", e)
             false
         }
     }
@@ -96,9 +97,9 @@ object PermissionManager {
         val hasPermissions = hasTerminalPermissions(context)
         val hasGps = isGpsEnabled(context)
         
-        Log.d(TAG, "Terminal readiness check:")
-        Log.d(TAG, "  Has permissions: $hasPermissions")
-        Log.d(TAG, "  GPS enabled: $hasGps")
+        MyLog.d("Terminal readiness check:")
+        MyLog.d("  Has permissions: $hasPermissions")
+        MyLog.d("  GPS enabled: $hasGps")
         
         return hasPermissions && hasGps
     }

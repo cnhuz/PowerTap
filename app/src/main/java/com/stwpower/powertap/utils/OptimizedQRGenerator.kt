@@ -21,17 +21,17 @@ object OptimizedQRGenerator {
         style: String = "WHITE_BORDERED"
     ): Bitmap = withContext(Dispatchers.IO) {
         
-        Log.d(TAG, "开始生成二维码: $content")
+        MyLog.d("开始生成二维码: $content")
         
         // 首先检查缓存
         val cachedBitmap = QRCodeCache.getCachedQRCode(content, size, style)
         if (cachedBitmap != null && !cachedBitmap.isRecycled) {
-            Log.d(TAG, "使用缓存的二维码: $content")
+            MyLog.d("使用缓存的二维码: $content")
             return@withContext cachedBitmap
         }
         
         // 缓存未命中，生成新的二维码
-        Log.d(TAG, "生成新的二维码: $content")
+        MyLog.d("生成新的二维码: $content")
         val startTime = System.currentTimeMillis()
         
         val bitmap = when (style) {
@@ -53,7 +53,7 @@ object OptimizedQRGenerator {
         }
         
         val endTime = System.currentTimeMillis()
-        Log.d(TAG, "二维码生成完成，耗时: ${endTime - startTime}ms")
+        MyLog.d("二维码生成完成，耗时: ${endTime - startTime}ms")
         
         // 缓存生成的二维码
         QRCodeCache.cacheQRCode(content, size, style, bitmap)
@@ -70,17 +70,17 @@ object OptimizedQRGenerator {
         style: String = "WHITE_BORDERED"
     ): Bitmap {
         
-        Log.d(TAG, "同步生成二维码: $content")
+        MyLog.d("同步生成二维码: $content")
         
         // 首先检查缓存
         val cachedBitmap = QRCodeCache.getCachedQRCode(content, size, style)
         if (cachedBitmap != null && !cachedBitmap.isRecycled) {
-            Log.d(TAG, "使用缓存的二维码: $content")
+            MyLog.d("使用缓存的二维码: $content")
             return cachedBitmap
         }
         
         // 缓存未命中，生成新的二维码
-        Log.d(TAG, "生成新的二维码: $content")
+        MyLog.d("生成新的二维码: $content")
         val startTime = System.currentTimeMillis()
         
         val bitmap = when (style) {
@@ -102,7 +102,7 @@ object OptimizedQRGenerator {
         }
         
         val endTime = System.currentTimeMillis()
-        Log.d(TAG, "二维码生成完成，耗时: ${endTime - startTime}ms")
+        MyLog.d("二维码生成完成，耗时: ${endTime - startTime}ms")
         
         // 缓存生成的二维码
         QRCodeCache.cacheQRCode(content, size, style, bitmap)
@@ -120,18 +120,18 @@ object OptimizedQRGenerator {
     ) {
         // 如果已经缓存，则跳过
         if (QRCodeCache.isQRCodeCached(content, size, style)) {
-            Log.d(TAG, "二维码已缓存，跳过预生成: $content")
+            MyLog.d("二维码已缓存，跳过预生成: $content")
             return
         }
         
         // 在后台线程预生成
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                Log.d(TAG, "开始预生成二维码: $content")
+                MyLog.d("开始预生成二维码: $content")
                 generateQRCodeAsync(content, size, style)
-                Log.d(TAG, "预生成二维码完成: $content")
+                MyLog.d("预生成二维码完成: $content")
             } catch (e: Exception) {
-                Log.e(TAG, "预生成二维码失败: $content", e)
+                MyLog.e("预生成二维码失败: $content", e)
             }
         }
     }
@@ -144,7 +144,7 @@ object OptimizedQRGenerator {
         size: Int = 400,
         style: String = "WHITE_BORDERED"
     ) {
-        Log.d(TAG, "开始批量预生成 ${contents.size} 个二维码")
+        MyLog.d("开始批量预生成 ${contents.size} 个二维码")
         
         CoroutineScope(Dispatchers.IO).launch {
             contents.forEach { content ->
@@ -155,10 +155,10 @@ object OptimizedQRGenerator {
                         delay(50)
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "批量预生成二维码失败: $content", e)
+                    MyLog.e("批量预生成二维码失败: $content", e)
                 }
             }
-            Log.d(TAG, "批量预生成二维码完成")
+            MyLog.d("批量预生成二维码完成")
         }
     }
     
@@ -167,6 +167,6 @@ object OptimizedQRGenerator {
      */
     fun cleanup() {
         QRCodeCache.cleanupExpiredCache()
-        Log.d(TAG, "二维码生成器资源清理完成")
+        MyLog.d("二维码生成器资源清理完成")
     }
 }

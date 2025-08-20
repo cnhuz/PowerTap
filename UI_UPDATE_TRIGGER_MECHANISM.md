@@ -116,7 +116,7 @@ stripeStateManager.setStateListener(object : StripeStateManager.StripeStateListe
     }
     
     override fun onStripeStateChanged(connection, payment, business) {
-        Log.d(TAG, "Stripe状态变化: connection=$connection, payment=$payment, business=$business")
+        MyLog.d("Stripe状态变化: connection=$connection, payment=$payment, business=$business")
     }
 })
 ```
@@ -138,7 +138,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 #### UI更新执行
 ```kotlin
 private fun updateUIForDisplayState(displayState: DisplayState) {
-    Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
+    MyLog.d( "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
     
     when (displayState.uiType) {
         UIType.LOADING -> {
@@ -279,7 +279,7 @@ runOnUiThread {
 ```kotlin
 Log.d("StripeTerminalManager", "Business phase changed to: $phase")
 Log.d("StripeStateManager", "Stripe状态变化: connection=$connection, payment=$payment, business=$business")
-Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
+MyLog.d( "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
 ```
 
 ### 状态报告

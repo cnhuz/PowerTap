@@ -43,7 +43,7 @@ object QRCodeCacheManager {
         cachedFullQRCodeContent = fullQRCodeContent
         cacheTimestamp = System.currentTimeMillis()
         
-        Log.d(TAG, "二维码已缓存，时间戳: $cacheTimestamp")
+        MyLog.d("二维码已缓存，时间戳: $cacheTimestamp")
     }
     
     /**
@@ -129,7 +129,7 @@ object QRCodeCacheManager {
         cachedQRCode = ""
         cachedFullQRCodeContent = ""
         cacheTimestamp = 0
-        Log.d(TAG, "二维码缓存已清除")
+        MyLog.d("二维码缓存已清除")
     }
     
     /**

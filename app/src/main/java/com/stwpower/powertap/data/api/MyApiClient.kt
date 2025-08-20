@@ -7,6 +7,7 @@ import com.stripe.stripeterminal.external.models.ConnectionTokenException
 import com.stwpower.powertap.config.ConfigLoader
 import com.stwpower.powertap.domain.MyResponse
 import com.stwpower.powertap.utils.LoggingInterceptor
+import com.stwpower.powertap.utils.MyLog
 import java.io.IOException
 import okhttp3.OkHttpClient
 import retrofit2.*
@@ -78,7 +79,7 @@ object MyApiClient {
     @Throws(IOException::class)
     fun createPaymentIntent(qrCode: String): Map<String, String>? {
         val result = service.createPaymentIntent(ConfigLoader.secretKey, qrCode).execute()
-        Log.d("terminal", Gson().toJson(result.body()))
+        MyLog.d(Gson().toJson(result.body()))
         if (result.body()?.code == 200) {
             val data = result.body()?.data
             if (data is Map<*, *>) {
@@ -175,25 +176,25 @@ object MyApiClient {
 
     @Throws(IOException::class)
     fun getQrCode(fno: String): String? {
-        android.util.Log.d("MyApiClient", "=== 开始调用getQrCode API ===")
-        android.util.Log.d("MyApiClient", "请求参数 fno: $fno")
+        MyLog.d( "=== 开始调用getQrCode API ===")
+        MyLog.d( "请求参数 fno: $fno")
 
         try {
             val result = service.getQrCode(fno).execute()
-            android.util.Log.d("MyApiClient", "API调用完成，HTTP状态码: ${result.code()}")
-            android.util.Log.d("MyApiClient", "响应体: ${result.body()}")
+            MyLog.d( "API调用完成，HTTP状态码: ${result.code()}")
+            MyLog.d( "响应体: ${result.body()}")
 
             if (result.body()?.code == 200) {
                 @Suppress("UNCHECKED_CAST")
                 val data = result.body()?.data as? Map<String, Any>
                 val qrCode = data?.get("qrCode") as? String
-                android.util.Log.d("MyApiClient", "成功获取QR码: $qrCode")
+                MyLog.d( "成功获取QR码: $qrCode")
                 return qrCode
             } else {
-                android.util.Log.w("MyApiClient", "API返回错误，code: ${result.body()?.code}, message: ${result.body()?.message}")
+                MyLog.w( "API返回错误，code: ${result.body()?.code}, message: ${result.body()?.message}")
             }
         } catch (e: Exception) {
-            android.util.Log.e("MyApiClient", "调用getQrCode API时发生异常", e)
+            MyLog.e("调用getQrCode API时发生异常", e)
             throw e
         }
 

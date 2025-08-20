@@ -28,6 +28,7 @@ import com.stwpower.powertap.terminal.UIType
 import com.stwpower.powertap.managers.PermissionManager
 import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.ChargeRuleManager
+import com.stwpower.powertap.utils.MyLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,30 +84,30 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         setupViews()
 
         // 显示初始加载状态
-        Log.d("TerminalPayment", "显示初始加载状态")
+        MyLog.d( "显示初始加载状态")
         showLoadingState()
         loadingText.text = "正在初始化..."
 
-        Log.d("TerminalPayment", "开始倒计时")
+        MyLog.d( "开始倒计时")
         startSmoothCountdown()
 
         // 使用TerminalConnectionManager获取Terminal管理器
-        Log.d("TerminalPayment", "获取Terminal管理器")
+        MyLog.d( "获取Terminal管理器")
         terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
 
         // 检查是否是Activity重建
         if (savedInstanceState != null) {
-            Log.d("TerminalPayment", "Activity重建，恢复状态")
+            MyLog.d( "Activity重建，恢复状态")
             // 如果Terminal已经在运行，不要重新初始化
             val terminalManager = TerminalConnectionManager.getTerminalManager(this, this)
             this.terminalManager = terminalManager
             
             // 确保视图已经完全加载后再更新UI
             terminalManager.getCurrentDisplayState().let { currentDisplayState ->
-                Log.d("TerminalPayment", "Activity重建，当前显示状态: $currentDisplayState")
+                MyLog.d( "Activity重建，当前显示状态: $currentDisplayState")
                 // 使用post确保UI更新在布局完成之后执行
                 loadingLayout.post {
-                    Log.d("TerminalPayment", "Activity重建，延迟更新UI")
+                    MyLog.d( "Activity重建，延迟更新UI")
                     updateUIForDisplayState(currentDisplayState, null)
                 }
             }
@@ -142,8 +143,8 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         backButton.setOnClickListener {
             if (!isProcessing) {
                 // 根据状态管理逻辑：离开terminal页面需要主动取消收集付款方式
-                Log.d("TerminalPayment", "用户主动离开Terminal页面，取消收集付款方式")
-                Log.d("TerminalPayment", "设置用户离开Terminal页面标志")
+                MyLog.d( "用户主动离开Terminal页面，取消收集付款方式")
+                MyLog.d( "设置用户离开Terminal页面标志")
 
                 // 设置用户离开标识，防止自动重新进入收集付款方式
                 if (::terminalManager.isInitialized) {
@@ -189,7 +190,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                     val depositValue = findViewById<TextView>(R.id.deposit_value)
                     depositValue.text = ChargeRuleManager.formatPrice(chargeRule.reportLoss)
                     
-                    Log.d("TerminalPayment", "价格信息更新成功")
+                    MyLog.d( "价格信息更新成功")
                 } else {
                     Log.w("TerminalPayment", "无法获取充电规则，使用默认价格")
                 }
@@ -207,7 +208,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
     
     private fun startSmoothCountdown() {
-        Log.d("TerminalPayment", "开始倒计时，取消之前的倒计时器")
+        MyLog.d( "开始倒计时，取消之前的倒计时器")
         countDownTimer?.cancel()
 
         // 使用优化的更新频率，在性能和丝滑度之间取得平衡
@@ -220,8 +221,8 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             }
 
             override fun onFinish() {
-                Log.d("TerminalPayment", "倒计时结束，返回主页面")
-                Log.d("TerminalPayment", "倒计时结束，设置用户离开Terminal页面标志")
+                MyLog.d( "倒计时结束，返回主页面")
+                MyLog.d( "倒计时结束，设置用户离开Terminal页面标志")
                 // 确保进度条到0，然后返回主页面
                 progressTimer.setProgress(0f)
                 
@@ -234,12 +235,12 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             }
         }
         countDownTimer?.start()
-        Log.d("TerminalPayment", "倒计时器已启动，持续时间: ${timeoutDuration}ms")
+        MyLog.d( "倒计时器已启动，持续时间: ${timeoutDuration}ms")
     }
 
     private fun returnToMainActivity() {
-        Log.d("TerminalPayment", "=== 准备返回主页面 ===")
-        Log.d("TerminalPayment", "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
+        MyLog.d( "=== 准备返回主页面 ===")
+        MyLog.d( "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
 
         // 设置用户离开标识，防止自动重新进入收集付款方式
         if (::terminalManager.isInitialized) {
@@ -256,7 +257,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      * 用于支付失败或租借失败后重新进入收集付款方式
      */
     private fun restartPaymentTimer() {
-        Log.d("TerminalPayment", "重置进度条为60秒")
+        MyLog.d( "重置进度条为60秒")
         countDownTimer?.cancel()
 
         // 重新开始60秒倒计时
@@ -285,7 +286,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      * 重新开始收集付款方式
      */
     private fun restartPaymentCollection() {
-        Log.d("TerminalPayment", "重新开始收集付款方式")
+        MyLog.d( "重新开始收集付款方式")
 
         // 重置UI状态
         isProcessing = true
@@ -302,7 +303,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      * 用于租借失败后显示错误信息
      */
     private fun resetProgressTimerTo20Seconds() {
-        Log.d("TerminalPayment", "重置进度条为20秒")
+        MyLog.d( "重置进度条为20秒")
         countDownTimer?.cancel()
 
         // 重新开始20秒倒计时
@@ -325,7 +326,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      * 用于升级过程
      */
     private fun resetProgressTimerTo10Minutes() {
-        Log.d("TerminalPayment", "重置进度条为10分钟")
+        MyLog.d( "重置进度条为10分钟")
         countDownTimer?.cancel()
 
         // 重新开始10分钟倒计时 (600000ms)
@@ -370,7 +371,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     override fun onProgressTimerReset() {
         runOnUiThread {
             // 统一重置进度条为20秒（用于错误显示）
-            Log.d("TerminalPayment", "收到进度条重置信号，重置为20秒")
+            MyLog.d( "收到进度条重置信号，重置为20秒")
             resetProgressTimerTo20Seconds()
         }
     }
@@ -379,7 +380,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     override fun onProgressTimerResetTo10Minutes() {
         runOnUiThread {
             // 重置进度条为10分钟（用于升级过程）
-            Log.d("TerminalPayment", "收到升级期间进度条重置信号，重置为10分钟")
+            MyLog.d( "收到升级期间进度条重置信号，重置为10分钟")
             resetProgressTimerTo10Minutes()
         }
     }
@@ -388,7 +389,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     override fun onRestartPayment() {
         runOnUiThread {
             // 统一重置进度条为60秒
-            Log.d("TerminalPayment", "收到重试进入收集付款方式信号，重置为60秒并重试")
+            MyLog.d( "收到重试进入收集付款方式信号，重置为60秒并重试")
             restartPaymentTimer()
         }
     }
@@ -396,7 +397,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
 
     // 根据DisplayState更新UI
     private fun updateUIForDisplayState(displayState: DisplayState, vararg message: Any?) {
-        Log.d("TerminalPayment", "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
+        MyLog.d( "更新UI为状态: $displayState (UIType: ${displayState.uiType})")
 
         // 根据UIType决定UI展示方式
         when (displayState.uiType) {
@@ -419,11 +420,11 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             UIType.TAP_TO_PAY -> {
                 // Type 2: 文字+图片
                 try {
-                    Log.d("TerminalPayment", "开始更新TAP_TO_PAY页面")
+                    MyLog.d( "开始更新TAP_TO_PAY页面")
                     showCompletedState()
                     
                     // 记录当前布局状态用于调试
-                    Log.d("TerminalPayment", "loadingLayout.visibility: ${loadingLayout.visibility}, completedLayout.visibility: ${completedLayout.visibility}")
+                    MyLog.d( "loadingLayout.visibility: ${loadingLayout.visibility}, completedLayout.visibility: ${completedLayout.visibility}")
                     
                     // 在TAP_TO_PAY状态下，completed_layout应该显示固定文本和图片
                     // 我们不需要更新任何动态文本，因为completed_layout中的文本是固定的
@@ -433,7 +434,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                     backButton.isEnabled = displayState.canGoBack
                     backButton.alpha = if (displayState.canGoBack) 1.0f else 0.5f
                     
-                    Log.d("TerminalPayment", "成功更新TAP_TO_PAY页面")
+                    MyLog.d( "成功更新TAP_TO_PAY页面")
                 } catch (e: Exception) {
                     Log.e("TerminalPayment", "进入TapToPay UI异常", e)
                 }
@@ -464,11 +465,11 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     private fun showCompletedState() {
-        Log.d("TerminalPayment", "显示完成状态: 隐藏loadingLayout，显示completedLayout")
+        MyLog.d( "显示完成状态: 隐藏loadingLayout，显示completedLayout")
         loadingLayout.visibility = View.GONE
         completedLayout.visibility = View.VISIBLE
         messageLayout.visibility = View.GONE
-        Log.d("TerminalPayment", "完成状态显示完成: loadingLayout.visibility=${loadingLayout.visibility}, completedLayout.visibility=${completedLayout.visibility}")
+        MyLog.d( "完成状态显示完成: loadingLayout.visibility=${loadingLayout.visibility}, completedLayout.visibility=${completedLayout.visibility}")
     }
 
     /**
@@ -539,29 +540,29 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
     }
 
     override fun onPause() {
-        Log.d("TerminalPayment", "=== onPause 被调用 ===")
+        MyLog.d( "=== onPause 被调用 ===")
         super.onPause()
         // 不要停止拦截，保持监控
 
         // 检查是否是用户主动离开页面（通过返回按钮）
         // 注意：不要在普通的onPause中无条件设置用户离开标志
         // 只有在用户明确表示要离开页面时才设置
-        Log.d("TerminalPayment", "onPause被调用，检查是否需要设置用户离开标志")
+        MyLog.d( "onPause被调用，检查是否需要设置用户离开标志")
         
         // 只有在真正finish时才应该设置用户离开标志
         // 这个检查会在onDestroy中进行更精确的判断
     }
 
     override fun onStop() {
-        Log.d("TerminalPayment", "=== onStop 被调用 ===")
+        MyLog.d( "=== onStop 被调用 ===")
         super.onStop()
     }
 
     override fun onDestroy() {
-        Log.d("TerminalPayment", "=== onDestroy 被调用 ===")
-        Log.d("TerminalPayment", "isFinishing: $isFinishing")
-        Log.d("TerminalPayment", "isChangingConfigurations: $isChangingConfigurations")
-        Log.d("TerminalPayment", "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
+        MyLog.d( "=== onDestroy 被调用 ===")
+        MyLog.d( "isFinishing: $isFinishing")
+        MyLog.d( "isChangingConfigurations: $isChangingConfigurations")
+        MyLog.d( "调用堆栈: ${Thread.currentThread().stackTrace.take(5).joinToString("\n")}")
 
         super.onDestroy()
         countDownTimer?.cancel()
@@ -576,7 +577,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
         // 如果不是正常finish，或者是因为配置更改导致的销毁，说明Activity被系统意外销毁或正在重建
         if (!isFinishing || isConfigurationChange) {
             if (isConfigurationChange) {
-                Log.d("TerminalPayment", "Activity因配置更改（如语言切换）而重建，保持支付收集")
+                MyLog.d( "Activity因配置更改（如语言切换）而重建，保持支付收集")
             } else {
                 Log.w("TerminalPayment", "Activity被系统意外销毁，但用户可能还在Terminal页面")
                 // 在这种情况下，我们不确定用户是否真的离开了页面
@@ -585,12 +586,12 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             // 不要暂停支付收集，让Terminal继续运行
             // 用户可能还期望Terminal功能继续工作
         } else {
-            Log.d("TerminalPayment", "Activity正常结束，暂停支付收集")
+            MyLog.d( "Activity正常结束，暂停支付收集")
             // 只有在用户主动离开页面时才设置用户离开标志
             // 这包括：点击返回按钮、倒计时结束等用户明确表示要离开的情况
             if (::terminalManager.isInitialized) {
                 terminalManager.setUserLeftTerminalPage(true)
-                Log.d("TerminalPayment", "设置用户离开Terminal页面标志")
+                MyLog.d( "设置用户离开Terminal页面标志")
             }
             
             // 重置配置更改标志
@@ -599,7 +600,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
             TerminalConnectionManager.pausePaymentCollection()
         }
 
-        Log.d("TerminalPayment", "TerminalPaymentActivity destroyed, connection maintained")
+        MyLog.d( "TerminalPaymentActivity destroyed, connection maintained")
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -620,13 +621,13 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
      * 初始化Terminal
      */
     private fun initializeTerminal() {
-        Log.d("TerminalPayment", "Initializing Terminal...")
+        MyLog.d( "Initializing Terminal...")
 
         // 打印Terminal连接状态报告
-        Log.d("TerminalPayment", TerminalConnectionManager.getStatusReport())
+        MyLog.d( TerminalConnectionManager.getStatusReport())
 
         // 使用TerminalConnectionManager初始化
-        Log.d("TerminalPayment", "Initializing via TerminalConnectionManager...")
+        MyLog.d( "Initializing via TerminalConnectionManager...")
         TerminalConnectionManager.initializeIfNeeded(this, this)
     }
 }

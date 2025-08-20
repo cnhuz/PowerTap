@@ -28,6 +28,7 @@ import com.stwpower.powertap.utils.OptimizedQRGenerator
 import com.stwpower.powertap.managers.PreferenceManager
 import com.stwpower.powertap.utils.QRCodeUrlProcessor
 import com.stwpower.powertap.utils.ChargeRuleManager
+import com.stwpower.powertap.utils.MyLog
 import com.stwpower.powertap.utils.QRCodeCacheManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,37 +57,37 @@ class AppPaymentActivity : AppCompatActivity() {
     private var qrCodeJob: Job? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("AppPayment", "AppPaymentActivity onCreate started")
+        MyLog.d("AppPaymentActivity onCreate started")
         super.onCreate(savedInstanceState)
 
         try {
             // 设置全屏
-            Log.d("AppPayment", "Setting up fullscreen")
+            MyLog.d("Setting up fullscreen")
             setupFullscreen()
 
             // 初始化Home键拦截器
-            Log.d("AppPayment", "Initializing home key interceptor")
+            MyLog.d("Initializing home key interceptor")
             homeKeyInterceptor = HomeKeyInterceptor(this)
 
-            Log.d("AppPayment", "Setting content view")
+            MyLog.d("Setting content view")
             setContentView(R.layout.activity_app_payment)
 
-            Log.d("AppPayment", "Setting up views")
+            MyLog.d("Setting up views")
             setupViews()
 
-            Log.d("AppPayment", "Starting countdown")
+            MyLog.d("Starting countdown")
             startSmoothCountdown()
 
-            Log.d("AppPayment", "Showing initial loading state")
+            MyLog.d("Showing initial loading state")
             showQRCodeLoading()
 
-            Log.d("AppPayment", "Generating QR code")
+            MyLog.d("Generating QR code")
             generateQRCode()
 
-            Log.d("AppPayment", "Simulating payment process")
+            MyLog.d("Simulating payment process")
             simulatePaymentProcess()
 
-            Log.d("AppPayment", "AppPaymentActivity onCreate completed successfully")
+            MyLog.d("AppPaymentActivity onCreate completed successfully")
         } catch (e: Exception) {
             Log.e("AppPayment", "Error in AppPaymentActivity onCreate", e)
             finish()
@@ -115,7 +116,7 @@ class AppPaymentActivity : AppCompatActivity() {
 
         backButton.setOnClickListener {
             // 用户主动离开页面，取消所有协程
-            Log.d("AppPayment", "用户主动离开App支付页面")
+            MyLog.d("用户主动离开App支付页面")
             qrCodeJob?.cancel()
             finish()
         }
@@ -192,7 +193,7 @@ class AppPaymentActivity : AppCompatActivity() {
                     val depositValue = findViewById<TextView>(R.id.deposit_value)
                     depositValue.text = ChargeRuleManager.formatPrice(chargeRule.reportLoss)
                     
-                    Log.d("AppPayment", "价格信息更新成功")
+                    MyLog.d("价格信息更新成功")
                 } else {
                     Log.w("AppPayment", "无法获取充电规则，使用默认价格")
                 }
@@ -206,7 +207,7 @@ class AppPaymentActivity : AppCompatActivity() {
      * 隐藏QR码加载状态，显示二维码
      */
     private fun hideQRCodeLoading() {
-        Log.d("AppPayment", "隐藏QR码加载状态，显示二维码")
+        MyLog.d("隐藏QR码加载状态，显示二维码")
         // 隐藏加载环，显示二维码
         qrLoadingLayout.visibility = View.GONE
         qrCodeImage.visibility = View.VISIBLE
@@ -236,7 +237,7 @@ class AppPaymentActivity : AppCompatActivity() {
         // 检查是否有有效的缓存并且内容匹配
         if (QRCodeCacheManager.hasValidCache() && 
             QRCodeCacheManager.isCacheMatch(qrCodeUrl, qrCode, fullQRCodeContent)) {
-            Log.d("AppPayment", "使用缓存的二维码")
+            MyLog.d("使用缓存的二维码")
             // 使用缓存的二维码
             val cachedBitmap = QRCodeCacheManager.getCachedQRCodeBitmap()
             if (cachedBitmap != null && !cachedBitmap.isRecycled) {
@@ -249,7 +250,7 @@ class AppPaymentActivity : AppCompatActivity() {
                 currentQRCode = cacheState.qrCode
                 currentQRCodeContent = cacheState.fullQRCodeContent
                 
-                Log.d("AppPayment", "缓存二维码显示完成")
+                MyLog.d("缓存二维码显示完成")
                 return
             } else {
                 Log.w("AppPayment", "缓存的二维码bitmap无效，重新生成")
@@ -264,7 +265,7 @@ class AppPaymentActivity : AppCompatActivity() {
             qrCodeUrl == cacheState.qrCodeUrl &&
             qrCode == cacheState.qrCode &&
             fullQRCodeContent == cacheState.fullQRCodeContent) {
-            Log.d("AppPayment", "二维码内容与缓存一致，跳过生成")
+            MyLog.d("二维码内容与缓存一致，跳过生成")
             // 如果内容与缓存一致，尝试使用缓存的bitmap
             val cachedBitmap = QRCodeCacheManager.getCachedQRCodeBitmap()
             if (cachedBitmap != null && !cachedBitmap.isRecycled) {
@@ -277,7 +278,7 @@ class AppPaymentActivity : AppCompatActivity() {
                 currentQRCode = cacheState.qrCode
                 currentQRCodeContent = cacheState.fullQRCodeContent
                 
-                Log.d("AppPayment", "缓存二维码显示完成")
+                MyLog.d("缓存二维码显示完成")
                 return
             } else {
                 Log.w("AppPayment", "缓存的二维码bitmap无效，重新生成")
@@ -316,7 +317,7 @@ class AppPaymentActivity : AppCompatActivity() {
                     // 更新共享缓存
                     QRCodeCacheManager.setCachedQRCode(bitmap, qrCodeUrl, qrCode ?: "", fullQRCodeContent)
 
-                    Log.d("AppPayment", "二维码生成并显示完成")
+                    MyLog.d("二维码生成并显示完成")
                 } else {
                     Log.e("AppPayment", "二维码bitmap生成失败")
                     // 保持loading状态，下方显示loading文字
@@ -395,7 +396,7 @@ class AppPaymentActivity : AppCompatActivity() {
         // 取消二维码生成任务
         qrCodeJob?.cancel()
 
-        Log.d("AppPayment", "AppPaymentActivity destroyed")
+        MyLog.d("AppPaymentActivity destroyed")
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.stwpower.powertap.domain.ChargeRule
+import com.stwpower.powertap.utils.MyLog
 
 /**
  * 收费规则缓存管理器
@@ -42,9 +43,9 @@ class ChargeRuleCacheManager private constructor(context: Context) {
             editor.putInt(KEY_HOUR_UNIT, chargeRule.hourUnit)
             editor.putFloat(KEY_REPORT_LOSS, chargeRule.reportLoss.toFloat())
             editor.apply()
-            Log.d(TAG, "收费规则已保存到缓存")
+            MyLog.d("收费规则已保存到缓存")
         } catch (e: Exception) {
-            Log.e(TAG, "保存收费规则到缓存时出错", e)
+            MyLog.e("保存收费规则到缓存时出错", e)
         }
     }
     
@@ -56,7 +57,7 @@ class ChargeRuleCacheManager private constructor(context: Context) {
             // 检查缓存是否过期
             val cacheTime = sharedPreferences.getLong(KEY_CACHE_TIME, 0L)
             if (cacheTime == 0L || System.currentTimeMillis() - cacheTime > CACHE_EXPIRY_TIME) {
-                Log.d(TAG, "缓存已过期或不存在")
+                MyLog.d("缓存已过期或不存在")
                 return null
             }
             
@@ -66,15 +67,15 @@ class ChargeRuleCacheManager private constructor(context: Context) {
             val reportLoss = sharedPreferences.getFloat(KEY_REPORT_LOSS, 0f).toDouble()
             
             if (maxPerMoney == 0.0 && oneMoneyUnit == 0.0 && reportLoss == 0.0) {
-                Log.d(TAG, "缓存中没有有效的收费规则数据")
+                MyLog.d("缓存中没有有效的收费规则数据")
                 return null
             }
             
             val chargeRule = ChargeRule(maxPerMoney, oneMoneyUnit, hourUnit, reportLoss)
-            Log.d(TAG, "从缓存获取到收费规则: $chargeRule")
+            MyLog.d("从缓存获取到收费规则: $chargeRule")
             chargeRule
         } catch (e: Exception) {
-            Log.e(TAG, "从缓存获取收费规则时出错", e)
+            MyLog.e("从缓存获取收费规则时出错", e)
             null
         }
     }
@@ -85,9 +86,9 @@ class ChargeRuleCacheManager private constructor(context: Context) {
     fun clearCache() {
         try {
             editor.clear().apply()
-            Log.d(TAG, "收费规则缓存已清除")
+            MyLog.d("收费规则缓存已清除")
         } catch (e: Exception) {
-            Log.e(TAG, "清除收费规则缓存时出错", e)
+            MyLog.e("清除收费规则缓存时出错", e)
         }
     }
     

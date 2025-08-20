@@ -2,6 +2,7 @@ package com.stwpower.powertap.managers
 
 import android.content.Context
 import android.util.Log
+import com.stwpower.powertap.utils.MyLog
 import kotlinx.coroutines.*
 
 /**
@@ -16,7 +17,7 @@ object DirectPermissionManager {
      * 直接授予所有必要权限
      */
     fun grantAllPermissions(context: Context): Boolean {
-        Log.d(TAG, "Starting direct permission grant...")
+        MyLog.d("Starting direct permission grant...")
         
         val packageName = context.packageName
         val permissions = arrayOf(
@@ -38,11 +39,11 @@ object DirectPermissionManager {
             }
         }
         
-        Log.d(TAG, "Granted $successCount/${permissions.size} permissions")
+        MyLog.d("Granted $successCount/${permissions.size} permissions")
         
         // 启用GPS
         val gpsEnabled = enableGPS()
-        Log.d(TAG, "GPS enabled: $gpsEnabled")
+        MyLog.d("GPS enabled: $gpsEnabled")
         
         return successCount == permissions.size && gpsEnabled
     }
@@ -52,7 +53,7 @@ object DirectPermissionManager {
      */
     private fun grantPermission(packageName: String, permission: String): Boolean {
         return try {
-            Log.d(TAG, "Granting permission: $permission")
+            MyLog.d("Granting permission: $permission")
             
             // 方法1: 直接pm命令
             val command = arrayOf("pm", "grant", packageName, permission)
@@ -63,17 +64,17 @@ object DirectPermissionManager {
             val output = process.inputStream.bufferedReader().readText()
             val exitCode = process.waitFor()
             
-            Log.d(TAG, "Permission $permission - Exit code: $exitCode, Output: $output")
+            MyLog.d("Permission $permission - Exit code: $exitCode, Output: $output")
             
             if (exitCode == 0) {
-                Log.d(TAG, "Successfully granted: $permission")
+                MyLog.d("Successfully granted: $permission")
                 true
             } else {
-                Log.w(TAG, "Failed to grant: $permission")
+                MyLog.w("Failed to grant: $permission")
                 false
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Exception granting permission: $permission", e)
+            MyLog.e("Exception granting permission: $permission", e)
             false
         }
     }
@@ -83,7 +84,7 @@ object DirectPermissionManager {
      */
     private fun enableGPS(): Boolean {
         return try {
-            Log.d(TAG, "Enabling GPS...")
+            MyLog.d("Enabling GPS...")
             
             // 启用位置服务
             val commands = arrayOf(
@@ -101,7 +102,7 @@ object DirectPermissionManager {
                 val output = process.inputStream.bufferedReader().readText()
                 val exitCode = process.waitFor()
                 
-                Log.d(TAG, "GPS command ${command.joinToString(" ")} - Exit code: $exitCode, Output: $output")
+                MyLog.d("GPS command ${command.joinToString(" ")} - Exit code: $exitCode, Output: $output")
                 
                 if (exitCode != 0) {
                     allSuccess = false
@@ -109,14 +110,14 @@ object DirectPermissionManager {
             }
             
             if (allSuccess) {
-                Log.d(TAG, "GPS enabled successfully")
+                MyLog.d("GPS enabled successfully")
             } else {
-                Log.w(TAG, "Some GPS commands failed")
+                MyLog.w("Some GPS commands failed")
             }
             
             allSuccess
         } catch (e: Exception) {
-            Log.e(TAG, "Exception enabling GPS", e)
+            MyLog.e("Exception enabling GPS", e)
             false
         }
     }
@@ -132,8 +133,8 @@ object DirectPermissionManager {
      * 检查权限状态
      */
     fun checkPermissionStatus(context: Context) {
-        Log.d(TAG, "=== Direct Permission Status Check ===")
-        Log.d(TAG, PermissionManager.getPermissionReport(context))
+        MyLog.d("=== Direct Permission Status Check ===")
+        MyLog.d(PermissionManager.getPermissionReport(context))
     }
     
     /**

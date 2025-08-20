@@ -48,11 +48,11 @@ object QRCodeCache {
         val cached = cache.get(key)
         
         if (cached != null) {
-            Log.d(TAG, "二维码缓存命中: $content")
+            MyLog.d("二维码缓存命中: $content")
             return cached.bitmap
         }
         
-        Log.d(TAG, "二维码缓存未命中: $content")
+        MyLog.d("二维码缓存未命中: $content")
         return null
     }
     
@@ -69,7 +69,7 @@ object QRCodeCache {
         )
         
         cache.put(key, cachedQRCode)
-        Log.d(TAG, "二维码已缓存: $content, 缓存大小: ${cache.size()}")
+        MyLog.d("二维码已缓存: $content, 缓存大小: ${cache.size()}")
     }
     
     /**
@@ -86,7 +86,7 @@ object QRCodeCache {
     fun clearQRCode(content: String, size: Int, style: String) {
         val key = generateCacheKey(content, size, style)
         cache.remove(key)
-        Log.d(TAG, "已清除二维码缓存: $content")
+        MyLog.d("已清除二维码缓存: $content")
     }
     
     /**
@@ -94,7 +94,7 @@ object QRCodeCache {
      */
     fun clearAll() {
         cache.evictAll()
-        Log.d(TAG, "已清除所有二维码缓存")
+        MyLog.d("已清除所有二维码缓存")
     }
     
     /**
@@ -145,7 +145,7 @@ object QRCodeCache {
         }
         
         if (removedCount > 0) {
-            Log.d(TAG, "已清理 $removedCount 个过期的二维码缓存")
+            MyLog.d("已清理 $removedCount 个过期的二维码缓存")
         }
     }
 }

@@ -5,6 +5,7 @@ import android.util.Log
 import com.stripe.stripeterminal.external.models.ConnectionStatus
 import com.stripe.stripeterminal.external.models.PaymentStatus
 import com.stripe.stripeterminal.Terminal
+import com.stwpower.powertap.utils.MyLog
 
 /**
  * Terminal连接管理器单例
@@ -23,11 +24,11 @@ object TerminalConnectionManager {
      */
     fun getTerminalManager(context: Context, stateListener: StripeTerminalManager.TerminalStateListener): StripeTerminalManager {
         if (terminalManager == null) {
-            Log.d(TAG, "创建新的TerminalManager实例")
+            MyLog.d("创建新的TerminalManager实例")
             terminalManager = StripeTerminalManager(context, stateListener)
             isInitialized = false
         } else {
-            Log.d(TAG, "复用现有的TerminalManager实例")
+            MyLog.d("复用现有的TerminalManager实例")
             // 更新状态监听器
             terminalManager!!.updateStateListener(stateListener)
         }
@@ -42,11 +43,11 @@ object TerminalConnectionManager {
         val manager = getTerminalManager(context, stateListener)
         
         if (!isInitialized) {
-            Log.d(TAG, "首次初始化Terminal")
+            MyLog.d("首次初始化Terminal")
             manager.initialize()
             isInitialized = true
         } else {
-            Log.d(TAG, "Terminal已初始化，检查连接状态")
+            MyLog.d("Terminal已初始化，检查连接状态")
             // 如果已经初始化，检查连接状态并恢复
             manager.resumePaymentCollection()
         }
@@ -57,10 +58,10 @@ object TerminalConnectionManager {
      */
     fun pausePaymentCollection() {
         if (!isPausedForConfigurationChange) {
-            Log.d(TAG, "暂停支付收集")
+            MyLog.d("暂停支付收集")
             terminalManager?.pausePaymentCollection()
         } else {
-            Log.d(TAG, "因配置更改暂停，保持支付收集")
+            MyLog.d("因配置更改暂停，保持支付收集")
         }
     }
     
@@ -68,7 +69,7 @@ object TerminalConnectionManager {
      * 恢复支付收集
      */
     fun resumePaymentCollection() {
-        Log.d(TAG, "恢复支付收集")
+        MyLog.d("恢复支付收集")
         terminalManager?.resumePaymentCollection()
     }
     
@@ -76,7 +77,7 @@ object TerminalConnectionManager {
      * 完全断开连接（应用退出时）
      */
     fun disconnect() {
-        Log.d(TAG, "完全断开Terminal连接")
+        MyLog.d("完全断开Terminal连接")
         terminalManager?.disconnect()
         terminalManager = null
         isInitialized = false
@@ -101,7 +102,7 @@ object TerminalConnectionManager {
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "获取连接状态失败", e)
+            MyLog.e("获取连接状态失败", e)
             null
         }
     }
@@ -117,7 +118,7 @@ object TerminalConnectionManager {
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "获取支付状态失败", e)
+            MyLog.e("获取支付状态失败", e)
             null
         }
     }
@@ -129,7 +130,7 @@ object TerminalConnectionManager {
         val connectionStatus = getConnectionStatus()
         val paymentStatus = getPaymentStatus()
         
-        Log.d(TAG, "检查活跃连接: 连接状态=$connectionStatus, 支付状态=$paymentStatus")
+        MyLog.d("检查活跃连接: 连接状态=$connectionStatus, 支付状态=$paymentStatus")
         
         return connectionStatus == ConnectionStatus.CONNECTED
     }
