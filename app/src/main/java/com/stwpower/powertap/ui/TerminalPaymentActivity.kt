@@ -151,7 +151,7 @@ class TerminalPaymentActivity : AppCompatActivity(), StripeTerminalManager.Termi
                     terminalManager.setUserLeftTerminalPage(true)
                 }
 
-                terminalManager.cancel()
+                terminalManager.pausePaymentCollection()
                 // 取消倒计时器
                 countDownTimer?.cancel()
                 finish()

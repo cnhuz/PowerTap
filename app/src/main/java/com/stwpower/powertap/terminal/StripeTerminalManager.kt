@@ -9,7 +9,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.core.content.ContextCompat
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.*
@@ -33,7 +32,7 @@ class StripeTerminalManager(
 ) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener, UsbDeviceManager.UsbDeviceListener {
 
     companion object {
-        private const val DISCOVERY_TIMEOUT = 30000L // 30秒
+        private const val DISCOVERY_TIMEOUT = 2 * 60 * 1000L // 2分钟
         private const val RETRY_DELAY = 10 * 1000L // 重试延迟10秒
         private const val DISCOVERY_RETRY_DELAY = 30 * 1000L // 发现重试延迟30秒
     }
@@ -97,11 +96,11 @@ class StripeTerminalManager(
         resetRetryCounters() // 重置所有重试计数器
 
         if (Terminal.isInitialized()) {
-            MyLog.d("Terminal already initialized")
+            MyLog.d("Terminal已经初始化")
 
             // 检查是否已有连接的阅读器
             if (checkExistingConnection()) {
-                MyLog.d("Found existing reader connection, skipping discovery")
+                MyLog.d("阅读器已连接，不进行扫描")
                 return
             }
 
@@ -131,12 +130,12 @@ class StripeTerminalManager(
                 TokenProvider(),
                 this
             )
-            MyLog.d("Terminal initialized successfully")
+            MyLog.d("Terminal初始化成功")
 
             // 初始化完成，开始发现读卡器
             startDiscovery()
         } catch (e: TerminalException) {
-            MyLog.e("Failed to initialize Terminal", e)
+            MyLog.e("Terminal初始化失败", e)
             updateDisplayState(DisplayState.INIT_FAILED, null)
         }
     }
@@ -145,17 +144,18 @@ class StripeTerminalManager(
      * 开始发现阅读器
      */
     private fun startDiscovery() {
+        MyLog.d("开始扫描阅读器前检查")
+
         // 发现读卡器是Stripe的技术状态，会通过ConnectionStatus自动更新
         updateDisplayState(DisplayState.SCANNING_READER, null)
-        
+
         // 记录发现开始时间
         lastDiscoveryStartTime = System.currentTimeMillis()
-        MyLog.d("开始扫描阅读器，位置id：${getLocationId()}")
 
-        // 检查SNO
-        val sno = getDeviceQrCode()
-        if (sno.isEmpty()) {
-            MyLog.e("SNO（二维码编号）为空，10s后重试")
+        // 检查二维码编号
+        val qrCode = getDeviceQrCode()
+        if (qrCode.isEmpty()) {
+            MyLog.e("二维码编号为空，10s后重试")
             handler.postDelayed({
                 startDiscovery()
             }, 10000)
@@ -174,7 +174,7 @@ class StripeTerminalManager(
 
         MyLog.d("开始扫描阅读器，位置id：$locationId")
 
-        // 使用USB发现方式（参考Example.kt）
+        // 使用USB发现方式
         val config = DiscoveryConfiguration(
             timeout = 0,
             discoveryMethod = DiscoveryMethod.USB,
@@ -187,36 +187,16 @@ class StripeTerminalManager(
             this,
             object : Callback {
                 override fun onSuccess() {
-                    MyLog.d("Discovery completed successfully")
+                    MyLog.d("扫描成功")
                 }
 
                 override fun onFailure(e: TerminalException) {
-                    MyLog.e("Discovery failed", e)
+                    MyLog.e("扫描失败", e)
                     retryDiscovery(e)
                 }
             }
         )
-
-        // 设置发现超时
-        handler.postDelayed({
-            if (discoveryCancelable?.isCompleted == false) {
-                MyLog.w("Discovery timeout, retrying...")
-                discoveryCancelable?.cancel(object : Callback {
-                    override fun onSuccess() {
-                        MyLog.d("Previous discovery cancelled successfully")
-                        // 创建一个新的TerminalException实例用于重试
-                        val errorCode = TerminalException.TerminalErrorCode.REQUEST_TIMED_OUT
-                        val errorMessage = "Discovery timeout after cancellation"
-                        val exception = TerminalException(errorCode, errorMessage)
-                        retryDiscovery(exception)
-                    }
-                    override fun onFailure(e: TerminalException) {
-                        MyLog.e("Failed to cancel previous discovery", e)
-                        retryDiscovery(e)
-                    }
-                })
-            }
-        }, DISCOVERY_TIMEOUT)
+        //移除自动超时设置
     }
 
     /**
@@ -289,7 +269,7 @@ class StripeTerminalManager(
                     }
                 }
             } catch (e: Exception) {
-                MyLog.e("Failed to start payment collection", e)
+                MyLog.e("开始收集支付流程失败", e)
                 withContext(Dispatchers.Main) {
                     updateDisplayState(DisplayState.ENTER_COLLECTION_METHOD_FAILED, null)
                     stateListener.onRestartPayment()
@@ -306,43 +286,45 @@ class StripeTerminalManager(
         updateDisplayState(DisplayState.LOADING, null)
 
         // 安全地取消发现操作
+        MyLog.d("取消扫描阅读器操作")
         discoveryCancelable?.let { cancelable ->
             try {
                 if (!cancelable.isCompleted) {
                     cancelable.cancel(object : Callback {
                         override fun onSuccess() {
-                            MyLog.d("Discovery cancelled successfully")
+                            MyLog.d("扫描阅读器已取消")
                         }
                         override fun onFailure(e: TerminalException) {
-                            MyLog.w("Failed to cancel discovery: ${e.message}")
+                            MyLog.w("取消扫描阅读器操作失败: ${e.message}")
                         }
                     })
                 } else {
-                    MyLog.d("Discovery operation already completed")
+                    MyLog.d("取消扫描阅读器操作已完成，无需操作")
                 }
             } catch (e: Exception) {
-                MyLog.w("Exception while cancelling discovery: ${e.message}")
+                MyLog.w("取消扫描阅读器时发生异常: ${e.message}")
             }
             discoveryCancelable = null
         }
 
         // 安全地取消支付收集操作
+        MyLog.d("取消收集支付方式操作")
         collectCancelable?.let { cancelable ->
             try {
                 if (!cancelable.isCompleted) {
                     cancelable.cancel(object : Callback {
                         override fun onSuccess() {
-                            MyLog.d("Payment collection cancelled successfully")
+                            MyLog.d("支付收集已取消")
                         }
                         override fun onFailure(e: TerminalException) {
-                            MyLog.w("Failed to cancel payment collection: ${e.message}")
+                            MyLog.w("取消支付收集失败: ${e.message}")
                         }
                     })
                 } else {
-                    MyLog.d("Payment collection operation already completed")
+                    MyLog.d("支付收集操作已完成，无需取消")
                 }
             } catch (e: Exception) {
-                MyLog.w("Exception while cancelling payment collection: ${e.message}")
+                MyLog.w("取消支付收集时发生异常: ${e.message}")
             }
             collectCancelable = null
         }
@@ -503,22 +485,10 @@ class StripeTerminalManager(
     }
 
     /**
-     * 清理资源（保持连接）
-     */
-    fun cleanup() {
-        MyLog.d("Cleaning up StripeTerminalManager (maintaining connection)")
-
-        // 暂停支付收集但保持连接
-        pausePaymentCollection()
-
-        MyLog.d("StripeTerminalManager cleanup completed (connection maintained)")
-    }
-
-    /**
      * 完全断开连接（仅在应用退出时调用）
      */
     fun disconnect() {
-        MyLog.d("Disconnecting StripeTerminalManager completely")
+        MyLog.d("完全断开阅读器")
         shouldMaintainConnection = false
 
         cancel()
@@ -528,10 +498,10 @@ class StripeTerminalManager(
         if (Terminal.isInitialized() && connectedReader != null) {
             Terminal.getInstance().disconnectReader(object : Callback {
                 override fun onSuccess() {
-                    MyLog.d("Reader disconnected successfully")
+                    MyLog.d("阅读器断开成功")
                 }
                 override fun onFailure(e: TerminalException) {
-                    MyLog.e("Failed to disconnect reader", e)
+                    MyLog.e("阅读器断开失败", e)
                 }
             })
         }
@@ -540,7 +510,7 @@ class StripeTerminalManager(
         connectedReader = null
         isReaderConnected = false
 
-        MyLog.d("StripeTerminalManager disconnected completely")
+        MyLog.d("阅读器断开完成")
     }
 
     // TerminalListener 实现
@@ -558,15 +528,11 @@ class StripeTerminalManager(
         // 重新开始扫描和连接流程，但添加延迟避免频繁重连
         handler.postDelayed({
             startDiscovery()
-        }, 2000) // 延迟2秒再开始扫描
+        }, 5000) // 延迟5秒再开始扫描
     }
 
     override fun onConnectionStatusChange(status: ConnectionStatus) {
-        MyLog.d("Connection status changed: $status")
-        
-        // 记录当前时间，便于调试
-        val currentTime = System.currentTimeMillis()
-        MyLog.d("Connection status change time: $currentTime")
+        MyLog.d("连接状态改变: $status")
 
         when (status) {
             ConnectionStatus.CONNECTING -> {
@@ -593,7 +559,7 @@ class StripeTerminalManager(
                 MyLog.d("重新开始发现流程")
                 handler.postDelayed({
                     startDiscovery()
-                }, 1000) // 延迟1秒再开始扫描
+                }, 3000) // 延迟3秒再开始扫描
             }
         }
     }
@@ -634,7 +600,7 @@ class StripeTerminalManager(
     }
 
     override fun onStartInstallingUpdate(update: ReaderSoftwareUpdate, cancelable: Cancelable?) {
-        MyLog.d("Starting reader update")
+        MyLog.d("开始升级")
         // 更新过程可以考虑添加到BusinessPhase，暂时保持现状
         updateDisplayState(DisplayState.START_UPGRADING_READER, null)
         // 通知Activity重置倒计时器为10分钟
@@ -655,24 +621,22 @@ class StripeTerminalManager(
     }
 
     override fun onFinishInstallingUpdate(update: ReaderSoftwareUpdate?, e: TerminalException?) {
-        MyLog.d("Update finished")
+        MyLog.d("升级结束，重置倒计时器为60s")
         if (e != null) {
-            MyLog.e("Update failed", e)
+            MyLog.e("升级结果：失败", e)
             updateDisplayState(DisplayState.UPGRADE_FAILED, e.message)
             // 升级失败，重置倒计时器为60秒
-            MyLog.d("通知Activity重置倒计时器为60秒（升级失败）")
             stateListener.onProgressTimerReset()
         } else {
-            MyLog.d("Update succeeded, waiting for connection status change")
+            MyLog.d("升级结果：成功")
             // 更新成功，重置倒计时器为60秒
-            MyLog.d("通知Activity重置倒计时器为60秒（升级成功）")
             stateListener.onProgressTimerReset()
         }
     }
 
     // DiscoveryListener 实现
     override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
-        MyLog.d("Discovered ${readers.size} readers")
+        MyLog.d("扫描到阅读器数量： ${readers.size}，进行连接")
         if (readers.isNotEmpty()) {
             discoveryRetryCount = 0 // 重置发现重试计数器
             connectToReader(readers[0])
@@ -689,16 +653,16 @@ class StripeTerminalManager(
     private fun createReaderCallback(): ReaderCallback {
         return object : ReaderCallback {
             override fun onSuccess(reader: Reader) {
-                MyLog.d("Successfully connected to reader: ${reader.serialNumber}")
+                MyLog.d("连接阅读器成功，序列号: ${reader.serialNumber}")
                 connectedReader = reader
                 connectionRetryCount = 0 // 重置连接重试计数器
                 // 连接成功会通过ConnectionStatus自动更新UI
             }
 
             override fun onFailure(e: TerminalException) {
-                MyLog.e("Failed to connect to reader", e)
+                MyLog.e("连接阅读器失败，${DISCOVERY_RETRY_DELAY}s后重新扫描", e)
                 currentReader?.let { reader ->
-                    retryConnection(reader, e)
+                    retryDiscovery(e)
                 } ?: run {
                     updateDisplayState(DisplayState.CONNECT_READER_FAILED, null)
                 }
@@ -718,7 +682,7 @@ class StripeTerminalManager(
             }
 
             override fun onFailure(e: TerminalException) {
-                MyLog.e("Failed to retrieve payment intent", e)
+                MyLog.e("取回PaymentIntent失败", e)
                 updateDisplayState(DisplayState.ENTER_COLLECTION_METHOD_FAILED, null)
                 stateListener.onRestartPayment()
             }
@@ -731,18 +695,18 @@ class StripeTerminalManager(
     private fun createReaderReconnectionListener(): ReaderReconnectionListener {
         return object : ReaderReconnectionListener {
             override fun onReaderReconnectFailed(reader: Reader) {
-                MyLog.w("Reader reconnect failed: ${reader.serialNumber}")
+                MyLog.w("阅读器重连失败: ${reader.serialNumber}")
                 handler.postDelayed({
                     startDiscovery()
                 }, 10000)
             }
 
             override fun onReaderReconnectStarted(reader: Reader, cancelReconnect: Cancelable) {
-                MyLog.d("Reader reconnect started: ${reader.serialNumber}")
+                MyLog.d("阅读器重连开始: ${reader.serialNumber}")
             }
 
             override fun onReaderReconnectSucceeded(reader: Reader) {
-                MyLog.d("Reader reconnect succeeded: ${reader.serialNumber}")
+                MyLog.d("阅读器重连成功: ${reader.serialNumber}")
                 connectedReader = reader
                 // 重连成功会通过ConnectionStatus自动更新UI
             }
@@ -751,17 +715,17 @@ class StripeTerminalManager(
 
     // BluetoothReaderListener 实现
     override fun onReportReaderEvent(event: ReaderEvent) {
-        MyLog.d("Reader event: $event")
+        MyLog.d("阅读器事件: $event")
         // 处理阅读器事件，如卡片插入、移除等
     }
 
     override fun onRequestReaderInput(options: ReaderInputOptions) {
-        MyLog.d("Reader input requested: $options")
+        MyLog.d("阅读器输入操作: $options")
         // 处理阅读器输入请求
     }
 
     override fun onRequestReaderDisplayMessage(message: ReaderDisplayMessage) {
-        MyLog.d("Reader display message: $message")
+        MyLog.d("阅读器显示消息: $message")
         // 处理阅读器显示消息
     }
 
@@ -779,13 +743,13 @@ class StripeTerminalManager(
             paymentIntent,
             object : PaymentIntentCallback {
                 override fun onSuccess(paymentIntent: PaymentIntent) {
-                    MyLog.d("Payment method collected")
+                    MyLog.d("收集付款方式成功")
                     updateDisplayState(DisplayState.RENTING, null)
                     confirmPayment(paymentIntent)
                 }
 
                 override fun onFailure(e: TerminalException) {
-                    MyLog.e("Failed to collect payment method", e)
+                    MyLog.e("收集付款方式失败", e)
 
                     // 检查是否是用户取消操作
                     val isCancelled = e.errorCode == TerminalException.TerminalErrorCode.CANCELED ||
@@ -811,13 +775,13 @@ class StripeTerminalManager(
             paymentIntent,
             object : PaymentIntentCallback {
                 override fun onSuccess(paymentIntent: PaymentIntent) {
-                    MyLog.d("Payment processed successfully")
+                    MyLog.d("确认付款方式成功，开始租借")
                     // 支付成功后调用租借接口
                     callRentalApiAfterPayment(paymentIntent)
                 }
 
                 override fun onFailure(e: TerminalException) {
-                    MyLog.e("Failed to process payment", e)
+                    MyLog.e("确认付款方式失败", e)
                     updateDisplayState(DisplayState.COLLECT_PAYMENT_METHOD_FAILED, null)
                     stateListener.onRestartPayment()
                 }
@@ -962,7 +926,7 @@ class StripeTerminalManager(
         return try {
             PreferenceManager.getLocationId()
         } catch (e: Exception) {
-            MyLog.e("Failed to get location ID", e)
+            MyLog.d("获取location ID异常", e)
             null
         }
     }
@@ -971,7 +935,7 @@ class StripeTerminalManager(
         return try {
             PreferenceManager.getDeviceSno() ?: ""
         } catch (e: Exception) {
-            MyLog.e("Failed to get device QR code", e)
+            MyLog.d("获取QRCode异常", e)
             ""
         }
     }
@@ -992,16 +956,6 @@ class StripeTerminalManager(
 
             startDiscovery()
         }, DISCOVERY_RETRY_DELAY)
-    }
-
-    /**
-     * 重试连接阅读器
-     */
-    private fun retryConnection(reader: Reader, error: TerminalException) {
-        // 重试过程保持当前状态
-        handler.postDelayed({
-            connectToReader(reader)
-        }, RETRY_DELAY)
     }
 
     /**
