@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 object ChargeRuleManager {
 
     /**
+     * TODO 请求次数太多，没有使用缓存，需优化
      * 获取充电规则（优先从网络获取，失败时使用缓存）
      * @param context 上下文
      * @return ChargeRule对象，如果获取失败则返回null

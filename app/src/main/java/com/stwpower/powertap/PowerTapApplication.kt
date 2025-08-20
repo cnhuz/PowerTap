@@ -72,6 +72,7 @@ class PowerTapApplication : Application() {
     private fun preloadChargeRule() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                //TODO 加载之后，应该存起来了
                 MyLog.d("开始预加载收费规则...")
                 val chargeRule = ChargeRuleManager.getChargeRule(this@PowerTapApplication)
                 if (chargeRule != null) {

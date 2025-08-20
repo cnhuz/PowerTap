@@ -1,6 +1,9 @@
 baseUrl:https://powerweb-stw.stwpower.com/power_bank
 qrCodeUrl:https://powerweb-stw.stwpower.com/appWeb/store?id=%s
 device_type:b6_2
+#stw-ca
 secretKey:q6b56jCopc7UW91eMON0wbAEeZdsd96x
+#stw-us
+#secretKey:VnE0xKMBuhAOHZDvQxmw8CXMC9NRvRbu
 currency:$
 brandName:STW

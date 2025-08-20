@@ -29,7 +29,7 @@ import kotlin.math.roundToInt
 class StripeTerminalManager(
     private val context: Context,
     private var stateListener: TerminalStateListener
-) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener, UsbDeviceManager.UsbDeviceListener {
+) : TerminalListener, DiscoveryListener, BluetoothReaderListener, UsbReaderListener {
 
     companion object {
         private const val DISCOVERY_TIMEOUT = 2 * 60 * 1000L // 2分钟
@@ -46,7 +46,7 @@ class StripeTerminalManager(
 
     // 使用新的状态管理器
     private val stripeStateManager = StripeStateManager()
-    private val usbDeviceManager = UsbDeviceManager(context)
+//    private val usbDeviceManager = UsbDeviceManager(context)
 
     // 标志：用户是否已经离开了Terminal页面
     private var userLeftTerminalPage = true
@@ -70,15 +70,16 @@ class StripeTerminalManager(
     // 状态保持相关
     private var isReaderConnected = false
     private var shouldMaintainConnection = true
+    private var isDiscover = false
 
     /**
      * 初始化 Terminal
      */
     fun initialize() {
         // 初始化USB设备管理器
-        usbDeviceManager.setDeviceListener(this)
-        usbDeviceManager.initialize()
-        
+//        usbDeviceManager.setDeviceListener(this)
+//        usbDeviceManager.initialize()
+
         // 设置状态管理器监听器
         stripeStateManager.setStateListener(object : StripeStateManager.StripeStateListener {
             override fun onDisplayStateChanged(displayState: DisplayState, vararg message: Any?) {
@@ -144,59 +145,67 @@ class StripeTerminalManager(
      * 开始发现阅读器
      */
     private fun startDiscovery() {
-        MyLog.d("开始扫描阅读器前检查")
+        synchronized(this@StripeTerminalManager) {
+            if (Terminal.getInstance().connectionStatus != ConnectionStatus.CONNECTED && !isDiscover) {
+                isDiscover = true
+                MyLog.d("开始扫描阅读器前检查")
 
-        // 发现读卡器是Stripe的技术状态，会通过ConnectionStatus自动更新
-        updateDisplayState(DisplayState.SCANNING_READER, null)
+                // 发现读卡器是Stripe的技术状态，会通过ConnectionStatus自动更新
+                updateDisplayState(DisplayState.SCANNING_READER, null)
 
-        // 记录发现开始时间
-        lastDiscoveryStartTime = System.currentTimeMillis()
+                // 记录发现开始时间
+                lastDiscoveryStartTime = System.currentTimeMillis()
 
-        // 检查二维码编号
-        val qrCode = getDeviceQrCode()
-        if (qrCode.isEmpty()) {
-            MyLog.e("二维码编号为空，10s后重试")
-            handler.postDelayed({
-                startDiscovery()
-            }, 10000)
-            return
-        }
-
-        // 获取位置ID
-        val locationId = getLocationId()
-        if (locationId.isNullOrEmpty()) {
-            MyLog.e("该设备的locationId为空，10s重试")
-            handler.postDelayed({
-                startDiscovery()
-            }, 10000)
-            return
-        }
-
-        MyLog.d("开始扫描阅读器，位置id：$locationId")
-
-        // 使用USB发现方式
-        val config = DiscoveryConfiguration(
-            timeout = 0,
-            discoveryMethod = DiscoveryMethod.USB,
-            isSimulated = false, // 使用真实设备
-            location = locationId
-        )
-
-        discoveryCancelable = Terminal.getInstance().discoverReaders(
-            config,
-            this,
-            object : Callback {
-                override fun onSuccess() {
-                    MyLog.d("扫描成功")
+                // 检查二维码编号
+                val qrCode = getDeviceQrCode()
+                if (qrCode.isEmpty()) {
+                    MyLog.e("二维码编号为空，10s后重试")
+                    handler.postDelayed({
+                        startDiscovery()
+                        isDiscover = false
+                    }, 10000)
+                    return
                 }
 
-                override fun onFailure(e: TerminalException) {
-                    MyLog.e("扫描失败", e)
-                    retryDiscovery(e)
+                // 获取位置ID
+                val locationId = getLocationId()
+                if (locationId.isNullOrEmpty()) {
+                    MyLog.e("该设备的locationId为空，10s重试")
+                    handler.postDelayed({
+                        startDiscovery()
+                        isDiscover = false
+                    }, 10000)
+                    return
                 }
+
+                MyLog.d("开始扫描阅读器，位置id：$locationId")
+
+                // 使用USB发现方式
+                val config = DiscoveryConfiguration(
+                    timeout = 0,
+                    discoveryMethod = DiscoveryMethod.USB,
+                    isSimulated = false, // 使用真实设备
+                    location = locationId
+                )
+
+                discoveryCancelable = Terminal.getInstance().discoverReaders(
+                    config,
+                    this,
+                    object : Callback {
+                        override fun onSuccess() {
+                            MyLog.d("扫描成功")
+                            isDiscover = false
+                        }
+
+                        override fun onFailure(e: TerminalException) {
+                            MyLog.e("扫描阅读器异常，重试", e)
+                            isDiscover = false
+                            retryDiscovery()
+                        }
+                    }
+                )
             }
-        )
-        //移除自动超时设置
+        }
     }
 
     /**
@@ -538,6 +547,16 @@ class StripeTerminalManager(
             ConnectionStatus.CONNECTING -> {
                 MyLog.d("正在连接阅读器")
                 updateDisplayState(DisplayState.CONNECTING_READER, null)
+                handler.postDelayed({
+                    if(Terminal.getInstance().connectionStatus == ConnectionStatus.CONNECTING){
+                        MyLog.w("阅读器处于连接中超过20s，主动触发升级")
+                        try{
+                            Terminal.getInstance().installAvailableUpdate()
+                        }catch (e: TerminalException){
+                            MyLog.e("主动触发升级异常", e)
+                        }
+                    }
+                }, 20 * 1000) // 延迟20秒再判断
             }
             ConnectionStatus.CONNECTED -> {
                 MyLog.d("阅读器连接成功")
@@ -636,6 +655,7 @@ class StripeTerminalManager(
 
     // DiscoveryListener 实现
     override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+        isDiscover = false
         MyLog.d("扫描到阅读器数量： ${readers.size}，进行连接")
         if (readers.isNotEmpty()) {
             discoveryRetryCount = 0 // 重置发现重试计数器
@@ -660,9 +680,9 @@ class StripeTerminalManager(
             }
 
             override fun onFailure(e: TerminalException) {
-                MyLog.e("连接阅读器失败，${DISCOVERY_RETRY_DELAY}s后重新扫描", e)
                 currentReader?.let { reader ->
-                    retryDiscovery(e)
+                    MyLog.e("连接阅读器异常，重试", e)
+                    retryDiscovery()
                 } ?: run {
                     updateDisplayState(DisplayState.CONNECT_READER_FAILED, null)
                 }
@@ -943,8 +963,8 @@ class StripeTerminalManager(
     /**
      * 重试发现阅读器
      */
-    private fun retryDiscovery(error: TerminalException) {
-        MyLog.e("发现错误: ${error.errorMessage}", error)
+    private fun retryDiscovery() {
+        MyLog.d("重试扫描阅读器")
         // 重试过程保持当前状态
         handler.postDelayed({
             // 检查当前连接状态
@@ -1101,32 +1121,32 @@ class StripeTerminalManager(
     }
     
     // UsbDeviceListener 实现
-    override fun onDeviceAttached(device: UsbDevice) {
-        MyLog.d("USB设备已连接: ${device.deviceName}")
-        // 检查是否是Stripe阅读器设备
-        if (usbDeviceManager.isStripeReaderDevice(device)) {
-            MyLog.d("检测到Stripe阅读器设备连接: ${device.deviceName}")
-            // 请求USB权限
-            usbDeviceManager.checkAndRequestUsbPermission(device)
-        }
-    }
-    
-    override fun onDeviceDetached(device: UsbDevice) {
-        MyLog.d("USB设备已断开: ${device.deviceName}")
-        // 检查是否是Stripe阅读器设备断开
-        if (usbDeviceManager.isStripeReaderDevice(device)) {
-            MyLog.d("Stripe阅读器设备断开连接: ${device.deviceName}")
-            // 可以在这里添加设备断开的处理逻辑
-        }
-    }
-    
-    override fun onPermissionGranted(device: UsbDevice) {
-        MyLog.d("USB设备权限已授予: ${device.deviceName}")
-        // 权限授予后，Stripe SDK会自动处理设备连接
-    }
-    
-    override fun onPermissionDenied(device: UsbDevice) {
-        MyLog.w("USB设备权限被拒绝: ${device.deviceName}")
-        // 可以在这里添加权限被拒绝的处理逻辑
-    }
+//    override fun onDeviceAttached(device: UsbDevice) {
+//        MyLog.d("USB设备已连接: ${device.deviceName}")
+//        // 检查是否是Stripe阅读器设备
+//        if (usbDeviceManager.isStripeReaderDevice(device)) {
+//            MyLog.d("检测到Stripe阅读器设备连接: ${device.deviceName}")
+//            // 请求USB权限
+//            usbDeviceManager.checkAndRequestUsbPermission(device)
+//        }
+//    }
+//
+//    override fun onDeviceDetached(device: UsbDevice) {
+//        MyLog.d("USB设备已断开: ${device.deviceName}")
+//        // 检查是否是Stripe阅读器设备断开
+//        if (usbDeviceManager.isStripeReaderDevice(device)) {
+//            MyLog.d("Stripe阅读器设备断开连接: ${device.deviceName}")
+//            // 可以在这里添加设备断开的处理逻辑
+//        }
+//    }
+//
+//    override fun onPermissionGranted(device: UsbDevice) {
+//        MyLog.d("USB设备权限已授予: ${device.deviceName}")
+//        // 权限授予后，Stripe SDK会自动处理设备连接
+//    }
+//
+//    override fun onPermissionDenied(device: UsbDevice) {
+//        MyLog.w("USB设备权限被拒绝: ${device.deviceName}")
+//        // 可以在这里添加权限被拒绝的处理逻辑
+//    }
 }

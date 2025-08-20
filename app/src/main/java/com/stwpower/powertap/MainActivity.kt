@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
     private var permissionsReady = false // 权限是否准备完成
 
     // USB设备管理器
-    private lateinit var usbDeviceManager: UsbDeviceManager
+//    private lateinit var usbDeviceManager: UsbDeviceManager
 
     // 权限请求
     private val requestPermissionLauncher = registerForActivityResult(
@@ -124,43 +124,43 @@ class MainActivity : AppCompatActivity() {
         kioskModeManager = KioskModeManager(this)
         homeKeyInterceptor = HomeKeyInterceptor(this)
         fullscreenManager = ImmersiveFullscreenManager(this)
-        usbDeviceManager = UsbDeviceManager(this)
-        usbDeviceManager.setDeviceListener(object : UsbDeviceManager.UsbDeviceListener {
-            override fun onDeviceAttached(device: UsbDevice) {
-                MyLog.d("MainActivity: USB设备已连接: ${device.deviceName}")
-                // 检查是否是Stripe阅读器设备
-                if (usbDeviceManager.isStripeReaderDevice(device)) {
-                    MyLog.d("MainActivity: 检测到Stripe阅读器设备连接: ${device.deviceName}")
-                    // 请求USB权限
-                    usbDeviceManager.checkAndRequestUsbPermission(device)
-                }
-            }
-            
-            override fun onDeviceDetached(device: UsbDevice) {
-                MyLog.d("MainActivity: USB设备已断开: ${device.deviceName}")
-                // 检查是否是Stripe阅读器设备断开
-                if (usbDeviceManager.isStripeReaderDevice(device)) {
-                    MyLog.d("MainActivity: Stripe阅读器设备断开连接: ${device.deviceName}")
-                }
-            }
-            
-            override fun onPermissionGranted(device: UsbDevice) {
-                MyLog.d("MainActivity: USB设备权限已授予: ${device.deviceName}")
-                // 权限授予后，可以显示提示信息
-                runOnUiThread {
-                    //TODO 国际化
-                    Toast.makeText(this@MainActivity, "Stripe读卡器已连接并获得权限", Toast.LENGTH_SHORT).show()
-                }
-            }
-            
-            override fun onPermissionDenied(device: UsbDevice) {
-                MyLog.w("MainActivity: USB设备权限被拒绝: ${device.deviceName}")
-                // 权限被拒绝，显示提示信息
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "请授予Stripe读卡器权限", Toast.LENGTH_LONG).show()
-                }
-            }
-        })
+//        usbDeviceManager = UsbDeviceManager(this)
+//        usbDeviceManager.setDeviceListener(object : UsbDeviceManager.UsbDeviceListener {
+//            override fun onDeviceAttached(device: UsbDevice) {
+//                MyLog.d("MainActivity: USB设备已连接: ${device.deviceName}")
+//                // 检查是否是Stripe阅读器设备
+//                if (usbDeviceManager.isStripeReaderDevice(device)) {
+//                    MyLog.d("MainActivity: 检测到Stripe阅读器设备连接: ${device.deviceName}")
+//                    // 请求USB权限
+//                    usbDeviceManager.checkAndRequestUsbPermission(device)
+//                }
+//            }
+//
+//            override fun onDeviceDetached(device: UsbDevice) {
+//                MyLog.d("MainActivity: USB设备已断开: ${device.deviceName}")
+//                // 检查是否是Stripe阅读器设备断开
+//                if (usbDeviceManager.isStripeReaderDevice(device)) {
+//                    MyLog.d("MainActivity: Stripe阅读器设备断开连接: ${device.deviceName}")
+//                }
+//            }
+//
+//            override fun onPermissionGranted(device: UsbDevice) {
+//                MyLog.d("MainActivity: USB设备权限已授予: ${device.deviceName}")
+//                // 权限授予后，可以显示提示信息
+//                runOnUiThread {
+//                    //TODO 国际化
+//                    Toast.makeText(this@MainActivity, "Stripe读卡器已连接并获得权限", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//
+//            override fun onPermissionDenied(device: UsbDevice) {
+//                MyLog.w("MainActivity: USB设备权限被拒绝: ${device.deviceName}")
+//                // 权限被拒绝，显示提示信息
+//                runOnUiThread {
+//                    Toast.makeText(this@MainActivity, "请授予Stripe读卡器权限", Toast.LENGTH_LONG).show()
+//                }
+//            }
+//        })
 
         // 应用默认语言设置
         applyDefaultLanguage()
@@ -527,7 +527,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         // 初始化USB设备管理器
-        usbDeviceManager.initialize()
+//        usbDeviceManager.initialize()
 
         // 只有在权限准备完成后才启用kiosk模式
         if (permissionsReady) {
@@ -585,7 +585,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         // 停止USB设备监听
-        usbDeviceManager.destroy()
+//        usbDeviceManager.destroy()
         // 不要在onPause中禁用kiosk模式，保持监控
         // kioskModeManager.disableKioskMode()
     }
@@ -624,7 +624,7 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         // 销毁USB设备管理器
-        usbDeviceManager.destroy()
+//        usbDeviceManager.destroy()
 
         // 检查是否是因为配置更改（如语言切换）导致的Activity重建
         if (isChangingConfigurations) {
